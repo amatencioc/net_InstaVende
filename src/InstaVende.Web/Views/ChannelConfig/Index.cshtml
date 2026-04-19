@@ -1,0 +1,50 @@
+@model IEnumerable<InstaVende.Web.ViewModels.ChannelConfigViewModel>
+@{ ViewData["Title"] = "Configuración de Canales"; }
+<h2><i class="bi bi-gear me-2"></i>Configuración de Canales</h2>
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tabWA"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabFB"><i class="bi bi-facebook me-1"></i>Messenger</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabIG"><i class="bi bi-instagram me-1"></i>Instagram</a></li>
+</ul>
+<div class="tab-content">
+@foreach (var (ct, tid, cname) in new[] { (1, "tabWA", "WhatsApp"), (2, "tabFB", "Facebook Messenger"), (3, "tabIG", "Instagram DM") })
+{
+    var cfg = Model.FirstOrDefault(c => (int)c.ChannelType == ct);
+    <div class="tab-pane fade @(ct==1?"show active":"")" id="@tid">
+    <div class="card" style="max-width:600px"><div class="card-header">@cname</div><div class="card-body">
+    <form class="formChannel" data-channel="@ct">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="ChannelType" value="@ct" />
+        <input type="hidden" name="Id" value="@(cfg?.Id ?? 0)" />
+        @if (ct == 1) {<div class="mb-3"><label class="form-label">Phone Number ID</label><input name="PhoneNumberId" class="form-control" value="@cfg?.PhoneNumberId" /></div>}
+        @if (ct == 2) {<div class="mb-3"><label class="form-label">Page ID</label><input name="PageId" class="form-control" value="@cfg?.PageId" /></div>}
+        @if (ct == 3) {<div class="mb-3"><label class="form-label">Instagram Account ID</label><input name="InstagramAccountId" class="form-control" value="@cfg?.InstagramAccountId" /></div>}
+        <div class="mb-3"><label class="form-label">Access Token *</label><input name="AccessToken" class="form-control" type="password" value="@cfg?.AccessToken" required /></div>
+        <div class="mb-3"><label class="form-label">App Secret</label><input name="AppSecret" class="form-control" type="password" value="@cfg?.AppSecret" /></div>
+        <div class="mb-3"><label class="form-label">Webhook Verify Token *</label><input name="WebhookVerifyToken" class="form-control" value="@cfg?.WebhookVerifyToken" required /></div>
+        <div class="mb-3 form-check"><input name="IsActive" class="form-check-input" type="checkbox" @(cfg?.IsActive==true?"checked":"") value="true" /><label class="form-check-label">Activo</label></div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <small class="text-muted ms-3">Webhook: <code>/api/webhooks/@(ct==1?"whatsapp":"meta")/{businessId}</code></small>
+    </form>
+    </div></div>
+    </div>
+}
+</div>
+@section Scripts {
+<script>
+$(function() {
+    var token = $('[name="__RequestVerificationToken"]').first().val();
+    $('.formChannel').on('submit', function(e) {
+        e.preventDefault();
+        var data = {};
+        $(this).serializeArray().forEach(function(f){data[f.name]=f.value;});
+        data.IsActive = $(this).find('[name=IsActive]').is(':checked');
+        data.ChannelType = parseInt(data.ChannelType);
+        $.ajax({ url:'/ChannelConfig/Save', method:'POST', contentType:'application/json', headers:{'RequestVerificationToken':token}, data:JSON.stringify(data),
+            success:function(){alert('Configuración guardada.');},
+            error:function(){alert('Error al guardar.');}
+        });
+    });
+});
+</script>
+}

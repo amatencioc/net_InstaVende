@@ -1,0 +1,67 @@
+## .NET Core
+*.user
+*.userosscache
+*.suo
+*.userprefs
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.pidb
+*.pidb.stale
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]uild/
+[Bb]uildLog/
+
+## Visual Studio
+.vs/
+*.sln.docstates
+*.ncrunchproject
+_NCrunch_*
+.ncrunchsolution
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+!**/[Pp]ackages/repositories.config
+*.DotSettings.user
+
+## Publish
+*.[Pp]ublish.xml
+*.pubxml
+!*PublishSettings.pubxml
+*.azurePubxml
+PublishScripts/
+
+## Coverage
+[Cc]overage*/
+*.trx
+TestResults/
+
+## dotnet-ef
+*.db
+*.mdf
+*.ldf
+migrations.log
+
+## Runtime
+logs/
+*.log
+
+## OS
+.DS_Store
+Thumbs.db

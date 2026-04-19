@@ -1,0 +1,110 @@
+@model InstaVende.Web.ViewModels.BotConfigViewModel
+@{ ViewData["Title"] = "ChatBot"; }
+<h2 class="mb-4"><i class="bi bi-cpu me-2"></i>Entrenamiento del ChatBot</h2>
+<ul class="nav nav-tabs mb-4" id="botTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#tabConfig">Configuración</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabIntents">Intenciones</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabKnowledge">Base de Conocimiento</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#tabPreview">Probar Bot</a></li>
+</ul>
+<div class="tab-content">
+
+<div class="tab-pane fade show active" id="tabConfig">
+<div class="card" style="max-width:700px"><div class="card-body">
+<form id="formConfig">
+    @Html.AntiForgeryToken()
+    <div class="row g-3 mb-3">
+        <div class="col-md-6"><label class="form-label">Nombre del Bot</label><input name="BotName" class="form-control" value="@Model.BotName" required /></div>
+        <div class="col-md-6"><label class="form-label">Idioma</label>
+        <select name="Language" class="form-select">
+            <option value="es" selected="@(Model.Language=="es")">Español</option>
+            <option value="en" selected="@(Model.Language=="en")">English</option>
+            <option value="pt" selected="@(Model.Language=="pt")">Português</option>
+        </select></div>
+    </div>
+    <div class="mb-3"><label class="form-label">Personalidad</label><input name="Personality" class="form-control" value="@Model.Personality" placeholder="Ej: Amigable, orientado a ventas" /></div>
+    <div class="mb-3"><label class="form-label">Prompt base</label><textarea name="BaseSystemPrompt" class="form-control" rows="4">@Model.BaseSystemPrompt</textarea></div>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6"><label class="form-label">Nivel de Interacción</label>
+        <select name="InteractionLevel" class="form-select">
+            <option value="1" selected="@(Model.InteractionLevel==InstaVende.Core.Enums.InteractionLevel.Minimal)">Mínimo</option>
+            <option value="2" selected="@(Model.InteractionLevel==InstaVende.Core.Enums.InteractionLevel.Standard)">Estándar</option>
+            <option value="3" selected="@(Model.InteractionLevel==InstaVende.Core.Enums.InteractionLevel.Proactive)">Proactivo</option>
+        </select></div>
+        <div class="col-md-6"><label class="form-label">Mensaje fallback</label><input name="FallbackMessage" class="form-control" value="@Model.FallbackMessage" required /></div>
+    </div>
+    <div class="mb-3 form-check"><input name="EnableHandoff" class="form-check-input" type="checkbox" @(Model.EnableHandoff?"checked":"") value="true" /><label class="form-check-label">Permitir transferencia a humano</label></div>
+    <div class="mb-3"><label class="form-label">Frase de transferencia</label><input name="HandoffTriggerPhrase" class="form-control" value="@Model.HandoffTriggerPhrase" placeholder="Ej: hablar con agente" /></div>
+    <div class="mb-3 form-check"><input name="IsActive" class="form-check-input" type="checkbox" @(Model.IsActive?"checked":"") value="true" /><label class="form-check-label">Bot activo</label></div>
+    <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+</form>
+</div></div>
+</div>
+
+<div class="tab-pane fade" id="tabIntents">
+<div class="d-flex justify-content-between mb-3"><h5>Intenciones</h5><button class="btn btn-primary btn-sm" onclick="openIntentModal(0)"><i class="bi bi-plus-circle me-1"></i>Nueva</button></div>
+<table class="table table-hover"><thead><tr><th>Intención</th><th>Frases</th><th>Respuesta</th><th>Prior.</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+@foreach (var i in (IEnumerable<dynamic>)ViewBag.Intents)
+{<tr><td>@i.IntentName</td><td><small>@i.TriggerPhrases</small></td><td>@i.Response</td><td>@i.Priority</td>
+<td>@(i.IsActive ? Html.Raw("<span class='badge bg-success'>Activo</span>") : Html.Raw("<span class='badge bg-secondary'>Inactivo</span>"))</td>
+<td><button class="btn btn-sm btn-outline-primary me-1" onclick="openIntentModal(@i.Id)"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteIntent(@i.Id)"><i class="bi bi-trash"></i></button></td></tr>}
+</tbody></table>
+</div>
+
+<div class="tab-pane fade" id="tabKnowledge">
+<div class="d-flex justify-content-between mb-3"><h5>Base de Conocimiento</h5><button class="btn btn-primary btn-sm" onclick="openKbModal(0)"><i class="bi bi-plus-circle me-1"></i>Nueva</button></div>
+<table class="table table-hover"><thead><tr><th>Pregunta</th><th>Respuesta</th><th>Categoría</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>
+@foreach (var k in (IEnumerable<dynamic>)ViewBag.Knowledge)
+{<tr><td>@k.Question</td><td>@k.Answer</td><td>@k.Category</td>
+<td>@(k.IsActive ? Html.Raw("<span class='badge bg-success'>Activo</span>") : Html.Raw("<span class='badge bg-secondary'>Inactivo</span>"))</td>
+<td><button class="btn btn-sm btn-outline-primary me-1" onclick="openKbModal(@k.Id)"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteKb(@k.Id)"><i class="bi bi-trash"></i></button></td></tr>}
+</tbody></table>
+</div>
+
+<div class="tab-pane fade" id="tabPreview">
+<div class="card" style="max-width:500px">
+    <div class="card-header bg-primary text-white"><i class="bi bi-chat-dots me-2"></i>Prueba tu Bot</div>
+    <div class="card-body" id="previewMessages" style="height:350px;overflow-y:auto;background:#f8f9fa"></div>
+    <div class="card-footer"><div class="input-group"><input id="previewInput" type="text" class="form-control" placeholder="Escribe un mensaje..." /><button id="previewSend" class="btn btn-primary"><i class="bi bi-send"></i></button></div></div>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="modalIntent" tabindex="-1">
+<div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Intención</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <form id="formIntent">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="intentId" value="0" />
+            <div class="mb-2"><label class="form-label">Nombre</label><input id="intentName" class="form-control" required /></div>
+            <div class="mb-2"><label class="form-label">Frases disparadoras (JSON)</label><textarea id="intentPhrases" class="form-control" rows="3" placeholder='["hola","buenos días"]' required></textarea></div>
+            <div class="mb-2"><label class="form-label">Respuesta</label><textarea id="intentResponse" class="form-control" rows="3" required></textarea></div>
+            <div class="row g-2 mb-2">
+                <div class="col"><label class="form-label">Prioridad</label><input id="intentPriority" class="form-control" type="number" value="0" /></div>
+                <div class="col form-check mt-4 ms-2"><input id="intentActive" class="form-check-input" type="checkbox" checked /><label class="form-check-label">Activo</label></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</div></div>
+</div>
+
+<div class="modal fade" id="modalKb" tabindex="-1">
+<div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title">Entrada de Conocimiento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <form id="formKb">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="kbId" value="0" />
+            <div class="mb-2"><label class="form-label">Pregunta</label><input id="kbQuestion" class="form-control" required /></div>
+            <div class="mb-2"><label class="form-label">Respuesta</label><textarea id="kbAnswer" class="form-control" rows="3" required></textarea></div>
+            <div class="mb-2"><label class="form-label">Categoría</label><input id="kbCategory" class="form-control" /></div>
+            <div class="mb-2 form-check"><input id="kbActive" class="form-check-input" type="checkbox" checked /><label class="form-check-label">Activo</label></div>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </form>
+    </div>
+</div></div>
+</div>
+
+@section Scripts { <script src="~/js/bot-trainer.js" asp-append-version="true"></script> }

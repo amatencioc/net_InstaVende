@@ -1,0 +1,39 @@
+/* InstaVende - Site CSS */
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Navbar */
+.navbar-brand { letter-spacing: 0.5px; }
+
+/* Cards */
+.card { border-radius: 0.5rem; }
+
+/* Conversation list */
+.conversation-item:hover { background-color: rgba(13, 110, 253, 0.06); }
+.conversation-item.active { background-color: rgba(13, 110, 253, 0.12); }
+
+/* Message bubbles */
+#messageThread, #previewMessages {
+    scroll-behavior: smooth;
+}
+
+/* DataTables */
+.dataTables_wrapper .dataTables_filter input { border-radius: 0.375rem; border: 1px solid #dee2e6; padding: 0.25rem 0.5rem; }
+
+/* Product cards */
+#productGrid .card-img-top { object-fit: cover; }
+
+/* Tabs */
+.nav-tabs .nav-link { color: #6c757d; }
+.nav-tabs .nav-link.active { font-weight: 600; }
+
+/* Alerts */
+.alert { border-radius: 0.5rem; }
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .d-flex[style*="height:calc(100vh"] { flex-direction: column; }
+    div[style*="width:320px"] { width: 100% !important; height: 250px; }
+}
