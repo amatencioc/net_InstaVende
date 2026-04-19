@@ -1,0 +1,28 @@
+@{ ViewData["Title"] = "Dashboard"; }
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2 me-2"></i>Dashboard — @ViewBag.BusinessName</h2>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card text-white bg-primary"><div class="card-body"><h6 class="card-title">Total Conversaciones</h6><h2 id="statTotal">—</h2></div></div></div>
+    <div class="col-md-3"><div class="card text-white bg-success"><div class="card-body"><h6 class="card-title">Resueltas</h6><h2 id="statResolved">—</h2></div></div></div>
+    <div class="col-md-3"><div class="card text-white bg-warning"><div class="card-body"><h6 class="card-title">Bot Activo</h6><h2 id="statActive">—</h2></div></div></div>
+    <div class="col-md-3"><div class="card text-white bg-info"><div class="card-body"><h6 class="card-title">Tasa Resolución</h6><h2 id="statRate">—%</h2></div></div></div>
+</div>
+<div class="row g-3">
+    <div class="col-md-8"><div class="card"><div class="card-header">Conversaciones (últimos 30 días)</div><div class="card-body"><canvas id="chartDaily" height="100"></canvas></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-header">Por Canal</div><div class="card-body"><canvas id="chartChannel" height="200"></canvas></div></div></div>
+</div>
+@section Scripts {
+<script>
+$(function() {
+    $.getJSON('/Dashboard/GetStats', function(d) {
+        $('#statTotal').text(d.totalConversations);
+        $('#statResolved').text(d.resolvedConversations);
+        $('#statActive').text(d.activeConversations);
+        $('#statRate').text(d.resolutionRate + '%');
+        new Chart(document.getElementById('chartDaily'), { type: 'line', data: { labels: d.dailyConversations.map(x => x.date), datasets: [{ label: 'Conversaciones', data: d.dailyConversations.map(x => x.count), borderColor: '#0d6efd', tension: 0.3, fill: true, backgroundColor: 'rgba(13,110,253,0.1)' }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+        new Chart(document.getElementById('chartChannel'), { type: 'doughnut', data: { labels: d.conversationsByChannel.map(x => x.channel), datasets: [{ data: d.conversationsByChannel.map(x => x.count), backgroundColor: ['#25D366','#1877F2','#E1306C'] }] } });
+    });
+});
+</script>
+}

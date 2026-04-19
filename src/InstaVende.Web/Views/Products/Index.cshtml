@@ -1,0 +1,32 @@
+@model InstaVende.Web.ViewModels.ProductListViewModel
+@{ ViewData["Title"] = "Productos"; }
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-box-seam me-2"></i>Mis Productos</h2>
+    <div>
+        <button class="btn btn-outline-secondary btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalCategory"><i class="bi bi-tag me-1"></i>Categorías</button>
+        <a asp-action="Create" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-1"></i>Nuevo Producto</a>
+    </div>
+</div>
+<div class="card mb-3"><div class="card-body d-flex gap-2">
+    <input id="searchInput" type="text" class="form-control" placeholder="Buscar producto..." style="max-width:300px" />
+    <select id="categoryFilter" class="form-select" style="max-width:200px">
+        <option value="">Todas las categorías</option>
+        @foreach (var cat in Model.Categories) { <option value="@cat.Id">@cat.Name</option> }
+    </select>
+</div></div>
+<div id="productGrid" class="row g-3"></div>
+<div class="modal fade" id="modalCategory" tabindex="-1">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><h5 class="modal-title">Categorías</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <form id="formCategory">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="catId" value="0" />
+                <div class="mb-2"><input id="catName" class="form-control" placeholder="Nombre de categoría" required /></div>
+                <div class="mb-2"><input id="catDesc" class="form-control" placeholder="Descripción (opcional)" /></div>
+                <button type="submit" class="btn btn-primary btn-sm">Guardar</button>
+            </form>
+        </div>
+    </div></div>
+</div>
+@section Scripts { <script src="~/js/products.js" asp-append-version="true"></script> }
