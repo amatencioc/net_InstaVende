@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("InstaVende.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ea46ffff94cc41c812dbfcc51f308cbbf5502fb8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b8f6c69b2e3be44f6ae46224c97ea33f0ffd7010")]
 [assembly: System.Reflection.AssemblyProductAttribute("InstaVende.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("InstaVende.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
