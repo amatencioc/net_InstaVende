@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InstaVende.Core/InstaVende.Core.csproj" />
+    <Project Path="src/InstaVende.Infrastructure/InstaVende.Infrastructure.csproj" />
+    <Project Path="src/InstaVende.Web/InstaVende.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InstaVende.Tests/InstaVende.Tests.csproj" />
+  </Folder>
+</Solution>
