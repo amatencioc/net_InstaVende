@@ -1,0 +1,54 @@
+@model InstaVende.Web.ViewModels.MetricasViewModel
+@{ ViewData["Title"] = "Métricas y resultados"; }
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="topbar-page-title mb-0">Métricas y resultados</h1>
+        <p class="text-muted small mb-0">Analiza el rendimiento de tu tienda</p>
+    </div>
+</div>
+
+@if (!Model.HasAccess)
+{
+    <!-- Blurred background panel -->
+    <div style="position:relative;overflow:hidden;border-radius:12px;min-height:400px">
+        <div style="filter:blur(6px);pointer-events:none;opacity:.45">
+            <div class="stat-grid mb-4">
+                <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-chat-dots-fill"></i></div><div class="st-val">@Model.TotalConversations</div><div class="st-lbl">Conversaciones</div></div>
+                <div class="stat-tile"><div class="st-icon st-b"><i class="bi bi-bag-check-fill"></i></div><div class="st-val">@Model.TotalOrders</div><div class="st-lbl">Órdenes</div></div>
+                <div class="stat-tile"><div class="st-icon st-a"><i class="bi bi-currency-dollar"></i></div><div class="st-val">S/ @Model.TotalRevenue.ToString("N2")</div><div class="st-lbl">Ingresos</div></div>
+                <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div><div class="st-val">@Model.ConversionRate.ToString("P1")</div><div class="st-lbl">Conversión</div></div>
+            </div>
+            <div class="a-card" style="height:250px"></div>
+        </div>
+
+        <!-- Paywall overlay -->
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem">
+            @await Html.PartialAsync("_UpgradeModal", new InstaVende.Web.ViewModels.UpgradeModalViewModel
+            {
+                Icon = "lock-fill",
+                Title = "¿Sabes dónde pierdes ventas?",
+                Subtitle = "Descúbrelo con Métricas Pro",
+                Description = "Accede al panel completo de métricas de tu tienda en WhatsApp. Toma decisiones en tiempo real con datos, no con intuición.",
+                Features = new List<(string Icon, string Title, string Desc)>
+                {
+                    ("lightning-charge-fill", "Conversión en tiempo real", "Conversaciones, ventas y % de conversión al instante"),
+                    ("bar-chart-fill", "Análisis de órdenes", "Ranking de productos, ticket promedio y combos ganadores"),
+                    ("megaphone-fill", "Rendimiento de campañas", "Mide qué anuncios generan ventas reales, no solo clics"),
+                    ("download", "Base de datos descargable", "Exporta tu base de clientes y segmenta como quieras")
+                },
+                PlanRequired = "Pro",
+                CtaUrl = "/Plans"
+            })
+        </div>
+    </div>
+}
+else
+{
+    <div class="stat-grid mb-4">
+        <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-chat-dots-fill"></i></div><div class="st-val">@Model.TotalConversations</div><div class="st-lbl">Conversaciones</div></div>
+        <div class="stat-tile"><div class="st-icon st-b"><i class="bi bi-bag-check-fill"></i></div><div class="st-val">@Model.TotalOrders</div><div class="st-lbl">Órdenes</div></div>
+        <div class="stat-tile"><div class="st-icon st-a"><i class="bi bi-currency-dollar"></i></div><div class="st-val">S/ @Model.TotalRevenue.ToString("N2")</div><div class="st-lbl">Ingresos</div></div>
+        <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div><div class="st-val">@Model.ConversionRate.ToString("P1")</div><div class="st-lbl">Conversión</div></div>
+    </div>
+}

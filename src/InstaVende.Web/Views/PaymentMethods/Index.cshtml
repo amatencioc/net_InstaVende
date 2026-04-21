@@ -1,0 +1,211 @@
+@model List<InstaVende.Web.ViewModels.PaymentMethodViewModel>
+@using InstaVende.Core.Enums
+@{ ViewData["Title"] = "Métodos de Pago"; }
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="topbar-page-title mb-0">Métodos de Pago</h1>
+        <p class="text-muted small mb-0">Define cómo tus clientes pueden pagarte. El bot usará esta información automáticamente.</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal(0)">
+        <i class="bi bi-plus-circle me-1"></i> Agregar método
+    </button>
+</div>
+
+@if (!Model.Any())
+{
+<div class="a-card text-center py-5">
+    <i class="bi bi-credit-card" style="font-size:3rem;color:#cbd5e1"></i>
+    <h5 class="mt-3 text-muted">Sin métodos de pago configurados</h5>
+    <p class="text-muted small">Agrega al menos un método para que el bot pueda informar a tus clientes cómo pagar.</p>
+    <button class="btn btn-primary" onclick="openModal(0)"><i class="bi bi-plus-circle me-1"></i> Agregar ahora</button>
+</div>
+}
+else
+{
+<div class="row g-3" id="pmList">
+    @foreach (var m in Model)
+    {
+    <div class="col-md-6 col-lg-4" id="pm-@m.Id">
+        <div class="a-card h-100">
+            <div class="a-card-header">
+                <div class="a-card-title">
+                    <span class="pm-icon pm-@m.Type.ToString().ToLower()">@GetIcon(m.Type)</span>
+                    @m.Name
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge @(m.IsActive ? "bg-success" : "bg-secondary") pm-status-@m.Id">
+                        @(m.IsActive ? "Activo" : "Inactivo")
+                    </span>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" onclick="openModal(@m.Id)"><i class="bi bi-pencil me-2"></i>Editar</a></li>
+                            <li><a class="dropdown-item" onclick="toggleActive(@m.Id)"><i class="bi bi-toggle-on me-2"></i>Activar/Pausar</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" onclick="deleteMethod(@m.Id)"><i class="bi bi-trash me-2"></i>Eliminar</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="a-card-body">
+                @if (!string.IsNullOrEmpty(m.AccountAlias))
+                { <p class="mb-1 small"><strong>Alias:</strong> @m.AccountAlias</p> }
+                @if (!string.IsNullOrEmpty(m.AccountNumber))
+                { <p class="mb-1 small"><strong>CBU/Cuenta:</strong> @m.AccountNumber</p> }
+                @if (!string.IsNullOrEmpty(m.PaymentLink))
+                { <p class="mb-1 small"><strong>Link:</strong> <a href="@m.PaymentLink" target="_blank">Ver link</a></p> }
+                @if (!string.IsNullOrEmpty(m.Instructions))
+                { <p class="mb-0 small text-muted mt-2">@m.Instructions</p> }
+            </div>
+        </div>
+    </div>
+    }
+</div>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="pmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="pmModalTitle">Método de Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="pmId" value="0" />
+                <div class="f-group">
+                    <label class="f-label">Tipo de método</label>
+                    <select class="f-input" id="pmType">
+                        <option value="1">?? Transferencia bancaria</option>
+                        <option value="2">?? Tarjeta de crédito/débito</option>
+                        <option value="3">?? Efectivo / Contra entrega</option>
+                        <option value="4">?? Mercado Pago</option>
+                        <option value="5">??? PayPal</option>
+                        <option value="6">?? Stripe</option>
+                        <option value="99">?? Otro</option>
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Nombre visible <span class="text-danger">*</span></label>
+                    <input type="text" class="f-input" id="pmName" placeholder="Ej: Transferencia Banco Nacional" />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Alias / CBU / Email de pago</label>
+                    <input type="text" class="f-input" id="pmAlias" placeholder="Ej: minegocio.mp o 123456789012" />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Número de cuenta / CBU</label>
+                    <input type="text" class="f-input" id="pmAccount" placeholder="Número completo" />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Link de pago</label>
+                    <input type="url" class="f-input" id="pmLink" placeholder="https://..." />
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Instrucciones para el cliente</label>
+                    <textarea class="f-input" id="pmInstructions" rows="3" placeholder="Ej: Transferir a este CBU e indicar nombre completo en el asunto."></textarea>
+                </div>
+                <div class="f-group">
+                    <label class="f-check">
+                        <input type="checkbox" id="pmActive" checked /> Método activo
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveMethod()"><i class="bi bi-check2 me-1"></i>Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+.pm-icon{font-size:1.3rem;margin-right:.25rem}
+</style>
+<script>
+var methods = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+var modal = new bootstrap.Modal(document.getElementById('pmModal'));
+
+function openModal(id) {
+    if (id === 0) {
+        document.getElementById('pmModalTitle').textContent = 'Nuevo método de pago';
+        document.getElementById('pmId').value = 0;
+        document.getElementById('pmType').value = 1;
+        document.getElementById('pmName').value = '';
+        document.getElementById('pmAlias').value = '';
+        document.getElementById('pmAccount').value = '';
+        document.getElementById('pmLink').value = '';
+        document.getElementById('pmInstructions').value = '';
+        document.getElementById('pmActive').checked = true;
+    } else {
+        var m = methods.find(x => x.Id === id);
+        if (!m) return;
+        document.getElementById('pmModalTitle').textContent = 'Editar método de pago';
+        document.getElementById('pmId').value = m.Id;
+        document.getElementById('pmType').value = m.Type;
+        document.getElementById('pmName').value = m.Name;
+        document.getElementById('pmAlias').value = m.AccountAlias || '';
+        document.getElementById('pmAccount').value = m.AccountNumber || '';
+        document.getElementById('pmLink').value = m.PaymentLink || '';
+        document.getElementById('pmInstructions').value = m.Instructions || '';
+        document.getElementById('pmActive').checked = m.IsActive;
+    }
+    modal.show();
+}
+
+function saveMethod() {
+    var name = document.getElementById('pmName').value.trim();
+    if (!name) { alert('El nombre es obligatorio.'); return; }
+    var payload = {
+        Id: parseInt(document.getElementById('pmId').value),
+        Type: parseInt(document.getElementById('pmType').value),
+        Name: name,
+        AccountAlias: document.getElementById('pmAlias').value,
+        AccountNumber: document.getElementById('pmAccount').value,
+        PaymentLink: document.getElementById('pmLink').value,
+        Instructions: document.getElementById('pmInstructions').value,
+        IsActive: document.getElementById('pmActive').checked,
+        SortOrder: 0
+    };
+    fetch('/PaymentMethods/Save', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        body: JSON.stringify(payload)
+    }).then(r => r.json()).then(d => { if (d.ok) { modal.hide(); location.reload(); } });
+}
+
+function toggleActive(id) {
+    fetch('/PaymentMethods/ToggleActive', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        body: 'id=' + id
+    }).then(r => r.json()).then(d => {
+        if (d.ok) {
+            var badge = document.querySelector('.pm-status-' + id);
+            if (badge) { badge.textContent = d.isActive ? 'Activo' : 'Inactivo'; badge.className = 'badge pm-status-' + id + (d.isActive ? ' bg-success' : ' bg-secondary'); }
+        }
+    });
+}
+
+function deleteMethod(id) {
+    if (!confirm('¿Eliminar este método de pago?')) return;
+    fetch('/PaymentMethods/Delete', {
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        body: 'id=' + id
+    }).then(r => r.json()).then(d => { if (d.ok) { var el = document.getElementById('pm-' + id); if (el) el.remove(); } });
+}
+</script>
+@Html.AntiForgeryToken()
+}
+
+@functions {
+    static string GetIcon(PaymentMethodType t) => t switch {
+        PaymentMethodType.BankTransfer => "??",
+        PaymentMethodType.CreditCard   => "??",
+        PaymentMethodType.Cash         => "??",
+        PaymentMethodType.MercadoPago  => "??",
+        PaymentMethodType.PayPal       => "???",
+        PaymentMethodType.Stripe       => "??",
+        _ => "??"
+    };
+}

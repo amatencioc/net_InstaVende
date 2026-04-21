@@ -11,6 +11,11 @@ public class Contact
     public string? AvatarUrl { get; set; }
     public DateTime FirstSeenAt { get; set; } = DateTime.UtcNow;
     public DateTime LastSeenAt { get; set; } = DateTime.UtcNow;
+    public int TotalPurchases { get; set; }
+    public decimal TotalSpent { get; set; }
+    public DateTime? LastPurchaseAt { get; set; }
     public Business Business { get; set; } = null!;
     public ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<Reminder> Reminders { get; set; } = new List<Reminder>();
 }

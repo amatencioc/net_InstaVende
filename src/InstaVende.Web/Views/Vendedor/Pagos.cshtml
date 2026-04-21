@@ -1,0 +1,236 @@
+@model InstaVende.Web.ViewModels.VendedorPagoViewModel
+@{ ViewData["Title"] = "Mi Vendedor – Pagos"; }
+
+@await Html.PartialAsync("_VendedorTabs", "pagos")
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Métodos de pago -->
+        <div class="a-card mb-4">
+            <div class="a-card-header">
+                <div class="a-card-title">
+                    <i class="bi bi-check-circle-fill text-success me-1"></i> Métodos de pago
+                </div>
+                <button class="btn btn-sm btn-outline-primary" onclick="addMethod()">
+                    <i class="bi bi-plus me-1"></i> Agregar método
+                </button>
+            </div>
+            <div class="a-card-body">
+                <p class="text-muted small mb-4">Selecciona si aceptas pago adelantado, contraentrega o ambos.</p>
+                <div id="methodList">
+                    @foreach (var m in Model.PaymentMethods)
+                    {
+                        <div class="a-card mb-3 method-card" id="method-@m.Id" data-id="@m.Id">
+                            <div class="a-card-body" style="padding:1rem">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input" type="checkbox" @(m.IsActive ? "checked" : "")
+                                                   onchange="toggleMethod(@m.Id, this)" />
+                                        </div>
+                                        <span class="badge" style="background:#ede9fe;color:#7c3aed">@m.Type</span>
+                                    </div>
+                                    <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteMethod(@m.Id)">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="f-label" style="font-size:.76rem">Nombre del método</label>
+                                    <input class="f-input method-name" style="font-size:.85rem" value="@m.Name"
+                                           placeholder="Ej. YAPE, PLIN" />
+                                </div>
+                                <div class="mb-2">
+                                    <label class="f-label" style="font-size:.76rem">Tipo de método</label>
+                                    <select class="f-input method-type" style="font-size:.85rem">
+                                        @foreach (var t in new[] { "Billeteras virtuales", "Transferencia bancaria", "Contraentrega", "Tarjeta de crédito", "Efectivo" })
+                                        {
+                                            if (m.Type == t) { <option value="@t" selected>@t</option> }
+                                            else { <option value="@t">@t</option> }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="f-label" style="font-size:.76rem">Instrucciones de pago</label>
+                                    <textarea class="f-input method-instructions" rows="3" style="font-size:.85rem"
+                                              placeholder="Enviar al número: 994 832 877 / Titular: ..."
+                                              oninput="updatePreview(this)">@m.Instructions</textarea>
+                                    <p class="text-muted mb-0 mt-1" style="font-size:.73rem">
+                                        Proporciona todos los datos necesarios para que el cliente pueda realizar el pago correctamente.
+                                    </p>
+                                </div>
+                                <div class="p-2 rounded-2" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.82rem">
+                                    <div class="text-muted mb-1" style="font-size:.72rem;font-weight:600">VISTA PREVIA</div>
+                                    <div class="method-preview">@(m.Instructions ?? "—")</div>
+                                </div>
+                                <div class="text-end mt-2">
+                                    <button class="btn btn-sm btn-primary" onclick="saveMethod(this, @m.Id)">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (!Model.PaymentMethods.Any())
+                    {
+                        <div class="text-center text-muted py-3" id="emptyMethods">
+                            <i class="bi bi-credit-card" style="font-size:2rem;color:#c4b5fd"></i>
+                            <p class="mt-2 mb-0">Aún no has agregado métodos de pago.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Imágenes de pago -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title">Imágenes de pago <span class="text-muted small fw-normal">(opcional)</span></div>
+            </div>
+            <div class="a-card-body">
+                <p class="text-muted small mb-3">
+                    Sube imágenes como códigos QR, capturas de cuenta o referencias visuales para facilitar el pago.
+                </p>
+                <div class="row g-2 mb-3" id="imgGrid">
+                    @foreach (var img in Model.PaymentImages)
+                    {
+                        <div class="col-auto" id="pimg-@img.Id">
+                            <div style="position:relative;display:inline-block">
+                                <img src="@img.ImageUrl" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #e2e8f0" />
+                                <button class="btn btn-sm" onclick="deletePaymentImage(@img.Id)"
+                                        style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#ef4444;color:white;padding:0;font-size:.6rem;line-height:1;border:none">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (Model.PaymentImages.Count < 5)
+                {
+                    <label class="d-flex flex-column align-items-center justify-content-center p-4 rounded-3 cursor-pointer"
+                           style="background:#f8fafc;border:2px dashed #e2e8f0;cursor:pointer" for="uploadPaymentImg">
+                        <i class="bi bi-cloud-upload" style="font-size:1.5rem;color:#94a3b8"></i>
+                        <span class="text-muted small mt-1">Haz clic para subir imágenes</span>
+                        <span class="text-muted" style="font-size:.72rem">PNG, JPG · máx. 5 imágenes · 5MB c/u</span>
+                    </label>
+                    <input type="file" id="uploadPaymentImg" accept="image/png,image/jpeg" style="display:none"
+                           onchange="uploadImage(this)" />
+                }
+                else
+                {
+                    <p class="text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Has alcanzado el límite de 5 imágenes.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template for new method -->
+<template id="tmplMethod">
+    <div class="a-card mb-3 method-card" id="method-new" data-id="0">
+        <div class="a-card-body" style="padding:1rem">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" checked />
+                    </div>
+                    <span class="badge" style="background:#ede9fe;color:#7c3aed">Nuevo método</span>
+                </div>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="this.closest('.method-card').remove()">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </div>
+            <div class="mb-2">
+                <label class="f-label" style="font-size:.76rem">Nombre del método</label>
+                <input class="f-input method-name" style="font-size:.85rem" placeholder="Ej. YAPE, PLIN" />
+            </div>
+            <div class="mb-2">
+                <label class="f-label" style="font-size:.76rem">Tipo de método</label>
+                <select class="f-input method-type" style="font-size:.85rem">
+                    @foreach (var t in new[] { "Billeteras virtuales", "Transferencia bancaria", "Contraentrega", "Tarjeta de crédito", "Efectivo" })
+                    { <option value="@t">@t</option> }
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="f-label" style="font-size:.76rem">Instrucciones de pago</label>
+                <textarea class="f-input method-instructions" rows="3" style="font-size:.85rem"
+                          placeholder="Enviar al número: ..." oninput="updatePreview(this)"></textarea>
+            </div>
+            <div class="p-2 rounded-2 mb-2" style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.82rem">
+                <div class="text-muted mb-1" style="font-size:.72rem;font-weight:600">VISTA PREVIA</div>
+                <div class="method-preview">—</div>
+            </div>
+            <div class="text-end">
+                <button class="btn btn-sm btn-primary" onclick="saveMethod(this, 0)">Guardar</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+@Html.AntiForgeryToken()
+
+<script>
+const token = document.querySelector('[name=__RequestVerificationToken]').value;
+
+function addMethod() {
+    const tmpl = document.getElementById('tmplMethod').content.cloneNode(true);
+    document.getElementById('methodList').appendChild(tmpl);
+    document.getElementById('emptyMethods')?.remove();
+}
+
+function saveMethod(btn, id) {
+    const card = btn.closest('.method-card');
+    const data = {
+        id,
+        name: card.querySelector('.method-name').value,
+        type: card.querySelector('.method-type').value,
+        instructions: card.querySelector('.method-instructions').value,
+        isActive: card.querySelector('input[type=checkbox]').checked
+    };
+    fetch('/Vendedor/SavePaymentMethod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
+}
+
+function toggleMethod(id, cb) {
+    fetch('/Vendedor/TogglePaymentMethod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => { cb.checked = d.isActive; });
+}
+
+function deleteMethod(id) {
+    if (!confirm('¿Eliminar este método de pago?')) return;
+    fetch('/Vendedor/DeletePaymentMethod', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ id })
+    }).then(() => document.getElementById('method-'+id)?.remove());
+}
+
+function updatePreview(ta) {
+    const preview = ta.closest('.method-card').querySelector('.method-preview');
+    preview.textContent = ta.value || '—';
+}
+
+function uploadImage(input) {
+    if (!input.files[0]) return;
+    const fd = new FormData();
+    fd.append('file', input.files[0]);
+    fd.append('__RequestVerificationToken', token);
+    fetch('/Vendedor/UploadPaymentImage', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) location.reload();
+            else alert(d.error);
+        });
+}
+
+function deletePaymentImage(id) {
+    fetch('/Vendedor/DeletePaymentImage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ id })
+    }).then(() => document.getElementById('pimg-'+id)?.remove());
+}
+</script>

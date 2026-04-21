@@ -1,0 +1,26 @@
+@model string
+@{
+    var links = new[] {
+        ("personalidad", "bi-person-badge", "Personalidad", "/Vendedor/Personalidad"),
+        ("base", "bi-book", "Base de conocimiento", "/Vendedor/BaseConocimiento"),
+        ("entrega", "bi-truck", "Entrega", "/Vendedor/Entrega"),
+        ("pagos", "bi-credit-card", "Pagos", "/Vendedor/Pagos"),
+    };
+}
+<div class="mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <div>
+            <h1 class="topbar-page-title mb-0">Configuración de tu vendedor</h1>
+        </div>
+    </div>
+    <ul class="nav nav-tabs">
+        @foreach (var (key, icon, label, href) in links)
+        {
+            <li class="nav-item">
+                <a class="nav-link @(Model == key ? "active" : "")" href="@href">
+                    <i class="bi @icon me-1"></i> @label
+                </a>
+            </li>
+        }
+    </ul>
+</div>

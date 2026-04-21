@@ -3,6 +3,7 @@ using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
 using InstaVende.Infrastructure.Data;
 using InstaVende.Web.Services;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -26,7 +27,13 @@ public class BotEngineServiceTests
             .AddInMemoryCollection(new Dictionary<string, string?> { ["OpenAI:ApiKey"] = openAiKey })
             .Build();
         var logger = Mock.Of<ILogger<BotEngineService>>();
-        return new BotEngineService(db, config, logger);
+
+        var env = new Mock<IWebHostEnvironment>();
+        env.Setup(e => e.ContentRootPath).Returns((string)Path.GetTempPath());
+        var promptBuilderLogger = Mock.Of<ILogger<MasterPromptBuilder>>();
+        var promptBuilder = new MasterPromptBuilder(env.Object, promptBuilderLogger);
+
+        return new BotEngineService(db, config, promptBuilder, logger);
     }
 
     [Fact]

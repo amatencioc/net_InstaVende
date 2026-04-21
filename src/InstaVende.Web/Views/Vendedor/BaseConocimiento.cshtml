@@ -1,0 +1,179 @@
+@model InstaVende.Web.ViewModels.BaseConocimientoViewModel
+@using InstaVende.Core.Enums
+@{ ViewData["Title"] = "Mi Vendedor – Base de conocimiento"; }
+
+@await Html.PartialAsync("_VendedorTabs", "base")
+
+@{
+    var cats = new (KnowledgeCategory? Val, string Label, string Icon)[]
+    {
+        (null, "Todas", "bi-grid"),
+        (KnowledgeCategory.Productos, "Productos", "bi-box"),
+        (KnowledgeCategory.Horarios, "Horarios", "bi-clock"),
+        (KnowledgeCategory.Envios, "Envíos", "bi-truck"),
+        (KnowledgeCategory.Pagos, "Pagos", "bi-credit-card"),
+        (KnowledgeCategory.Devoluciones, "Devoluciones", "bi-arrow-return-left"),
+        (KnowledgeCategory.Otros, "Otros", "bi-question-circle"),
+    };
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <ul class="nav nav-pills">
+        @foreach (var (val, label, icon) in cats)
+        {
+            var isActive = Model.FilterCategory == val;
+            var href = val == null ? "/Vendedor/BaseConocimiento" : $"/Vendedor/BaseConocimiento?categoria={(int)val}";
+            <li class="nav-item">
+                <a class="nav-link @(isActive ? "active" : "")" href="@href" style="font-size:.82rem;padding:.3rem .8rem">
+                    <i class="bi @icon me-1"></i>@label
+                </a>
+            </li>
+        }
+    </ul>
+    <button class="btn btn-primary btn-sm" onclick="openKnowledgeModal(null)">
+        <i class="bi bi-plus me-1"></i> Agregar tema
+    </button>
+</div>
+
+@if (!Model.Entries.Any())
+{
+    <div class="a-card text-center py-5">
+        <i class="bi bi-book" style="font-size:2.5rem;color:#c4b5fd"></i>
+        <p class="text-muted mt-3 mb-2">No hay entradas en esta categoría.</p>
+        <button class="btn btn-outline-primary btn-sm" onclick="openKnowledgeModal(null)">
+            <i class="bi bi-plus me-1"></i> Agregar primer tema
+        </button>
+    </div>
+}
+else
+{
+    <div class="row g-3" id="knowledgeGrid">
+        @foreach (var e in Model.Entries)
+        {
+            <div class="col-md-6" id="ke-@e.Id">
+                <div class="a-card h-100">
+                    <div class="a-card-body">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold mb-1" style="font-size:.9rem">@e.Title</div>
+                                <span class="badge" style="background:#ede9fe;color:#7c3aed;font-size:.72rem">@e.Category</span>
+                            </div>
+                            <div class="d-flex gap-1 ms-2 flex-shrink-0">
+                                <button class="btn btn-sm btn-link p-1 @(e.IsFavorite ? "text-warning" : "text-muted")"
+                                        onclick="toggleFavorite(@e.Id, this)" title="Favorito">
+                                    <i class="bi bi-star@(e.IsFavorite ? "-fill" : "")"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link p-1 text-muted"
+                                        onclick="openKnowledgeModal(@e.Id)" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link p-1 text-danger"
+                                        onclick="deleteKnowledge(@e.Id)" title="Eliminar">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-0" style="font-size:.82rem;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">
+                            @e.Content
+                        </p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="modalKnowledge" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalKnowledgeTitle">Agregar tema</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="keId" />
+                <div class="mb-3">
+                    <label class="f-label">Título / Pregunta *</label>
+                    <input id="keTitle" class="f-input" placeholder="Ej. ¿Realizan envíos a provincia?" required />
+                </div>
+                <div class="mb-3">
+                    <label class="f-label">Categoría</label>
+                    <select id="keCategory" class="f-input">
+                        @foreach (KnowledgeCategory c in Enum.GetValues<KnowledgeCategory>())
+                        { <option value="@((int)c)">@c</option> }
+                    </select>
+                </div>
+                <div class="mb-0">
+                    <label class="f-label">Contenido / Respuesta *</label>
+                    <textarea id="keContent" class="f-input" rows="5"
+                              placeholder="Respuesta completa que usará el vendedor IA..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveKnowledge()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+let keData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Entries));
+
+function openKnowledgeModal(id) {
+    const modal = new bootstrap.Modal(document.getElementById('modalKnowledge'));
+    document.getElementById('keId').value = id || 0;
+    if (id) {
+        const e = keData.find(x => x.id === id);
+        if (!e) return;
+        document.getElementById('modalKnowledgeTitle').textContent = 'Editar tema';
+        document.getElementById('keTitle').value = e.title;
+        document.getElementById('keCategory').value = e.category;
+        document.getElementById('keContent').value = e.content;
+    } else {
+        document.getElementById('modalKnowledgeTitle').textContent = 'Agregar tema';
+        document.getElementById('keTitle').value = '';
+        document.getElementById('keCategory').value = '6';
+        document.getElementById('keContent').value = '';
+    }
+    modal.show();
+}
+
+function saveKnowledge() {
+    const data = {
+        id: parseInt(document.getElementById('keId').value) || 0,
+        title: document.getElementById('keTitle').value,
+        category: parseInt(document.getElementById('keCategory').value),
+        content: document.getElementById('keContent').value
+    };
+    fetch('/Vendedor/SaveKnowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
+}
+
+function toggleFavorite(id, btn) {
+    fetch('/Vendedor/ToggleFavoriteKnowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => {
+        const icon = btn.querySelector('i');
+        icon.className = d.isFavorite ? 'bi bi-star-fill' : 'bi bi-star';
+        btn.className = btn.className.replace('text-muted','').replace('text-warning','') + (d.isFavorite ? ' text-warning' : ' text-muted');
+    });
+}
+
+function deleteKnowledge(id) {
+    if (!confirm('¿Eliminar esta entrada? Esta acción no se puede deshacer.')) return;
+    fetch('/Vendedor/DeleteKnowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(() => document.getElementById('ke-'+id)?.remove());
+}
+</script>

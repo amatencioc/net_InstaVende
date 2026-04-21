@@ -1,8 +1,449 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Vende más con tu Bot IA";
+    Layout = "_LandingLayout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- ANNOUNCE -->
+<div class="announce-bar">
+    <i class="bi bi-stars"></i>
+    <span>InstaVende ya está disponible — configura tu bot en menos de 1 día</span>
+    <a asp-controller="Account" asp-action="Register">Empezar gratis →</a>
 </div>
+
+<!-- NAV -->
+<nav class="lp-nav">
+    <div class="container">
+        <a asp-controller="Home" asp-action="Index" class="lp-logo">Insta<span class="dot">Vende</span></a>
+        <button class="nav-toggle" id="navToggle"><i class="bi bi-list"></i></button>
+        <ul class="lp-links" id="navLinks">
+            <li><a href="#como-funciona">Cómo funciona</a></li>
+            <li><a href="#caracteristicas">Características</a></li>
+            <li><a href="#canales">Canales</a></li>
+            <li><a href="#precios">Precios</a></li>
+            <li><a asp-controller="Account" asp-action="Login" class="btn-nav-login">Iniciar sesión</a></li>
+            <li><a asp-controller="Account" asp-action="Register" class="btn-nav-cta"><i class="bi bi-rocket-takeoff-fill"></i> Crear Bot IA</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="hero-grid"></div>
+    </div>
+    <div class="container">
+        <div class="hero-copy">
+            <div class="channel-badges">
+                <span class="ch-b ch-wa"><i class="bi bi-whatsapp"></i> WhatsApp</span>
+                <span class="ch-b ch-ig"><i class="bi bi-instagram"></i> Instagram</span>
+                <span class="ch-b ch-fb"><i class="bi bi-facebook"></i> Facebook</span>
+                <span class="ch-b ch-ai"><i class="bi bi-cpu-fill"></i> GPT-4o</span>
+            </div>
+            <h1>Tu negocio vende<br/><span class="gl">las 24 horas, solo</span></h1>
+            <p class="hero-sub">InstaVende crea tu vendedor IA personalizado que atiende, negocia y cierra ventas por WhatsApp, Instagram y Facebook — sin que tú tengas que responder nada.</p>
+            <div class="hero-actions">
+                <a asp-controller="Account" asp-action="Register" class="btn-cta"><i class="bi bi-rocket-takeoff-fill"></i> Crear mi Bot gratis</a>
+                <a href="#como-funciona" class="btn-outline"><i class="bi bi-play-circle"></i> Ver cómo funciona</a>
+            </div>
+            <div class="hero-nums">
+                <div class="hero-num"><strong>+800</strong><span>ventas cerradas<br/>automáticamente</span></div>
+                <div class="hero-num"><strong>24/7</strong><span>atención sin<br/>descanso</span></div>
+                <div class="hero-num"><strong>3X</strong><span>más conversiones<br/>vs. manual</span></div>
+                <div class="hero-num"><strong>&lt;30s</strong><span>tiempo de<br/>respuesta</span></div>
+            </div>
+        </div>
+        <div class="phone-scene">
+            <div class="p-badge pb1"><span>🛍️</span><span><strong style="color:var(--brand)">+47</strong> ventas hoy</span></div>
+            <div class="p-badge pb2"><span style="color:var(--brand)"><i class="bi bi-whatsapp"></i></span><span>Bot respondiendo <strong style="color:var(--brand)">128</strong> chats</span></div>
+            <div class="phone-device">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                    <div class="phone-header">
+                        <div class="p-avatar">🤖</div>
+                        <div class="p-info"><strong>Tu Negocio IA</strong><small>● En línea ahora</small></div>
+                        <div class="p-acts"><i class="bi bi-telephone"></i><i class="bi bi-three-dots-vertical"></i></div>
+                    </div>
+                    <div class="chat-body">
+                        <div class="msg min">Hola! tienen las zapatillas Nike talla 42?<span class="mt">9:31</span></div>
+                        <div class="msg mout">¡Hola! 👟 Sí, tenemos Nike Air Max en talla 42.<br/><br/>💰 <strong>$129.99</strong> · 📦 En stock<br/>🎨 Negro · Blanco · Gris<br/><br/>¿Cuál color te interesa? 😊<span class="mt">9:31 ✓✓</span></div>
+                        <div class="msg min">Las negras! Hacen descuento?<span class="mt">9:34</span></div>
+                        <div class="msg mout">¡Excelente elección! 🔥<br/><br/>Por ser tu primera compra te incluyo <strong>envío gratis</strong> 🎁<br/><br/>Total: <strong>$129.99</strong> con envío ✅<span class="mt">9:34 ✓✓</span></div>
+                        <div class="msg min">Sí! Cómo pago?<span class="mt">9:35</span></div>
+                        <div class="msg mout">Aceptamos 💳 Tarjeta · 🏦 Transferencia · 💵 Efectivo<span class="mt">9:35 ✓✓</span></div>
+                        <div class="typing"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item"><strong>+800</strong><span>ventas cerradas en automático</span></div>
+            <div class="stat-div"></div>
+            <div class="stat-item"><strong>98%</strong><span>satisfacción del cliente</span></div>
+            <div class="stat-div"></div>
+            <div class="stat-item"><strong>&lt;30s</strong><span>tiempo de respuesta promedio</span></div>
+            <div class="stat-div"></div>
+            <div class="stat-item"><strong>3</strong><span>canales integrados</span></div>
+            <div class="stat-div"></div>
+            <div class="stat-item"><strong>+500</strong><span>negocios activos</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- PAIN POINTS -->
+<section class="pain-section">
+    <div class="container">
+        <div class="chip"><i class="bi bi-exclamation-triangle-fill"></i> El problema</div>
+        <h2 class="section-title">Tus clientes compran por RRSS,<br/>pero <span style="color:#f87171;font-style:italic">responderlos te consume</span></h2>
+        <p class="section-sub">Estos 3 problemas frenan tu crecimiento ahora mismo:</p>
+        <div class="pain-grid">
+            <div class="pain-card">
+                <div class="pi pi-r"><i class="bi bi-bell-slash-fill"></i></div>
+                <h4>Más ventas = más estrés operativo</h4>
+                <p>Más mensajes significa más horas pegado al celular. Escalar se vuelve imposible sin contratar personal.</p>
+            </div>
+            <div class="pain-card">
+                <div class="pi pi-a"><i class="bi bi-hourglass-split"></i></div>
+                <h4>El 78% compra al que responde primero</h4>
+                <p>Tus clientes no esperan. Si tardas más de 5 minutos, ya compraron en la competencia que respondió antes.</p>
+            </div>
+            <div class="pain-card">
+                <div class="pi pi-p"><i class="bi bi-tools"></i></div>
+                <h4>Configurar otras plataformas es agotador</h4>
+                <p>Otras soluciones requieren semanas de configuración y raramente funcionan como prometen. Tiempo y dinero perdidos.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- STEPS -->
+<section class="steps-section" id="como-funciona">
+    <div class="container">
+        <div class="tc">
+            <div class="chip"><i class="bi bi-lightning-fill"></i> El proceso</div>
+            <h2 class="section-title">En menos de 1 día tu <span class="gr">vendedor IA</span><br/>está cerrando ventas</h2>
+            <p class="section-sub tc" style="margin:0 auto">Un asesor te acompañará en cada paso del proceso</p>
+        </div>
+        <div class="steps-track">
+            <div class="step-item"><div class="step-circle">📦</div><span class="step-chip">Paso 1</span><h4>Carga tu catálogo</h4><p>Sube productos, precios y fotos. Conecta tu tienda online si tienes.</p></div>
+            <div class="step-item"><div class="step-circle">🧠</div><span class="step-chip">Paso 2</span><h4>Entrena a tu bot</h4><p>Define personalidad, tono y reglas de negociación únicas de tu marca.</p></div>
+            <div class="step-item"><div class="step-circle">🚀</div><span class="step-chip">Paso 3</span><h4>Lanzamiento en vivo</h4><p>Tu bot conecta con WhatsApp, Instagram y Facebook de forma simultánea.</p></div>
+            <div class="step-item"><div class="step-circle">📈</div><span class="step-chip">Paso 4</span><h4>Escala sin límites</h4><p>Cierra 3X más ventas mientras el bot trabaja. Tú solo supervisas.</p></div>
+        </div>
+        <div style="text-align:center;margin-top:2.75rem">
+            <a asp-controller="Account" asp-action="Register" class="btn-cta"><i class="bi bi-rocket-takeoff-fill"></i> Crear mi Bot ahora</a>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="caracteristicas">
+    <div class="container">
+        <!-- F1 -->
+        <div class="feat-block">
+            <div class="feat-copy">
+                <span class="fc fc-g"><i class="bi bi-chat-dots-fill"></i> Ventas automáticas</span>
+                <h2 class="feat-title">Conversaciones que<br/><span style="color:var(--brand)">convierten</span></h2>
+                <p class="feat-desc">Tu bot maneja precios, stock, características, objeciones y pagos de forma completamente automática. Con la personalidad de tu marca.</p>
+                <ul class="feat-list">
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Responde consultas de productos en tiempo real</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Negocia descuentos con reglas que tú defines</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Guía al cliente hasta el cierre de la venta</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Atiende múltiples conversaciones simultáneas</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Funciona en WhatsApp, Instagram y Facebook</li>
+                </ul>
+            </div>
+            <div class="feat-visual fv-green">
+                <div class="conv-preview">
+                    <div class="conv-bubble-in">
+                        <div class="conv-label"><i class="bi bi-whatsapp" style="color:#25D366"></i> Cliente · WhatsApp</div>
+                        <div class="conv-text">"¿Tienen el vestido rojo en talla S?"</div>
+                    </div>
+                    <div class="conv-bubble-out">
+                        <div class="conv-label" style="color:var(--brand)"><i class="bi bi-cpu-fill"></i> Bot · responde en 2s</div>
+                        <div class="conv-text">¡Hola! 😊 Sí, el vestido rojo está disponible en S.<br/><br/>💰 <strong>$49.99</strong> · 📦 Últimas 3 unidades<br/>¿Te lo reservo? 🛍️</div>
+                        <div class="conv-tags">
+                            <span class="conv-tag ct-green">✓ Cierre automático</span>
+                            <span class="conv-tag ct-purple">✓ Sin intervención humana</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- F2 -->
+        <div class="feat-block flip">
+            <div class="feat-copy">
+                <span class="fc fc-p"><i class="bi bi-speedometer2"></i> Control total</span>
+                <h2 class="feat-title">Dashboard en<br/><span style="color:var(--purple)">tiempo real</span></h2>
+                <p class="feat-desc">Monitorea todas las conversaciones activas en un solo lugar. Toma el control cuando lo necesites y analiza el rendimiento con métricas gerenciales.</p>
+                <ul class="feat-list">
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Bandeja unificada: WhatsApp + Instagram + Facebook</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> KPIs en tiempo real: conversiones y respuestas</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Historial completo de cada cliente</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Transferencia al agente humano con 1 clic</li>
+                </ul>
+            </div>
+            <div class="feat-visual fv-light">
+                <div class="dash-mini">
+                    <div class="dash-top">
+                        <strong><span class="live-dot"></span>Dashboard en vivo</strong>
+                        <span style="font-size:.7rem">Hoy · @DateTime.Now.ToString("HH:mm")</span>
+                    </div>
+                    <div class="m-grid">
+                        <div class="m-tile"><div class="m-val" style="color:var(--brand)">47</div><div class="m-lbl">Ventas hoy</div><span class="m-tag tg">+12%</span></div>
+                        <div class="m-tile"><div class="m-val" style="color:#2563eb">128</div><div class="m-lbl">Chats activos</div><span class="m-tag tb">En vivo</span></div>
+                        <div class="m-tile"><div class="m-val" style="color:#fbbf24">94%</div><div class="m-lbl">Tasa respuesta</div><span class="m-tag ta">Excelente</span></div>
+                        <div class="m-tile"><div class="m-val" style="color:#f97316">&lt;30s</div><div class="m-lbl">Resp. promedio</div><span class="m-tag tp">Óptimo</span></div>
+                    </div>
+                    <div class="c-list">
+                        <div class="c-item"><div class="c-av" style="background:rgba(37,211,102,.15)">👤</div><div class="c-info"><strong>María García</strong><span>"Me quedo con las 3 unidades..."</span></div><span class="c-tag ct-wa"><i class="bi bi-whatsapp"></i></span></div>
+                        <div class="c-item"><div class="c-av" style="background:rgba(225,48,108,.15)">👤</div><div class="c-info"><strong>Carlos Ruiz</strong><span>"¿Tienen en color azul?"</span></div><span class="c-tag ct-ig"><i class="bi bi-instagram"></i></span></div>
+                        <div class="c-item"><div class="c-av" style="background:rgba(24,119,242,.15)">👤</div><div class="c-info"><strong>Ana López</strong><span>Pregunta por el stock disponible</span></div><span class="c-tag ct-fb"><i class="bi bi-facebook"></i></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- F3 -->
+        <div class="feat-block">
+            <div class="feat-copy">
+                <span class="fc fc-g"><i class="bi bi-person-badge-fill"></i> Identidad de marca</span>
+                <h2 class="feat-title">Un bot con<br/><span style="color:var(--brand)">tu personalidad</span></h2>
+                <p class="feat-desc">No es un bot genérico. Es tu vendedor IA con el nombre, tono y estilo de tu marca. Tus clientes no sabrán que no es humano.</p>
+                <ul class="feat-list">
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Nombre y personalidad personalizados</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Tono formal, casual o profesional a tu elección</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Conoce tu catálogo y políticas de tu negocio</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Aprende de cada conversación</li>
+                </ul>
+            </div>
+            <div class="feat-visual fv-purple">
+                <div class="bot-card">
+                    <div class="bot-av">🤖</div>
+                    <h4>Sofía — Asistente IA</h4>
+                    <p>Vendedora virtual de <strong style="color:#0f172a">TuNegocio</strong></p>
+                    <div class="bot-traits">
+                        <span class="bt">Amigable</span><span class="bt">Persuasiva</span>
+                        <span class="bt">Empática</span><span class="bt">Profesional</span>
+                        <span class="bt">24/7 disponible</span><span class="bt">Español nativo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- F4 -->
+        <div class="feat-block flip">
+            <div class="feat-copy">
+                <span class="fc fc-b"><i class="bi bi-people-fill"></i> Humano + IA</span>
+                <h2 class="feat-title">Handoff <em>inteligente</em><br/><span style="color:#2563eb">al agente</span></h2>
+                <p class="feat-desc">El bot maneja el 80% de consultas solo. Cuando detecta una situación compleja, transfiere al agente con todo el contexto listo.</p>
+                <ul class="feat-list">
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Detección automática de casos complejos</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Resumen instantáneo para el agente</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> Transferencia con un clic desde el dashboard</li>
+                    <li><div class="fl-ok"><i class="bi bi-check"></i></div> El cliente nunca pierde el hilo</li>
+                </ul>
+            </div>
+            <div class="feat-visual fv-blue">
+                <div class="ho-card">
+                    <div class="ho-top">
+                        <span style="background:#fef2f2;color:#dc2626;border-radius:8px;padding:.25rem .6rem;font-size:.75rem;font-weight:700"><i class="bi bi-exclamation-triangle-fill"></i> Transferencia urgente</span>
+                        <span style="font-size:.7rem;color:#94a3b8">Ahora</span>
+                    </div>
+                    <div class="ho-info">
+                        <strong>Motivo:</strong> Negociación avanzada · <strong>Prioridad:</strong> Alta<br/>
+                        <strong>Cliente:</strong> Juan García · WhatsApp<br/>
+                        <strong>Producto:</strong> Pack Premium $299<br/>
+                        <strong>Descuento ofrecido:</strong> 8% ($275 final)
+                    </div>
+                    <div class="ho-sum">💬 "El cliente quiere $250. Ya aplicamos 3 niveles de descuento. Solicita hablar con un responsable."</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CHANNELS -->
+<section class="channels-section" id="canales">
+    <div class="container">
+        <div class="tc">
+            <div class="chip"><i class="bi bi-broadcast"></i> Multi-canal</div>
+            <h2 class="section-title">Un bot. <span class="gr">Todos tus canales.</span></h2>
+            <p class="section-sub tc">Conecta donde están tus clientes. Un solo dashboard para gestionar todo.</p>
+        </div>
+        <div class="ch-grid">
+            <div class="ch-tile t-wa"><div class="ch-ico ci-wa"><i class="bi bi-whatsapp"></i></div><h4>WhatsApp</h4><p>Business API oficial</p><span class="ch-st cs-live">● Disponible</span></div>
+            <div class="ch-tile t-ig"><div class="ch-ico ci-ig"><i class="bi bi-instagram"></i></div><h4>Instagram</h4><p>Direct Messages</p><span class="ch-st cs-live">● Disponible</span></div>
+            <div class="ch-tile t-fb"><div class="ch-ico ci-fb"><i class="bi bi-facebook"></i></div><h4>Facebook</h4><p>Messenger</p><span class="ch-st cs-live">● Disponible</span></div>
+            <div class="ch-tile t-web"><div class="ch-ico ci-web"><i class="bi bi-globe2"></i></div><h4>Web Chat</h4><p>Widget para tu sitio web</p><span class="ch-st cs-soon">⏳ Próximamente</span></div>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi-section">
+    <div class="container">
+        <div class="tc">
+            <div class="chip"><i class="bi bi-star-fill"></i> Testimonios</div>
+            <h2 class="section-title">Lo que dicen <span class="gr">nuestros clientes</span></h2>
+        </div>
+        <div class="testi-grid">
+            <div class="testi-card">
+                <div class="t-stars">★★★★★</div>
+                <p class="t-quote">"Pasé de responder 200 mensajes diarios a solo revisar el dashboard. Mi bot cierra ventas mientras duermo."</p>
+                <div class="t-author"><div class="t-av" style="background:rgba(37,211,102,.15)">👩</div><div class="t-info"><strong>Valentina Ríos</strong><small>Tienda de ropa</small></div><span class="t-ch" style="color:#E1306C"><i class="bi bi-instagram"></i></span></div>
+            </div>
+            <div class="testi-card">
+                <div class="t-stars">★★★★★</div>
+                <p class="t-quote">"Implementé InstaVende en 1 día. La primera semana cerré 34 ventas de forma automática. El ROI fue inmediato."</p>
+                <div class="t-author"><div class="t-av" style="background:rgba(24,119,242,.15)">👨</div><div class="t-info"><strong>Carlos Mendoza</strong><small>Electronics Store · CEO</small></div><span class="t-ch" style="color:#25D366"><i class="bi bi-whatsapp"></i></span></div>
+            </div>
+            <div class="testi-card">
+                <div class="t-stars">★★★★★</div>
+                <p class="t-quote">"Mi bot responde al instante, negocia descuentos y programa entregas. Mis clientes piensan que tengo un equipo enorme."</p>
+                <div class="t-author"><div class="t-av" style="background:rgba(168,85,247,.15)">👩</div><div class="t-info"><strong>Laura Castillo</strong><small>Cosméticos · 3 sucursales</small></div><span class="t-ch" style="color:#1877F2"><i class="bi bi-facebook"></i></span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="precios">
+    <div class="container">
+        <div class="tc">
+            <div class="chip"><i class="bi bi-tag-fill"></i> Planes y precios</div>
+            <h2 class="section-title">Elige tu plan y <span class="gr">empieza hoy</span></h2>
+            <p class="section-sub tc">Sin contratos. Sin permanencia. Cancela cuando quieras.</p>
+        </div>
+        <div class="p-grid">
+            <div class="p-card">
+                <div class="p-name">Starter</div>
+                <div class="p-price"><span class="am">$29</span><small> /mes</small></div>
+                <p class="p-desc">Para negocios que están comenzando</p>
+                <ul class="p-feats">
+                    <li><i class="bi bi-check-circle-fill"></i> 1 canal (WhatsApp)</li>
+                    <li><i class="bi bi-check-circle-fill"></i> 500 conversaciones/mes</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Hasta 50 productos</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Bot con respuestas inteligentes</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Dashboard básico</li>
+                    <li class="off"><i class="bi bi-x-circle-fill"></i> Multi-canal</li>
+                    <li class="off"><i class="bi bi-x-circle-fill"></i> GPT-4o avanzado</li>
+                </ul>
+                <a asp-controller="Account" asp-action="Register"><button class="p-btn">Empezar gratis 14 días</button></a>
+            </div>
+            <div class="p-card featured">
+                <span class="p-popular">⭐ Más popular</span>
+                <div class="p-name">Pro</div>
+                <div class="p-price"><span class="am">$79</span><small> /mes</small></div>
+                <p class="p-desc">Para negocios en crecimiento activo</p>
+                <ul class="p-feats">
+                    <li><i class="bi bi-check-circle-fill"></i> WhatsApp + Instagram + Facebook</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Conversaciones ilimitadas</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Catálogo ilimitado</li>
+                    <li><i class="bi bi-check-circle-fill"></i> GPT-4o con personalidad de marca</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Dashboard + analíticas</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Handoff a agente humano</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Soporte prioritario</li>
+                </ul>
+                <a asp-controller="Account" asp-action="Register"><button class="p-btn">Empezar gratis 14 días</button></a>
+            </div>
+            <div class="p-card">
+                <div class="p-name">Enterprise</div>
+                <div class="p-price"><span class="am">$199</span><small> /mes</small></div>
+                <p class="p-desc">Para equipos y alto volumen</p>
+                <ul class="p-feats">
+                    <li><i class="bi bi-check-circle-fill"></i> Todo lo de Pro</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Múltiples negocios</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Agentes ilimitados</li>
+                    <li><i class="bi bi-check-circle-fill"></i> API para integraciones</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Onboarding personalizado</li>
+                    <li><i class="bi bi-check-circle-fill"></i> SLA garantizado</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Manager dedicado</li>
+                </ul>
+                <a asp-controller="Account" asp-action="Register"><button class="p-btn">Contactar ventas</button></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta">
+    <div class="container">
+        <h2>Tu negocio merece vender<br/><span class="gr">sin límites de horario</span></h2>
+        <p>Únete a los negocios que ya automatizan sus ventas con InstaVende. Empieza gratis, sin tarjeta de crédito.</p>
+        <div class="cta-actions">
+            <a asp-controller="Account" asp-action="Register" class="btn-cta"><i class="bi bi-rocket-takeoff-fill"></i> Crear mi Bot IA gratis</a>
+            <a asp-controller="Account" asp-action="Login" class="btn-cta-light"><i class="bi bi-box-arrow-in-right"></i> Ya tengo cuenta</a>
+        </div>
+        <div class="cta-note">
+            <span><i class="bi bi-check-circle-fill"></i> Sin tarjeta de crédito</span>
+            <span><i class="bi bi-check-circle-fill"></i> 14 días gratis</span>
+            <span><i class="bi bi-check-circle-fill"></i> Listo en 1 día</span>
+            <span><i class="bi bi-check-circle-fill"></i> Cancela cuando quieras</span>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="lp-footer">
+    <div class="container">
+        <div class="f-top">
+            <div class="f-brand">
+                <a asp-controller="Home" asp-action="Index" class="lp-logo">Insta<span class="dot">Vende</span></a>
+                <p>Bot de ventas IA para WhatsApp, Instagram y Facebook. Vende más, trabaja menos.</p>
+            </div>
+            <div class="f-col">
+                <h5>Producto</h5>
+                <a href="#como-funciona">Cómo funciona</a>
+                <a href="#caracteristicas">Características</a>
+                <a href="#canales">Canales</a>
+                <a href="#precios">Precios</a>
+            </div>
+            <div class="f-col">
+                <h5>Cuenta</h5>
+                <a asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                <a asp-controller="Account" asp-action="Register">Crear cuenta gratis</a>
+            </div>
+            <div class="f-col">
+                <h5>Soporte</h5>
+                <a href="#">Documentación</a>
+                <a href="#">Centro de ayuda</a>
+                <a href="#">Estado del servicio</a>
+                <a href="#">Contacto</a>
+            </div>
+        </div>
+        <div class="f-bottom">
+            <span>© @DateTime.Now.Year InstaVende · Todos los derechos reservados</span>
+            <div class="soc-links">
+                <a href="#" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+                <a href="#" title="Instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" title="Facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" title="LinkedIn"><i class="bi bi-linkedin"></i></a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+@section Scripts {
+<script>
+    document.getElementById('navToggle').addEventListener('click', function () {
+        document.getElementById('navLinks').classList.toggle('open');
+    });
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+            var target = document.querySelector(a.getAttribute('href'));
+            if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        });
+    });
+    window.addEventListener('scroll', function () {
+        var nav = document.querySelector('.lp-nav');
+        if (nav) nav.style.padding = window.scrollY > 60 ? '.65rem 0' : '1rem 0';
+    });
+</script>
+}

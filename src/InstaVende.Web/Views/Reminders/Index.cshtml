@@ -1,0 +1,171 @@
+@model List<InstaVende.Web.ViewModels.ReminderViewModel>
+@using InstaVende.Core.Enums
+@{ ViewData["Title"] = "Recordatorios"; }
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="topbar-page-title mb-0">Recordatorios</h1>
+        <p class="text-muted small mb-0">Programa mensajes de seguimiento automático para tus clientes</p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal(0)"><i class="bi bi-plus-circle me-1"></i> Nuevo recordatorio</button>
+</div>
+
+<!-- Tabs por estado -->
+<ul class="nav nav-pills mb-4">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tabPending">Pendientes <span class="badge bg-warning ms-1">@Model.Count(r => r.Status == ReminderStatus.Pending)</span></a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabSent">Enviados <span class="badge bg-success ms-1">@Model.Count(r => r.Status == ReminderStatus.Sent)</span></a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabAll">Todos</a></li>
+</ul>
+
+<div class="tab-content">
+    @foreach (var (tabId, statuses, active) in new[] {
+        ("tabPending", new[] { ReminderStatus.Pending }, "show active"),
+        ("tabSent",    new[] { ReminderStatus.Sent, ReminderStatus.Failed }, ""),
+        ("tabAll",     Enum.GetValues<ReminderStatus>(), "")
+    })
+    {
+    <div class="tab-pane fade @active" id="@tabId">
+        @{ var items = Model.Where(r => statuses.Contains(r.Status)).ToList(); }
+        @if (!items.Any())
+        {
+        <div class="a-card text-center py-5">
+            <i class="bi bi-alarm" style="font-size:2.5rem;color:#cbd5e1"></i>
+            <p class="text-muted mt-3 mb-0">No hay recordatorios en esta sección</p>
+        </div>
+        }
+        else
+        {
+        <div class="row g-3">
+            @foreach (var r in items)
+            {
+            <div class="col-md-6 col-lg-4">
+                <div class="a-card h-100">
+                    <div class="a-card-header">
+                        <div class="a-card-title">
+                            <i class="bi @GetChannelIcon(r.ChannelType)" style="color:@GetChannelColor(r.ChannelType)"></i>
+                            @(r.ContactName ?? "Cliente")
+                        </div>
+                        <span class="badge bg-@GetStatusCss(r.Status)">@r.StatusLabel</span>
+                    </div>
+                    <div class="a-card-body">
+                        <p class="mb-2">@r.Message</p>
+                        <p class="mb-0 small text-muted"><i class="bi bi-calendar-event me-1"></i>@r.ScheduledAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        @if (r.SentAt.HasValue)
+                        { <p class="mb-0 small text-success"><i class="bi bi-check-circle me-1"></i>Enviado: @r.SentAt.Value.ToString("dd/MM/yyyy HH:mm")</p> }
+                        <div class="d-flex gap-2 mt-3">
+                            @if (r.Status == ReminderStatus.Pending)
+                            {
+                            <button class="btn btn-sm btn-outline-primary" onclick="openModal(@r.Id)"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-warning" onclick="cancelReminder(@r.Id)"><i class="bi bi-x-circle"></i></button>
+                            }
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteReminder(@r.Id)"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            }
+        </div>
+        }
+    </div>
+    }
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="reminderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Programar recordatorio</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="remId" value="0" />
+                <div class="f-group">
+                    <label class="f-label">Cliente <span class="text-danger">*</span></label>
+                    <select class="f-input" id="remContact">
+                        <option value="">— Seleccionar —</option>
+                        @foreach (dynamic c in ViewBag.Contacts)
+                        { <option value="@c.Id">@(c.Name ?? c.Phone ?? "Sin nombre")</option> }
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Canal</label>
+                    <select class="f-input" id="remChannel">
+                        <option value="1">WhatsApp</option>
+                        <option value="2">Facebook Messenger</option>
+                        <option value="3">Instagram</option>
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Mensaje <span class="text-danger">*</span></label>
+                    <textarea class="f-input" id="remMessage" rows="3" placeholder="Ej: Hola! ¿Pudiste revisar el producto que te ofrecí?"></textarea>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Fecha y hora de envío <span class="text-danger">*</span></label>
+                    <input type="datetime-local" class="f-input" id="remScheduled" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveReminder()"><i class="bi bi-alarm me-1"></i>Programar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+@section Scripts {
+<script>
+var reminders = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+var modal = new bootstrap.Modal(document.getElementById('reminderModal'));
+
+function openModal(id) {
+    var now = new Date(); now.setHours(now.getHours()+24);
+    document.getElementById('remId').value = id;
+    if (id === 0) {
+        document.getElementById('remContact').value = '';
+        document.getElementById('remMessage').value = '';
+        document.getElementById('remScheduled').value = now.toISOString().slice(0,16);
+    } else {
+        var r = reminders.find(x => x.Id === id);
+        if (!r) return;
+        document.getElementById('remContact').value = r.ContactId;
+        document.getElementById('remChannel').value = r.ChannelType;
+        document.getElementById('remMessage').value = r.Message;
+        document.getElementById('remScheduled').value = new Date(r.ScheduledAt).toISOString().slice(0,16);
+    }
+    modal.show();
+}
+
+function saveReminder() {
+    var contactId = document.getElementById('remContact').value;
+    var msg = document.getElementById('remMessage').value.trim();
+    var sched = document.getElementById('remScheduled').value;
+    if (!contactId) { alert('Selecciona un cliente.'); return; }
+    if (!msg) { alert('El mensaje es obligatorio.'); return; }
+    if (!sched) { alert('La fecha y hora son obligatorias.'); return; }
+    fetch('/Reminders/Save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        body: JSON.stringify({ Id: parseInt(document.getElementById('remId').value), ContactId: parseInt(contactId), ChannelType: parseInt(document.getElementById('remChannel').value), Message: msg, ScheduledAt: sched })
+    }).then(r => r.json()).then(d => { if (d.ok) { modal.hide(); location.reload(); } });
+}
+
+function cancelReminder(id) {
+    if (!confirm('¿Cancelar este recordatorio?')) return;
+    fetch('/Reminders/Cancel', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':$('input[name=__RequestVerificationToken]').val()}, body:'id='+id })
+        .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); });
+}
+function deleteReminder(id) {
+    if (!confirm('¿Eliminar este recordatorio?')) return;
+    fetch('/Reminders/Delete', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':$('input[name=__RequestVerificationToken]').val()}, body:'id='+id })
+        .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); });
+}
+</script>
+}
+
+@functions {
+    static string GetChannelIcon(ChannelType c) => c switch { ChannelType.WhatsApp => "bi-whatsapp", ChannelType.FacebookMessenger => "bi-facebook", ChannelType.Instagram => "bi-instagram", _ => "bi-chat" };
+    static string GetChannelColor(ChannelType c) => c switch { ChannelType.WhatsApp => "#25D366", ChannelType.FacebookMessenger => "#1877F2", ChannelType.Instagram => "#E1306C", _ => "#64748b" };
+    static string GetStatusCss(ReminderStatus s) => s switch { ReminderStatus.Pending => "warning", ReminderStatus.Sent => "success", ReminderStatus.Failed => "danger", ReminderStatus.Cancelled => "secondary", _ => "secondary" };
+}

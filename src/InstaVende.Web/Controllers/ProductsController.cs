@@ -58,8 +58,10 @@ public class ProductsController : Controller
         if (!ModelState.IsValid) { ViewBag.Categories = await _db.ProductCategories.Where(c => c.BusinessId == bid).ToListAsync(); return View(model); }
         _db.Products.Add(new Product
         {
-            BusinessId = bid.Value, Name = model.Name, Description = model.Description, Price = model.Price,
-            Stock = model.Stock, CategoryId = model.CategoryId, IsActive = model.IsActive, IsFeatured = model.IsFeatured,
+            BusinessId = bid.Value, Name = model.Name, Description = model.Description,
+            Price = model.Price, PriceOriginal = model.PriceOriginal,
+            Sku = model.Sku, Stock = model.Stock, CategoryId = model.CategoryId,
+            IsActive = model.IsActive, IsFeatured = model.IsFeatured,
             ImageUrl = model.ImageFile != null ? await _img.SaveImageAsync(model.ImageFile) : null
         });
         await _db.SaveChangesAsync();
@@ -70,7 +72,7 @@ public class ProductsController : Controller
     [HttpGet] public async Task<IActionResult> Edit(int id)
     {
         var bid = await _cu.GetBusinessIdAsync();
-        var p = await _db.Products.FirstOrDefaultAsync(x => x.Id == id && x.BusinessId == bid);
+        var p = await _db.Products.Include(x => x.Variants).FirstOrDefaultAsync(x => x.Id == id && x.BusinessId == bid);
         if (p == null) return NotFound();
         ViewBag.Categories = await _db.ProductCategories.Where(c => c.BusinessId == bid).ToListAsync();
         return View(Map(p));
@@ -84,8 +86,10 @@ public class ProductsController : Controller
         if (p == null) return NotFound();
         if (!ModelState.IsValid) { ViewBag.Categories = await _db.ProductCategories.Where(c => c.BusinessId == bid).ToListAsync(); return View(model); }
         if (model.ImageFile != null) { _img.DeleteImage(p.ImageUrl); p.ImageUrl = await _img.SaveImageAsync(model.ImageFile); }
-        p.Name = model.Name; p.Description = model.Description; p.Price = model.Price; p.Stock = model.Stock;
-        p.CategoryId = model.CategoryId; p.IsActive = model.IsActive; p.IsFeatured = model.IsFeatured; p.UpdatedAt = DateTime.UtcNow;
+        p.Name = model.Name; p.Description = model.Description; p.Price = model.Price;
+        p.PriceOriginal = model.PriceOriginal; p.Stock = model.Stock; p.Sku = model.Sku;
+        p.CategoryId = model.CategoryId; p.IsActive = model.IsActive; p.IsFeatured = model.IsFeatured;
+        p.SortOrder = model.SortOrder; p.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
         TempData["Success"] = "Producto actualizado.";
         return RedirectToAction(nameof(Index));
@@ -117,10 +121,47 @@ public class ProductsController : Controller
         return Json(new { success = true });
     }
 
+    [HttpPost][ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddVariant(int productId, string attributeName, string attributeValue,
+        decimal priceModifier, int stock, string? sku)
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == productId && p.BusinessId == bid);
+        if (product == null) return Json(new { ok = false });
+
+        _db.ProductVariants.Add(new ProductVariant
+        {
+            ProductId = productId, AttributeName = attributeName, AttributeValue = attributeValue,
+            PriceModifier = priceModifier, Stock = stock, Sku = sku, IsActive = true
+        });
+        await _db.SaveChangesAsync();
+        return Json(new { ok = true });
+    }
+
+    [HttpPost][ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteVariant(int id)
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        var variant = await _db.ProductVariants.Include(v => v.Product)
+            .FirstOrDefaultAsync(v => v.Id == id && v.Product.BusinessId == bid);
+        if (variant == null) return Json(new { ok = false });
+        _db.ProductVariants.Remove(variant);
+        await _db.SaveChangesAsync();
+        return Json(new { ok = true });
+    }
+
     private static ProductViewModel Map(Product p) => new()
     {
-        Id = p.Id, Name = p.Name, Description = p.Description, Price = p.Price, Stock = p.Stock,
-        CategoryId = p.CategoryId, CategoryName = p.Category?.Name, ImageUrl = p.ImageUrl,
-        IsActive = p.IsActive, IsFeatured = p.IsFeatured, CreatedAt = p.CreatedAt
+        Id = p.Id, Name = p.Name, Description = p.Description,
+        Sku = p.Sku, Price = p.Price, PriceOriginal = p.PriceOriginal,
+        Stock = p.Stock, CategoryId = p.CategoryId, CategoryName = p.Category?.Name,
+        ImageUrl = p.ImageUrl, IsActive = p.IsActive, IsFeatured = p.IsFeatured,
+        SortOrder = p.SortOrder, CreatedAt = p.CreatedAt,
+        Variants = p.Variants.Select(v => new ProductVariantViewModel
+        {
+            Id = v.Id, ProductId = v.ProductId, AttributeName = v.AttributeName,
+            AttributeValue = v.AttributeValue, PriceModifier = v.PriceModifier,
+            Stock = v.Stock, Sku = v.Sku, IsActive = v.IsActive
+        }).ToList()
     };
 }

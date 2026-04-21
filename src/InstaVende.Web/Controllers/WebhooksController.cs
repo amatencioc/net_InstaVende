@@ -68,6 +68,16 @@ public class WebhooksController : ControllerBase
         Request.EnableBuffering();
         using var sr = new StreamReader(Request.Body, leaveOpen: true);
         var body = await sr.ReadToEndAsync(); Request.Body.Position = 0;
+
+        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == merchantId
+            && (c.ChannelType == ChannelType.FacebookMessenger || c.ChannelType == ChannelType.Instagram) && c.IsActive);
+        if (cfg != null && !string.IsNullOrWhiteSpace(cfg.AppSecretEncrypted))
+        {
+            var secret = _dp.Decrypt(cfg.AppSecretEncrypted);
+            var sig = Request.Headers["X-Hub-Signature-256"].ToString();
+            if (!ValidateHmac(body, secret, sig)) { _logger.LogWarning("Bad HMAC for Meta {Id}", merchantId); return Forbid(); }
+        }
+
         var doc = JsonDocument.Parse(body).RootElement;
         var obj = doc.TryGetProperty("object", out var o) ? o.GetString() : null;
         try

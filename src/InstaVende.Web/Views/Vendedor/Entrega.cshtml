@@ -1,0 +1,161 @@
+@model List<InstaVende.Web.ViewModels.DeliveryZoneViewModel>
+@{ ViewData["Title"] = "Mi Vendedor – Entrega"; }
+
+@await Html.PartialAsync("_VendedorTabs", "entrega")
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+        <div class="d-flex align-items-center gap-2">
+            <div class="rounded-3 d-flex align-items-center justify-content-center"
+                 style="width:40px;height:40px;background:#ede9fe">
+                <i class="bi bi-truck" style="color:#7c3aed;font-size:1.1rem"></i>
+            </div>
+            <div>
+                <div class="fw-bold">Configuración de entrega</div>
+                <div class="text-muted small">Define las zonas de entrega, opciones de envío y costos.</div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary" onclick="openZoneModal(null)">
+        <i class="bi bi-plus me-1"></i> Agregar zona de entrega
+    </button>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="a-card text-center py-5">
+        <i class="bi bi-truck" style="font-size:3rem;color:#c4b5fd"></i>
+        <p class="text-muted mt-3 mb-3">Aún no has configurado zonas de entrega.</p>
+        <button class="btn btn-outline-primary" onclick="openZoneModal(null)">
+            <i class="bi bi-plus me-1"></i> Agregar zona de entrega
+        </button>
+    </div>
+}
+else
+{
+    <div class="a-card">
+        <div class="a-card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Zona</th><th>Costo</th><th>Descripción</th><th>Estado</th><th></th></tr>
+                </thead>
+                <tbody id="zoneList">
+                    @foreach (var z in Model)
+                    {
+                        <tr id="zone-@z.Id">
+                            <td class="fw-medium">@z.Name</td>
+                            <td>@(z.Cost.HasValue ? $"S/ {z.Cost:N2}" : "Gratis")</td>
+                            <td class="text-muted small">@(z.Description ?? "—")</td>
+                            <td>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox"
+                                           @(z.IsActive ? "checked" : "")
+                                           onchange="toggleZone(@z.Id, this)" />
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-link text-muted p-1" onclick="openZoneModal(@z.Id)">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link text-danger p-1" onclick="deleteZone(@z.Id)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- Modal -->
+<div class="modal fade" id="modalZone" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalZoneTitle">Agregar zona</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="zoneId" />
+                <div class="mb-3">
+                    <label class="f-label">Nombre de la zona *</label>
+                    <input id="zoneName" class="f-input" placeholder="Ej. Lima Metropolitana" required />
+                </div>
+                <div class="mb-3">
+                    <label class="f-label">Costo de envío</label>
+                    <div class="input-group">
+                        <span class="input-group-text">S/</span>
+                        <input id="zoneCost" type="number" step="0.01" min="0" class="form-control" placeholder="0.00 (gratis)" />
+                    </div>
+                </div>
+                <div class="mb-0">
+                    <label class="f-label">Descripción (opcional)</label>
+                    <input id="zoneDesc" class="f-input" placeholder="Ej. Entrega en 24-48 horas" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveZone()">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+let zonesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+
+function openZoneModal(id) {
+    const modal = new bootstrap.Modal(document.getElementById('modalZone'));
+    document.getElementById('zoneId').value = id || 0;
+    if (id) {
+        const z = zonesData.find(x => x.id === id);
+        if (!z) return;
+        document.getElementById('modalZoneTitle').textContent = 'Editar zona';
+        document.getElementById('zoneName').value = z.name;
+        document.getElementById('zoneCost').value = z.cost ?? '';
+        document.getElementById('zoneDesc').value = z.description ?? '';
+    } else {
+        document.getElementById('modalZoneTitle').textContent = 'Agregar zona';
+        document.getElementById('zoneName').value = '';
+        document.getElementById('zoneCost').value = '';
+        document.getElementById('zoneDesc').value = '';
+    }
+    modal.show();
+}
+
+function saveZone() {
+    const data = {
+        id: parseInt(document.getElementById('zoneId').value) || 0,
+        name: document.getElementById('zoneName').value,
+        cost: parseFloat(document.getElementById('zoneCost').value) || null,
+        description: document.getElementById('zoneDesc').value || null,
+        isActive: true
+    };
+    fetch('/Vendedor/SaveDeliveryZone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
+}
+
+function deleteZone(id) {
+    if (!confirm('¿Eliminar esta zona de entrega?')) return;
+    fetch('/Vendedor/DeleteDeliveryZone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(() => document.getElementById('zone-'+id)?.remove());
+}
+
+function toggleZone(id, cb) {
+    fetch('/Vendedor/ToggleDeliveryZone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => { cb.checked = d.isActive; });
+}
+</script>

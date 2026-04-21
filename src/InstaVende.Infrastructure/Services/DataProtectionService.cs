@@ -12,5 +12,12 @@ public class DataProtectionService
     }
 
     public string Encrypt(string plainText) => _protector.Protect(plainText);
+
+    public string? TryDecrypt(string cipherText)
+    {
+        try { return _protector.Unprotect(cipherText); }
+        catch { return null; }
+    }
+
     public string Decrypt(string cipherText) => _protector.Unprotect(cipherText);
 }

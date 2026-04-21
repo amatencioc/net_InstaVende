@@ -1,0 +1,294 @@
+@model InstaVende.Web.ViewModels.AccountConfigViewModel
+@{
+    ViewData["Title"] = "Configuración de la cuenta";
+    var tab = Model.ActiveTab ?? "organizacion";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1" style="font-size:.78rem">
+                <li class="breadcrumb-item"><a href="/Settings/Account" class="text-muted">Configuración</a></li>
+                <li class="breadcrumb-item active">Cuenta</li>
+            </ol>
+        </nav>
+        <h1 class="topbar-page-title mb-0">Configuración de la cuenta</h1>
+    </div>
+    <button class="btn btn-primary" id="btnSave" onclick="saveChanges()" disabled>
+        <i class="bi bi-floppy me-1"></i> Guardar cambios
+    </button>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-4" id="accountTabs">
+    <li class="nav-item">
+        <a class="nav-link @(tab == "organizacion" ? "active" : "")" href="?tab=organizacion">Organización</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "usuarios" ? "active" : "")" href="?tab=usuarios">Usuarios</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "notificaciones" ? "active" : "")" href="?tab=notificaciones">Notificaciones por email</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "pago" ? "active" : "")" href="?tab=pago">Métodos de pago</a>
+    </li>
+</ul>
+
+<!-- TAB 1: Organización -->
+@if (tab == "organizacion")
+{
+    <div class="a-card">
+        <div class="a-card-body" style="max-width:560px">
+            <p class="text-muted small mb-4">
+                <i class="bi bi-info-circle me-1"></i>
+                Incluye el país y la moneda para personalizar el vendedor inteligente.
+            </p>
+            <div class="mb-3">
+                <label class="f-label">Nombre de la organización</label>
+                <input type="text" id="orgName" class="f-input" value="@Model.Organizacion.Name"
+                       placeholder="Nombre de tu negocio" oninput="enableSave()" />
+            </div>
+            <div class="mb-3">
+                <label class="f-label">País</label>
+                <select id="orgCountry" class="f-input" onchange="enableSave()">
+                    <option value="">Seleccionar país</option>
+                    @foreach (var c in new[] { "Perú", "México", "Colombia", "Argentina", "Chile", "Ecuador", "Bolivia", "Uruguay", "Paraguay", "Venezuela" })
+                    {
+                        <option value="@c" selected="@(Model.Organizacion.Country == c)">@c</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="f-label">Moneda</label>
+                <select id="orgCurrency" class="f-input" onchange="enableSave()">
+                    <option value="">Seleccionar moneda</option>
+                    @foreach (var m in new[] { "PEN - Sol Peruano", "MXN - Peso Mexicano", "COP - Peso Colombiano", "ARS - Peso Argentino", "CLP - Peso Chileno", "USD - Dólar Americano" })
+                    {
+                        <option value="@m" selected="@(Model.Organizacion.Currency == m)">@m</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- TAB 2: Usuarios -->
+@if (tab == "usuarios")
+{
+    <div class="a-card mb-3">
+        <div class="a-card-header">
+            <div class="a-card-title"><i class="bi bi-person-plus"></i> Invitar a tu equipo</div>
+        </div>
+        <div class="a-card-body">
+            <div class="d-flex gap-2" style="max-width:480px">
+                <input type="email" id="inviteEmail" class="f-input flex-grow-1" placeholder="correo@ejemplo.com" />
+                <button class="btn btn-primary" onclick="inviteUser()">
+                    <i class="bi bi-send me-1"></i> Invitar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="a-card mb-3">
+        <div class="a-card-header">
+            <div class="a-card-title"><i class="bi bi-clock-history"></i> Invitaciones pendientes</div>
+        </div>
+        <div class="a-card-body">
+            @if (!Model.Usuarios.PendingInvitations.Any())
+            {
+                <p class="text-muted small mb-0"><i class="bi bi-inbox me-1"></i> No hay invitaciones pendientes.</p>
+            }
+            else
+            {
+                <table class="table table-sm">
+                    <thead><tr><th>Email</th><th>Rol</th><th>Expira</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var inv in Model.Usuarios.PendingInvitations)
+                        {
+                            <tr>
+                                <td>@inv.Email</td>
+                                <td><span class="badge bg-secondary">@inv.Role</span></td>
+                                <td class="text-muted small">@inv.ExpiresAt.ToLocalTime().ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="cancelInvitation(@inv.Id)">
+                                        Cancelar
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    <div class="a-card">
+        <div class="a-card-header">
+            <div class="a-card-title"><i class="bi bi-people"></i> Usuarios</div>
+            <span class="text-muted small">@Model.Usuarios.Users.Count de @Model.Usuarios.MaxUsers usuarios disponibles en tu plan</span>
+        </div>
+        <div class="a-card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Usuario</th><th>Teléfono</th><th>Rol</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.Usuarios.Users)
+                    {
+                        <tr>
+                            <td class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                                     style="width:36px;height:36px;background:var(--brand);font-size:.8rem">
+                                    @u.AvatarInitial
+                                </div>
+                                <span>@u.Email</span>
+                            </td>
+                            <td class="text-muted small">@(u.Phone ?? "—")</td>
+                            <td>
+                                <span class="badge @(u.Role == InstaVende.Core.Enums.UserRole.Admin ? "bg-primary" : "bg-secondary")">
+                                    @(u.Role == InstaVende.Core.Enums.UserRole.Admin ? "Admin" : "Member")
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- TAB 3: Notificaciones -->
+@if (tab == "notificaciones")
+{
+    <div class="a-card">
+        <div class="a-card-header">
+            <div class="a-card-title"><i class="bi bi-bell"></i> Notificaciones por email</div>
+        </div>
+        <div class="a-card-body">
+            <p class="text-muted small mb-4">
+                Recibe avisos cuando tu vendedor IA cierre una venta o cuando sea necesario que un humano tome la conversación.
+            </p>
+
+            <div id="emailList">
+                @foreach (var e in Model.Notificaciones.Emails)
+                {
+                    <div class="d-flex align-items-center gap-2 mb-2" id="notif-@e.Id">
+                        <input type="email" class="f-input flex-grow-1" value="@e.Email" readonly />
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeNotifEmail(@e.Id)">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex gap-2 mt-3" style="max-width:480px">
+                <input type="email" id="newNotifEmail" class="f-input flex-grow-1" placeholder="nuevo@email.com" />
+                <button class="btn btn-outline-primary" onclick="addNotifEmail()">
+                    <i class="bi bi-plus me-1"></i> Añadir email
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- TAB 4: Métodos de pago -->
+@if (tab == "pago")
+{
+    <div class="a-card">
+        <div class="a-card-body text-center py-5">
+            <div class="rounded-3 d-flex align-items-center justify-content-center mx-auto mb-3"
+                 style="width:64px;height:64px;background:#ede9fe">
+                <i class="bi bi-credit-card-2-front" style="font-size:1.8rem;color:#7c3aed"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Gestiona tus métodos de pago</h5>
+            <p class="text-muted small mb-4">
+                Gestiona tus métodos de pago a través de nuestro portal de pagos seguro.
+            </p>
+            <a href="#" class="btn btn-primary">
+                <i class="bi bi-shield-lock me-2"></i> Gestionar métodos de pago
+            </a>
+        </div>
+    </div>
+}
+
+@Html.AntiForgeryToken()
+
+<script>
+function enableSave() {
+    document.getElementById('btnSave').disabled = false;
+}
+
+function saveChanges() {
+    const tab = '@tab';
+    if (tab === 'organizacion') {
+        fetch('/AccountConfig/SaveOrganizacion', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+            body: JSON.stringify({
+                name: document.getElementById('orgName').value,
+                country: document.getElementById('orgCountry').value,
+                currency: document.getElementById('orgCurrency').value
+            })
+        }).then(r => r.json()).then(d => {
+            if (d.success) {
+                document.getElementById('btnSave').disabled = true;
+                showToast('Cambios guardados correctamente.', 'success');
+            }
+        });
+    }
+}
+
+function inviteUser() {
+    const email = document.getElementById('inviteEmail').value;
+    if (!email) return;
+    fetch('/AccountConfig/InviteUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ email })
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else showToast(d.error, 'error');
+    });
+}
+
+function cancelInvitation(id) {
+    if (!confirm('¿Cancelar esta invitación?')) return;
+    fetch('/AccountConfig/CancelInvitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(() => location.reload());
+}
+
+function addNotifEmail() {
+    const email = document.getElementById('newNotifEmail').value;
+    if (!email) return;
+    fetch('/AccountConfig/AddNotificationEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ email })
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else showToast(d.error, 'error');
+    });
+}
+
+function removeNotifEmail(id) {
+    fetch('/AccountConfig/RemoveNotificationEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify({ id })
+    }).then(() => document.getElementById('notif-' + id)?.remove());
+}
+
+function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = 'app-alert app-alert-' + (type === 'success' ? 'success' : 'error');
+    t.innerHTML = `<i class="bi bi-${type === 'success' ? 'check' : 'exclamation'}-circle-fill"></i> ${msg}`;
+    t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;animation:fadeIn .3s ease';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+}
+</script>

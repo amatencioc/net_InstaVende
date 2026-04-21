@@ -1,0 +1,141 @@
+@model List<InstaVende.Web.ViewModels.OrderViewModel>
+@using InstaVende.Core.Enums
+@{
+    ViewData["Title"] = "Gestion de pedidos";
+    var nuevos      = Model.Where(o => o.TabGroup == "nuevos").ToList();
+    var enCurso     = Model.Where(o => o.TabGroup == "encurso").ToList();
+    var completados = Model.Where(o => o.TabGroup == "completados").ToList();
+    var cancelados  = Model.Where(o => o.TabGroup == "cancelados").ToList();
+}
+
+<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div>
+        <h1 class="topbar-page-title mb-0">Gestion de pedidos</h1>
+    </div>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <div class="position-relative">
+            <i class="bi bi-search position-absolute" style="left:.75rem;top:50%;transform:translateY(-50%);color:#94a3b8;pointer-events:none"></i>
+            <input type="text" id="orderSearch" class="f-input" placeholder="Buscar pedidos..."
+                   style="padding-left:2.2rem;min-width:220px" oninput="filterCards(this.value)" />
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                <i class="bi bi-download me-1"></i> Exportar pedidos
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/Orders/ExportCsv"><i class="bi bi-filetype-csv me-2"></i>Exportar CSV</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav nav-tabs mb-0" id="kanbanTabs">
+    <li class="nav-item">
+        <button class="nav-link active" onclick="switchTab('nuevos',this)">
+            Nuevos pedidos <span class="badge ms-1" style="background:#7c3aed;font-size:.7rem">@nuevos.Count</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" onclick="switchTab('encurso',this)">
+            En curso <span class="badge ms-1 bg-secondary" style="font-size:.7rem">@enCurso.Count</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" onclick="switchTab('completados',this)">
+            Completados <span class="badge ms-1 bg-success" style="font-size:.7rem">@completados.Count</span>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" onclick="switchTab('cancelados',this)">
+            Cancelados <span class="badge ms-1 bg-danger" style="font-size:.7rem">@cancelados.Count</span>
+        </button>
+    </li>
+</ul>
+
+<div style="background:#f1f5f9;border-radius:0 0 12px 12px;padding:1.25rem;overflow-x:auto;min-height:400px">
+    @{
+        void RenderCol(string title, string css, List<InstaVende.Web.ViewModels.OrderViewModel> cards)
+        {
+            <div class="kanban-col">
+                <div class="kanban-col-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="kanban-col-title">@title</span>
+                        <span class="badge substatus-@css.Replace("substatus-","")">@cards.Count</span>
+                    </div>
+                    <button class="kanban-col-opts" title="Opciones">···</button>
+                </div>
+                <div>
+                    @if (!cards.Any())
+                    {
+                        <div class="kanban-empty">Sin pedidos</div>
+                    }
+                    @foreach (var o in cards)
+                    {
+                        <div class="kanban-card" onclick="location.href='/Orders/Detail/@o.Id'">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="kanban-card-id">@o.OrderNumber</span>
+                                <span class="kanban-card-date">@o.CreatedAt.ToString("dd/MM/yy")</span>
+                            </div>
+                            <div class="kanban-card-name">@(o.ContactName ?? "Sin nombre")</div>
+                            @if (!string.IsNullOrEmpty(o.ContactPhone))
+                            {
+                                <div class="kanban-card-phone">@o.ContactPhone</div>
+                            }
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="kanban-card-total">S/ @o.Total.ToString("N2")</span>
+                                <span class="kanban-card-items">@o.Items.Count item(s)</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+
+    <div id="tab-nuevos" class="kanban-tab">
+        <div class="d-flex gap-3 align-items-start">
+            @{ RenderCol("En validacion", "substatus-purple", nuevos.Where(o => o.SubStatus == OrderSubStatus.EnValidacion).ToList()); }
+        </div>
+    </div>
+
+    <div id="tab-encurso" class="kanban-tab" style="display:none">
+        <div class="d-flex gap-3 align-items-start">
+            @{ RenderCol("En preparacion", "substatus-blue", enCurso.Where(o => o.SubStatus == OrderSubStatus.EnPreparacion).ToList()); }
+            @{ RenderCol("Listo para envio", "substatus-orange", enCurso.Where(o => o.SubStatus == OrderSubStatus.ListoParaEnvio).ToList()); }
+            @{ RenderCol("Enviado", "substatus-teal", enCurso.Where(o => o.SubStatus == OrderSubStatus.Enviado).ToList()); }
+        </div>
+    </div>
+
+    <div id="tab-completados" class="kanban-tab" style="display:none">
+        <div class="d-flex gap-3 align-items-start">
+            @{ RenderCol("Entregado", "substatus-green", completados.Where(o => o.SubStatus == OrderSubStatus.Entregado).ToList()); }
+            @{ RenderCol("Finalizado", "substatus-green", completados.Where(o => o.SubStatus == OrderSubStatus.Finalizado).ToList()); }
+        </div>
+    </div>
+
+    <div id="tab-cancelados" class="kanban-tab" style="display:none">
+        <div class="d-flex gap-3 align-items-start">
+            @{ RenderCol("Rechazado", "substatus-red", cancelados.Where(o => o.SubStatus == OrderSubStatus.Rechazado).ToList()); }
+            @{ RenderCol("Cancelado", "substatus-red", cancelados.Where(o => o.SubStatus == OrderSubStatus.Cancelado).ToList()); }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function switchTab(name, btn) {
+    document.querySelectorAll('.kanban-tab').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('#kanbanTabs .nav-link').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).style.display = '';
+    btn.classList.add('active');
+}
+function filterCards(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.kanban-card').forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+</script>
+}
+

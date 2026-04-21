@@ -1,0 +1,182 @@
+@model InstaVende.Web.ViewModels.ReminderSegmentViewModel
+@using InstaVende.Core.Enums
+@{ ViewData["Title"] = "Recordatorios automáticos"; }
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="topbar-page-title mb-0">Recordatorios</h1>
+        <p class="text-muted small mb-0">Segmento del cliente</p>
+    </div>
+</div>
+
+<p class="text-muted small mb-4">
+    <i class="bi bi-info-circle me-1"></i>
+    Usamos modelos por segmento (Frío, Tibio, Caliente) con ventanas de 2-3h y una segunda de 22-23h cuando aplica.
+</p>
+
+<!-- Tabs de segmento -->
+<ul class="nav nav-tabs mb-4">
+    @foreach (CustomerSegment seg in Enum.GetValues<CustomerSegment>())
+    {
+        <li class="nav-item">
+            <a class="nav-link @(Model.ActiveSegment == seg ? "active" : "")"
+               href="/ReminderTemplates/Index?segment=@((int)seg)">
+                @(seg == CustomerSegment.Frio ? "?? Frío" : seg == CustomerSegment.Tibio ? "??? Tibio" : "?? Caliente")
+            </a>
+        </li>
+    }
+</ul>
+
+@if (!string.IsNullOrEmpty(Model.SegmentNote))
+{
+    <div class="alert" style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:.84rem;color:#0369a1">
+        <i class="bi bi-lightbulb me-2"></i>@Model.SegmentNote
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Editor panel -->
+    <div class="col-lg-7">
+        @for (int i = 0; i < Model.Reminders.Count; i++)
+        {
+            var r = Model.Reminders[i];
+            <div class="a-card mb-4">
+                <div class="a-card-header">
+                    <div class="a-card-title">
+                        @(r.Order == 1 ? "Primer" : "Segundo") recordatorio
+                        <span class="badge ms-2" style="background:#e2e8f0;color:#475569;font-size:.72rem">
+                            @r.TimeWindow
+                        </span>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input toggle-active" type="checkbox"
+                               id="toggle-@r.Id" @(r.IsActive ? "checked" : "")
+                               onchange="toggleTemplate(@r.Id, this)" />
+                        <label class="form-check-label small" for="toggle-@r.Id">
+                            @(r.IsActive ? "Activo" : "Inactivo")
+                        </label>
+                    </div>
+                </div>
+                <div class="a-card-body">
+                    <input type="hidden" class="tmpl-id" value="@r.Id" />
+                    <div class="position-relative">
+                        <textarea class="f-input tmpl-message" id="msg-@r.Id" rows="4" maxlength="200"
+                                  oninput="updateCounter(this);updatePreview()"
+                                  placeholder="Escribe tu mensaje de recordatorio...">@r.Message</textarea>
+                        <div class="text-end text-muted mt-1" style="font-size:.72rem">
+                            <span id="cnt-@r.Id">@r.Message.Length</span>/200
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-2">
+                        <button class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-magic me-1"></i> Plantillas
+                        </button>
+                    </div>
+
+                    <!-- Paywall multimedia -->
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded-2 mt-3"
+                         style="background:#fefce8;border:1px solid #fde68a">
+                        <span style="font-size:.78rem;color:#92400e">
+                            <i class="bi bi-image me-1"></i>
+                            Adjuntar imagen, video o PDF — <strong>Disponible desde el plan Gold</strong>
+                        </span>
+                        <a href="/Plans" class="btn btn-xs btn-warning btn-sm py-0 px-2" style="font-size:.72rem">
+                            Actualizar plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="text-end">
+            <button class="btn btn-primary" onclick="saveAll()">
+                <i class="bi bi-floppy me-1"></i> Guardar cambios
+            </button>
+        </div>
+    </div>
+
+    <!-- Previsualización -->
+    <div class="col-lg-5">
+        <div class="a-card sticky-top" style="top:80px">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-whatsapp me-1 text-success"></i> Previsualización</div>
+            </div>
+            <div class="a-card-body" style="background:#e5ddd5;border-radius:0 0 12px 12px;min-height:300px;padding:1.5rem">
+                <div id="previewBubbles">
+                    @foreach (var r in Model.Reminders)
+                    {
+                        <div class="mb-3">
+                            <div class="text-center mb-1">
+                                <span style="background:#fff;border-radius:8px;padding:2px 8px;font-size:.7rem;color:#666">
+                                    @(r.Order == 1 ? "Primer" : "Segundo") recordatorio (@r.TimeWindow)
+                                </span>
+                            </div>
+                            <div class="ms-auto rounded-3 p-2 shadow-sm preview-bubble"
+                                 id="bubble-@r.Id"
+                                 style="max-width:80%;background:#dcf8c6;margin-left:auto;word-break:break-word;font-size:.85rem;line-height:1.5">
+                                @(string.IsNullOrEmpty(r.Message) ? "..." : r.Message)
+                                <div class="text-end text-muted mt-1" style="font-size:.65rem">18:20 ??</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+const token = document.querySelector('[name=__RequestVerificationToken]').value;
+
+function updateCounter(ta) {
+    const id = ta.id.replace('msg-','');
+    document.getElementById('cnt-'+id).textContent = ta.value.length;
+}
+
+function updatePreview() {
+    document.querySelectorAll('.tmpl-message').forEach(ta => {
+        const id = ta.id.replace('msg-','');
+        const bubble = document.getElementById('bubble-'+id);
+        if (bubble) bubble.childNodes[0].textContent = ta.value || '...';
+    });
+}
+
+function toggleTemplate(id, cb) {
+    fetch('/ReminderTemplates/Toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify({ id })
+    }).then(r => r.json()).then(d => {
+        cb.checked = d.isActive;
+        cb.nextElementSibling.textContent = d.isActive ? 'Activo' : 'Inactivo';
+    });
+}
+
+function saveAll() {
+    const data = [];
+    document.querySelectorAll('.tmpl-id').forEach((inp, i) => {
+        data.push({
+            id: parseInt(inp.value),
+            message: document.querySelectorAll('.tmpl-message')[i].value,
+            isActive: document.querySelectorAll('.toggle-active')[i].checked
+        });
+    });
+    fetch('/ReminderTemplates/Save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            const t = document.createElement('div');
+            t.className = 'app-alert app-alert-success';
+            t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999';
+            t.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Cambios guardados';
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 3000);
+        }
+    });
+}
+</script>

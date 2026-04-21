@@ -1,0 +1,250 @@
+@model InstaVende.Web.ViewModels.VendorPersonalidadViewModel
+@{ ViewData["Title"] = "Mi Vendedor – Personalidad"; }
+
+@* Shared vendor tab nav *@
+@await Html.PartialAsync("_VendedorTabs", "personalidad")
+
+<form id="frmPersonalidad">
+    <div class="row g-4">
+        <div class="col-lg-8">
+
+            <!-- S1: Información básica -->
+            <div class="a-card mb-4">
+                <div class="a-card-header"><div class="a-card-title">Información básica</div></div>
+                <div class="a-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="f-label">Nombre del vendedor *</label>
+                            <input name="VendorName" class="f-input" value="@Model.VendorName" placeholder="Ej. Favio" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="f-label">Género del vendedor *</label>
+                            <div class="d-flex gap-3 mt-2">
+                                @foreach (var g in new[] { "Masculino", "Femenino", "No especificado", "Otro" })
+                                {
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="VendorGender" value="@g"
+                                               id="gender_@g.Replace(" ","_")"
+                                               @(Model.VendorGender == g ? "checked" : "") />
+                                        <label class="form-check-label small" for="gender_@g.Replace(" ","_")">@g</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="f-label">Nombre de la empresa *</label>
+                            <input name="BusinessName" class="f-input" value="@Model.BusinessName" placeholder="Tu negocio" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="f-label">País de operación *</label>
+                            <select name="Country" class="f-input">
+                                <option value="">Seleccionar</option>
+                                @foreach (var c in new[] { "Per\u00fa", "M\u00e9xico", "Colombia", "Argentina", "Chile", "Ecuador" })
+                                {
+                                    if (Model.Country == c) { <option value="@c" selected>@c</option> }
+                                    else { <option value="@c">@c</option> }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="f-label">Descripción de la empresa *</label>
+                            <textarea name="BusinessDescription" class="f-input" rows="3"
+                                      placeholder="Describe brevemente tu negocio...">@Model.BusinessDescription</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- S2: Audiencia e instrucciones -->
+            <div class="a-card mb-4">
+                <div class="a-card-header"><div class="a-card-title">Audiencia e instrucciones</div></div>
+                <div class="a-card-body">
+                    <div class="mb-3">
+                        <label class="f-label">¿A quién le vendes? *</label>
+                        <input name="TargetAudience" class="f-input" value="@Model.TargetAudience"
+                               placeholder="Ej. Personas entre 18-35 años interesadas en moda" />
+                    </div>
+                    <div class="mb-0">
+                        <label class="f-label">Reglas para mi vendedor *</label>
+                        <p class="text-muted" style="font-size:.76rem;margin-bottom:6px">
+                            Siempre agrega las reglas usando términos absolutos como <strong>SIEMPRE</strong> y <strong>NUNCA</strong>.
+                        </p>
+                        <textarea name="Rules" class="f-input" rows="3"
+                                  placeholder="Ej. SIEMPRE saludar al cliente. NUNCA ofrecer descuentos sin autorización.">@Model.Rules</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- S3: Personalidad -->
+            <div class="a-card mb-4">
+                <div class="a-card-header">
+                    <div class="a-card-title">Personalidad</div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-magic me-1"></i> Plantillas
+                    </button>
+                </div>
+                <div class="a-card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="f-label">Estilo de comunicación <span class="text-muted small">(200 máx.)</span></label>
+                            <textarea name="CommunicationStyle" class="f-input" rows="3" maxlength="200"
+                                      data-counter="200">@Model.CommunicationStyle</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="f-label">Estilo de ventas <span class="text-muted small">(210 máx.)</span></label>
+                            <textarea name="SalesStyle" class="f-input" rows="3" maxlength="210"
+                                      data-counter="210">@Model.SalesStyle</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Slider longitud de respuesta -->
+                    <div class="mt-3">
+                        <label class="f-label">Longitud de respuesta</label>
+                        <input type="range" class="form-range" name="ResponseLength"
+                               min="1" max="5" step="1" value="@Model.ResponseLength"
+                               oninput="updateResponseLabel(this.value)" id="sliderResponse" />
+                        <div class="d-flex justify-content-between" style="font-size:.72rem;color:#94a3b8;margin-top:2px">
+                            <span>Muy conciso</span><span>Conciso</span><span>Equilibrado</span><span>Detallado</span><span>Muy detallado</span>
+                        </div>
+                        <div class="mt-1 text-center">
+                            <span class="badge" style="background:#ede9fe;color:#7c3aed" id="responseLengthLabel"></span>
+                        </div>
+                    </div>
+
+                    <!-- Toggles -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                                 style="background:#f8fafc;border:1px solid #e2e8f0">
+                                <span class="small fw-medium">¿Usar emojis?</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" name="UseEmojis"
+                                           id="chkEmojis" @(Model.UseEmojis ? "checked" : "") />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center justify-content-between p-3 rounded-3"
+                                 style="background:#f8fafc;border:1px solid #e2e8f0">
+                                <span class="small fw-medium">¿Usar signos ¿¡?</span>
+                                <div class="form-check form-switch mb-0">
+                                    <input class="form-check-input" type="checkbox" name="UseOpeningPunctuation"
+                                           id="chkPunctuation" @(Model.UseOpeningPunctuation ? "checked" : "") />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <label class="f-label">Palabras a evitar</label>
+                        <input name="WordsToAvoid" class="f-input" value="@Model.WordsToAvoid"
+                               placeholder="Ej. gratis, barato, urgente (separadas por comas)" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- S4: Inicio de conversación -->
+            <div class="a-card mb-4">
+                <div class="a-card-header"><div class="a-card-title">Inicio de conversación</div></div>
+                <div class="a-card-body">
+                    <div class="mb-3">
+                        <label class="f-label">Mensaje inicial *</label>
+                        <textarea name="WelcomeMessage" class="f-input" rows="2"
+                                  placeholder="¡Hola! Soy [nombre]. ¿En qué puedo ayudarte hoy?">@Model.WelcomeMessage</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- S5: Mensajes -->
+            <div class="a-card mb-4">
+                <div class="a-card-header"><div class="a-card-title">Mensajes</div></div>
+                <div class="a-card-body">
+                    <label class="f-label">Mensaje de confirmación de compra *</label>
+                    <textarea name="PurchaseConfirmationMessage" class="f-input" rows="2"
+                              placeholder="¡Gracias por tu compra! Estamos procesando tu pedido...">@Model.PurchaseConfirmationMessage</textarea>
+                </div>
+            </div>
+
+            <!-- S6: Derivación humana -->
+            <div class="a-card mb-4">
+                <div class="a-card-header"><div class="a-card-title">Derivación humana</div></div>
+                <div class="a-card-body">
+                    <div class="mb-3">
+                        <label class="f-label">Situaciones que requieren un humano</label>
+                        <textarea name="HumanHandoffSituations" class="f-input" rows="2"
+                                  placeholder="Ej. Quejas graves, reembolsos, solicitudes especiales">@Model.HumanHandoffSituations</textarea>
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 mb-3"
+                         style="background:#f8fafc;border:1px solid #e2e8f0">
+                        <span class="small fw-medium">Pausar al vendedor IA automáticamente</span>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" name="AutoPauseOnHandoff"
+                                   id="chkAutoPause" @(Model.AutoPauseOnHandoff ? "checked" : "") />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="f-label">Ejemplo de mensaje de derivación (opcional)</label>
+                        <input name="HandoffExampleMessage" class="f-input" value="@Model.HandoffExampleMessage"
+                               placeholder="Brindame un momento para poder ayudarte." />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar acciones -->
+        <div class="col-lg-4">
+            <div class="a-card sticky-top" style="top:80px">
+                <div class="a-card-body">
+                    <button type="button" class="btn btn-primary w-100 mb-2" onclick="savePersonalidad()">
+                        <i class="bi bi-floppy me-1"></i> Guardar cambios
+                    </button>
+                    <div id="saveStatus" class="text-muted text-center small"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@Html.AntiForgeryToken()
+
+<script>
+const labels = ['Muy conciso','Conciso','Equilibrado','Detallado','Muy detallado'];
+function updateResponseLabel(v) {
+    document.getElementById('responseLengthLabel').textContent = labels[v-1];
+}
+updateResponseLabel(@Model.ResponseLength);
+
+// Char counters
+document.querySelectorAll('[data-counter]').forEach(el => {
+    const max = parseInt(el.dataset.counter);
+    const counter = document.createElement('div');
+    counter.className = 'text-end text-muted'; counter.style.fontSize = '.72rem';
+    counter.textContent = `${(el.value||'').length}/${max}`;
+    el.parentNode.insertBefore(counter, el.nextSibling);
+    el.addEventListener('input', () => { counter.textContent = `${el.value.length}/${max}`; });
+});
+
+function savePersonalidad() {
+    const f = document.getElementById('frmPersonalidad');
+    const data = {};
+    new FormData(f).forEach((v,k) => {
+        if (k === 'UseEmojis' || k === 'UseOpeningPunctuation' || k === 'AutoPauseOnHandoff') return;
+        if (k === 'ResponseLength') data[k] = parseInt(v);
+        else data[k] = v;
+    });
+    data.UseEmojis = document.getElementById('chkEmojis').checked;
+    data.UseOpeningPunctuation = document.getElementById('chkPunctuation').checked;
+    data.AutoPauseOnHandoff = document.getElementById('chkAutoPause').checked;
+
+    fetch('/Vendedor/SavePersonalidad', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+        const s = document.getElementById('saveStatus');
+        if (d.success) { s.innerHTML = '<span class="text-success"><i class="bi bi-check-circle me-1"></i>Guardado</span>'; }
+        else { s.innerHTML = '<span class="text-danger">Error al guardar</span>'; }
+    });
+}
+</script>

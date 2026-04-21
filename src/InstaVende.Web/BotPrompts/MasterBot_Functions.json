@@ -1,0 +1,227 @@
+{
+  "functions": [
+    {
+      "name": "buscar_productos",
+      "description": "Busca productos en el catálogo según criterios del usuario. Úsala siempre antes de presentar productos.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "description": "Término de búsqueda libre" },
+          "categoria": { "type": "string", "description": "Categoría o subcategoría del producto" },
+          "marca": { "type": "string", "description": "Marca preferida" },
+          "precio_min": { "type": "number", "description": "Precio mínimo" },
+          "precio_max": { "type": "number", "description": "Precio máximo" },
+          "orden": {
+            "type": "string",
+            "enum": ["relevancia", "precio_asc", "precio_desc", "rating", "mas_vendido"],
+            "description": "Criterio de ordenamiento"
+          },
+          "solo_en_stock": { "type": "boolean", "description": "Mostrar solo productos en stock" }
+        },
+        "required": ["query"]
+      }
+    },
+    {
+      "name": "obtener_producto",
+      "description": "Obtiene información completa de un producto por su ID.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string", "description": "ID único del producto" }
+        },
+        "required": ["product_id"]
+      }
+    },
+    {
+      "name": "obtener_imagen_producto",
+      "description": "Obtiene la URL de la imagen de un producto. SIEMPRE úsala al presentar un producto.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string", "description": "ID único del producto" }
+        },
+        "required": ["product_id"]
+      }
+    },
+    {
+      "name": "buscar_alternativas",
+      "description": "Encuentra productos similares cuando el producto exacto no está disponible.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string", "description": "ID del producto original" },
+          "max_resultados": { "type": "integer", "default": 3, "description": "Número máximo de alternativas" }
+        },
+        "required": ["product_id"]
+      }
+    },
+    {
+      "name": "verificar_stock",
+      "description": "Verifica disponibilidad en tiempo real de un producto, con variantes opcionales.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string" },
+          "talla": { "type": "string" },
+          "color": { "type": "string" }
+        },
+        "required": ["product_id"]
+      }
+    },
+    {
+      "name": "calcular_descuento",
+      "description": "Calcula el descuento máximo permitido según el nivel de negociación. No superar el nivel 3.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string" },
+          "cantidad": { "type": "integer", "default": 1 },
+          "es_cliente_recurrente": { "type": "boolean", "default": false },
+          "intento_negociacion": {
+            "type": "integer",
+            "enum": [1, 2, 3],
+            "description": "Nivel de negociación: 1=bajo, 2=medio, 3=máximo"
+          }
+        },
+        "required": ["product_id", "intento_negociacion"]
+      }
+    },
+    {
+      "name": "calcular_envio",
+      "description": "Calcula costo y tiempo de envío estimado.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "codigo_postal": { "type": "string" },
+          "productos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": { "type": "string" },
+                "cantidad": { "type": "integer" }
+              }
+            }
+          }
+        },
+        "required": ["productos"]
+      }
+    },
+    {
+      "name": "crear_pedido",
+      "description": "Inicia el proceso de creación de pedido. Usar solo cuando el cliente confirma la compra.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "productos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "product_id": { "type": "string" },
+                "cantidad": { "type": "integer" },
+                "variante": { "type": "string" }
+              },
+              "required": ["product_id", "cantidad"]
+            }
+          },
+          "datos_cliente": {
+            "type": "object",
+            "properties": {
+              "nombre": { "type": "string" },
+              "telefono": { "type": "string" },
+              "direccion": { "type": "string" },
+              "email": { "type": "string" }
+            }
+          },
+          "metodo_pago": {
+            "type": "string",
+            "enum": ["tarjeta", "transferencia", "contra_entrega", "paypal", "efectivo"]
+          },
+          "descuento_aplicado": { "type": "number", "description": "Porcentaje de descuento negociado" }
+        },
+        "required": ["productos"]
+      }
+    },
+    {
+      "name": "transferir_a_humano",
+      "description": "Transfiere la conversación a un agente humano. Incluir siempre un resumen detallado.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "motivo": {
+            "type": "string",
+            "enum": [
+              "solicitud_cliente", "negociacion_fallida", "cliente_frustrado",
+              "consulta_compleja", "postventa", "queja", "tema_legal", "falla_tecnica"
+            ]
+          },
+          "prioridad": {
+            "type": "string",
+            "enum": ["baja", "media", "alta", "urgente"]
+          },
+          "resumen": {
+            "type": "string",
+            "description": "Resumen detallado: productos vistos, descuentos ofrecidos, necesidad del cliente, sentimiento"
+          },
+          "productos_discutidos": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs de productos discutidos"
+          }
+        },
+        "required": ["motivo", "prioridad", "resumen"]
+      }
+    },
+    {
+      "name": "obtener_promociones",
+      "description": "Obtiene promociones y descuentos vigentes para una categoría o segmento.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "categoria": { "type": "string" },
+          "segmento_usuario": { "type": "string", "enum": ["general", "recurrente", "vip", "nuevo"] }
+        }
+      }
+    },
+    {
+      "name": "registrar_interes",
+      "description": "Registra el interés del cliente en un producto sin stock para notificarle cuando esté disponible.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "product_id": { "type": "string" },
+          "user_id": { "type": "string" },
+          "canal_notificacion": {
+            "type": "string",
+            "enum": ["whatsapp", "email", "sms"],
+            "default": "whatsapp"
+          }
+        },
+        "required": ["product_id", "user_id"]
+      }
+    },
+    {
+      "name": "obtener_historial_cliente",
+      "description": "Obtiene historial de compras y preferencias del cliente para personalizar la atención.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" }
+        },
+        "required": ["user_id"]
+      }
+    },
+    {
+      "name": "rastrear_pedido",
+      "description": "Rastrea el estado de un pedido existente por su número de orden.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "order_id": { "type": "string" }
+        },
+        "required": ["order_id"]
+      }
+    }
+  ]
+}

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InstaVende.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260419140227_InitialCreate")]
+    [Migration("20260419185904_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -112,11 +112,20 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActivePromotions")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BaseSystemPrompt")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BotName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("BundleDiscount")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("BusinessHours")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("BusinessId")
@@ -125,12 +134,24 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("DiscountLevel1")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("DiscountLevel2")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("DiscountLevel3")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<bool>("EnableHandoff")
                         .HasColumnType("bit");
 
                     b.Property<string>("FallbackMessage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("FreeShippingThreshold")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("HandoffTriggerPhrase")
                         .HasColumnType("nvarchar(max)");
@@ -145,11 +166,32 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("LoyaltyDiscount")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("MaxDiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("MinMarginPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("PaymentMethods")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Personality")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReturnPolicy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingTimes")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("WarrantyPolicy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -241,10 +283,16 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BusinessSector")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FacebookPageId")
@@ -263,6 +311,12 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SocialMedia")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -783,13 +837,13 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasOne("InstaVende.Core.Entities.Business", "Business")
                         .WithMany("Conversations")
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("InstaVende.Core.Entities.Contact", "Contact")
                         .WithMany("Conversations")
                         .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("AssignedAgent");

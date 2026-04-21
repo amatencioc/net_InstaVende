@@ -1,0 +1,53 @@
+@model InstaVende.Web.ViewModels.AccountProfileViewModel
+@{ ViewData["Title"] = "Mi perfil"; }
+
+<div class="row g-4">
+    <!-- Sidebar de navegación de settings -->
+    <div class="col-lg-3">
+        <div class="a-card">
+            <div class="a-card-body p-0">
+                <div class="p-3 border-bottom text-center">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-2" style="width:64px;height:64px;font-size:1.5rem;font-weight:700">
+                        @(Model.FirstName.Length > 0 ? Model.FirstName[0].ToString().ToUpper() : "U")
+                    </div>
+                    <div class="fw-semibold">@Model.FirstName @Model.LastName</div>
+                    <small class="text-muted">@Model.Email</small>
+                </div>
+                <nav class="py-2">
+                    <a asp-controller="Settings" asp-action="Account" class="sb-link active"><i class="bi bi-person"></i> Mi perfil</a>
+                    <a asp-controller="Settings" asp-action="Business" class="sb-link"><i class="bi bi-building"></i> Negocio</a>
+                    <a asp-controller="Settings" asp-action="Password" class="sb-link"><i class="bi bi-key"></i> Contraseña</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-9">
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-person-fill"></i> Datos personales</div></div>
+            <div class="a-card-body">
+                <form asp-action="Account" method="post">
+                    <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
+                    <div class="f-row mb-3">
+                        <div class="f-group mb-0">
+                            <label class="f-label">Nombre</label>
+                            <input asp-for="FirstName" class="f-input" />
+                            <span asp-validation-for="FirstName" class="f-val-msg"></span>
+                        </div>
+                        <div class="f-group mb-0">
+                            <label class="f-label">Apellido</label>
+                            <input asp-for="LastName" class="f-input" />
+                            <span asp-validation-for="LastName" class="f-val-msg"></span>
+                        </div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Email</label>
+                        <input asp-for="Email" class="f-input" />
+                        <span asp-validation-for="Email" class="f-val-msg"></span>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Guardar cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

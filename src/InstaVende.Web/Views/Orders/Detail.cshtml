@@ -1,0 +1,120 @@
+@model InstaVende.Web.ViewModels.OrderViewModel
+@using InstaVende.Core.Enums
+@{ ViewData["Title"] = "Pedido " + Model.OrderNumber; }
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <div>
+        <h1 class="topbar-page-title mb-0">@Model.OrderNumber</h1>
+        <small class="text-muted">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+    </div>
+    <span class="badge bg-@Model.StatusCss ms-2">@Model.StatusLabel</span>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <!-- Items -->
+        <div class="a-card mb-4">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-bag"></i> Productos del pedido</div></div>
+            <div class="a-card-body p-0">
+                <table class="table mb-0">
+                    <thead><tr><th>Producto</th><th>Variante</th><th class="text-end">Precio</th><th class="text-center">Cant.</th><th class="text-end">Subtotal</th></tr></thead>
+                    <tbody>
+                        @foreach (var i in Model.Items)
+                        {
+                        <tr>
+                            <td class="fw-semibold">@i.ProductName</td>
+                            <td><small class="text-muted">@i.VariantDescription</small></td>
+                            <td class="text-end">$@i.UnitPrice.ToString("N2")</td>
+                            <td class="text-center">@i.Quantity</td>
+                            <td class="text-end fw-bold">$@i.Subtotal.ToString("N2")</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Resumen financiero -->
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-receipt"></i> Resumen</div></div>
+            <div class="a-card-body">
+                <div class="d-flex justify-content-between mb-1"><span>Subtotal</span><span>$@Model.Subtotal.ToString("N2")</span></div>
+                @if (Model.Discount > 0)
+                { <div class="d-flex justify-content-between mb-1 text-success"><span>Descuento</span><span>-$@Model.Discount.ToString("N2")</span></div> }
+                @if (Model.ShippingCost > 0)
+                { <div class="d-flex justify-content-between mb-1"><span>Envío</span><span>$@Model.ShippingCost.ToString("N2")</span></div> }
+                <hr/>
+                <div class="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>$@Model.Total.ToString("N2")</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Cliente -->
+        <div class="a-card mb-3">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-person"></i> Cliente</div></div>
+            <div class="a-card-body">
+                <p class="fw-semibold mb-1">@(Model.ContactName ?? "Sin nombre")</p>
+                @if (!string.IsNullOrEmpty(Model.ContactPhone))
+                { <p class="text-muted small mb-1"><i class="bi bi-telephone me-1"></i>@Model.ContactPhone</p> }
+                @if (Model.ConversationId.HasValue)
+                { <a asp-controller="Inbox" asp-action="Index" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-dots me-1"></i>Ver conversación</a> }
+            </div>
+        </div>
+        <!-- Pago y envío -->
+        <div class="a-card mb-3">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-credit-card"></i> Pago y entrega</div></div>
+            <div class="a-card-body">
+                @if (!string.IsNullOrEmpty(Model.PaymentMethodName))
+                { <p class="mb-1 small"><strong>Método:</strong> @Model.PaymentMethodName</p> }
+                @if (!string.IsNullOrEmpty(Model.ShippingAddress))
+                { <p class="mb-1 small"><strong>Dirección:</strong> @Model.ShippingAddress</p> }
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                { <p class="mb-0 small text-muted"><strong>Notas:</strong> @Model.Notes</p> }
+            </div>
+        </div>
+        <!-- Cambiar estado -->
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-arrow-repeat"></i> Cambiar estado</div></div>
+            <div class="a-card-body">
+                <select class="f-input mb-3" id="newStatus">
+                    @foreach (var s in Enum.GetValues<OrderStatus>())
+                    {
+                        if (Model.Status == s)
+                        { <option value="@((int)s)" selected>@GetStatusLabel(s)</option> }
+                        else
+                        { <option value="@((int)s)">@GetStatusLabel(s)</option> }
+                    }
+                </select>
+                <button class="btn btn-primary w-100" onclick="changeStatus()">Actualizar estado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+@section Scripts {
+<script>
+function changeStatus() {
+    var status = document.getElementById('newStatus').value;
+    $.post('/Orders/UpdateStatus', { id: @Model.Id, status: status, __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val() })
+        .done(function (d) {
+            if (d.ok) { location.reload(); }
+            else alert('Error al actualizar el estado.');
+        });
+}
+</script>
+}
+
+@functions {
+    static string GetStatusLabel(OrderStatus s) => s switch {
+        OrderStatus.Pending   => "Pendiente",
+        OrderStatus.Confirmed => "Confirmado",
+        OrderStatus.Preparing => "En preparación",
+        OrderStatus.Shipped   => "Enviado",
+        OrderStatus.Delivered => "Entregado",
+        OrderStatus.Cancelled => "Cancelado",
+        OrderStatus.Refunded  => "Reembolsado",
+        _ => s.ToString()
+    };
+}

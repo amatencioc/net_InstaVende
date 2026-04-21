@@ -11,6 +11,9 @@ public class ChannelConfig
     public string AccessTokenEncrypted { get; set; } = string.Empty;
     public string? AppSecretEncrypted { get; set; }
     public string? WebhookVerifyToken { get; set; }
+    public string? WabaId { get; set; }
+    public string? PhoneNumber { get; set; }
+    public DateTime? ConnectedAt { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Business Business { get; set; } = null!;

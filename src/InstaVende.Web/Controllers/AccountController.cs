@@ -26,9 +26,21 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
-            await _userManager.AddToRoleAsync(user, "Merchant");
-            _db.Businesses.Add(new Business { UserId = user.Id, Name = model.BusinessName });
-            await _db.SaveChangesAsync();
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                await _userManager.AddToRoleAsync(user, "Merchant");
+                _db.Businesses.Add(new Business { UserId = user.Id, Name = model.BusinessName });
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                await _userManager.DeleteAsync(user);
+                ModelState.AddModelError(string.Empty, "Error al crear la cuenta. Intenta de nuevo.");
+                return View(model);
+            }
             await _signInManager.SignInAsync(user, false);
             return RedirectToAction("Index", "Dashboard");
         }

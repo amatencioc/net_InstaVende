@@ -1,25 +1,171 @@
 @model InstaVende.Web.ViewModels.ProductViewModel
 @{ ViewData["Title"] = "Editar Producto"; }
-<h2><i class="bi bi-pencil me-2"></i>Editar Producto</h2>
-<div class="card" style="max-width:700px"><div class="card-body">
-    <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
-        @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2"></div>
-        @if (!string.IsNullOrEmpty(Model.ImageUrl)) { <img src="@Model.ImageUrl" class="img-thumbnail mb-3" style="max-height:150px" /> }
-        <div class="mb-3"><label asp-for="Name" class="form-label">Nombre *</label><input asp-for="Name" class="form-control" /><span asp-validation-for="Name" class="text-danger small"></span></div>
-        <div class="mb-3"><label asp-for="Description" class="form-label">Descripción</label><textarea asp-for="Description" class="form-control" rows="3"></textarea></div>
-        <div class="row g-2 mb-3">
-            <div class="col"><label asp-for="Price" class="form-label">Precio *</label><input asp-for="Price" class="form-control" type="number" step="0.01" min="0" /><span asp-validation-for="Price" class="text-danger small"></span></div>
-            <div class="col"><label asp-for="Stock" class="form-label">Stock</label><input asp-for="Stock" class="form-control" type="number" min="0" /></div>
-            <div class="col"><label asp-for="CategoryId" class="form-label">Categoría</label><select asp-for="CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))"><option value="">Sin categoría</option></select></div>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+    <h1 class="topbar-page-title mb-0">Editar Producto</h1>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="a-card mb-4">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-box-seam"></i> Información general</div></div>
+            <div class="a-card-body">
+                <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data" id="editForm">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
+                    <div class="f-group">
+                        <label class="f-label">Nombre del producto <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="f-input" />
+                        <span asp-validation-for="Name" class="f-val-msg"></span>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Descripción</label>
+                        <textarea asp-for="Description" class="f-input" rows="3"></textarea>
+                    </div>
+                    <div class="f-row">
+                        <div class="f-group">
+                            <label class="f-label">SKU / Código</label>
+                            <input asp-for="Sku" class="f-input" placeholder="Ej: PROD-001" />
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Categoría</label>
+                            <select asp-for="CategoryId" class="f-input" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+                                <option value="">Sin categoría</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="f-row">
+                        <div class="f-group">
+                            <label class="f-label">Precio de venta <span class="text-danger">*</span></label>
+                            <input asp-for="Price" class="f-input" type="number" step="0.01" min="0" />
+                            <span asp-validation-for="Price" class="f-val-msg"></span>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Precio original (tachado)</label>
+                            <input asp-for="PriceOriginal" class="f-input" type="number" step="0.01" min="0" placeholder="Opcional" />
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Stock</label>
+                            <input asp-for="Stock" class="f-input" type="number" min="0" />
+                        </div>
+                    </div>
+                    <div class="f-row">
+                        <div class="f-group"><label class="f-check"><input asp-for="IsActive" /> Activo</label></div>
+                        <div class="f-group"><label class="f-check"><input asp-for="IsFeatured" /> Destacado</label></div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Imagen</label>
+                        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                        { <img src="@Model.ImageUrl" class="d-block mb-2 rounded" style="max-height:120px" /> }
+                        <input asp-for="ImageFile" class="f-input" type="file" accept="image/*" />
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Actualizar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
         </div>
-        <div class="mb-3"><label asp-for="ImageFile" class="form-label">Nueva Imagen (opcional)</label><input asp-for="ImageFile" class="form-control" type="file" accept="image/*" /></div>
-        <div class="row g-2 mb-3">
-            <div class="col-auto form-check ms-2"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label">Activo</label></div>
-            <div class="col-auto form-check"><input asp-for="IsFeatured" class="form-check-input" /><label asp-for="IsFeatured" class="form-check-label">Destacado</label></div>
+    </div>
+
+    <div class="col-lg-4">
+        <!-- Variantes -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-tags"></i> Variantes</div>
+                <button class="btn btn-sm btn-outline-primary" onclick="openVariantModal(0)"><i class="bi bi-plus"></i></button>
+            </div>
+            <div class="a-card-body p-0" id="variantList">
+                @if (Model.Variants.Any())
+                {
+                <ul class="list-group list-group-flush">
+                    @foreach (var v in Model.Variants)
+                    {
+                    <li class="list-group-item d-flex justify-content-between align-items-center py-2 px-3">
+                        <div>
+                            <span class="badge bg-light text-dark border me-1">@v.AttributeName</span>
+                            <strong>@v.AttributeValue</strong>
+                            @if (v.PriceModifier != 0)
+                            { <small class="text-muted ms-1">@(v.PriceModifier > 0 ? "+" : "")@v.PriceModifier.ToString("N2")</small> }
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <small class="text-muted">Stock: @v.Stock</small>
+                            <button class="btn btn-sm btn-outline-danger p-0 px-1" onclick="deleteVariant(@v.Id)"><i class="bi bi-trash" style="font-size:.7rem"></i></button>
+                        </div>
+                    </li>
+                    }
+                </ul>
+                }
+                else
+                { <p class="text-muted small text-center py-3 mb-0">Sin variantes. Agrega tallas, colores, etc.</p> }
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Actualizar</button>
-        <a asp-action="Index" class="btn btn-secondary ms-2">Cancelar</a>
-    </form>
-</div></div>
-@section Scripts { @await Html.PartialAsync("_ValidationScripts") }
+    </div>
+</div>
+
+<!-- Modal variante -->
+<div class="modal fade" id="variantModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header"><h6 class="modal-title fw-bold">Nueva variante</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="f-group">
+                    <label class="f-label">Tipo</label>
+                    <select class="f-input" id="vAttrName">
+                        <option>Talla</option><option>Color</option><option>Material</option><option>Peso</option><option>Otro</option>
+                    </select>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">Valor</label>
+                    <input type="text" class="f-input" id="vAttrValue" placeholder="Ej: XL / Rojo" />
+                </div>
+                <div class="f-row">
+                    <div class="f-group">
+                        <label class="f-label">Modificador precio</label>
+                        <input type="number" class="f-input" id="vPriceMod" value="0" step="0.01" />
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Stock</label>
+                        <input type="number" class="f-input" id="vStock" value="0" min="0" />
+                    </div>
+                </div>
+                <div class="f-group">
+                    <label class="f-label">SKU variante</label>
+                    <input type="text" class="f-input" id="vSku" placeholder="Opcional" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button class="btn btn-primary" onclick="saveVariant()">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+@await Html.PartialAsync("_ValidationScripts")
+<script>
+var varModal = new bootstrap.Modal(document.getElementById('variantModal'));
+function openVariantModal() { varModal.show(); }
+function saveVariant() {
+    var val = document.getElementById('vAttrValue').value.trim();
+    if (!val) { alert('El valor es obligatorio.'); return; }
+    $.post('/Products/AddVariant', {
+        productId: @Model.Id,
+        attributeName: document.getElementById('vAttrName').value,
+        attributeValue: val,
+        priceModifier: document.getElementById('vPriceMod').value,
+        stock: document.getElementById('vStock').value,
+        sku: document.getElementById('vSku').value,
+        __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
+    }).done(function(d) { if(d.ok) { varModal.hide(); location.reload(); } });
+}
+function deleteVariant(id) {
+    if (!confirm('¿Eliminar esta variante?')) return;
+    $.post('/Products/DeleteVariant', { id, __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val() })
+        .done(function(d) { if(d.ok) location.reload(); });
+}
+</script>
+}
+

@@ -30,6 +30,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -50,6 +53,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -109,11 +115,20 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("ActivePromotions")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("BaseSystemPrompt")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BotName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("BundleDiscount")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("BusinessHours")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("BusinessId")
@@ -122,12 +137,24 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<decimal>("DiscountLevel1")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("DiscountLevel2")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("DiscountLevel3")
+                        .HasColumnType("decimal(5,2)");
+
                     b.Property<bool>("EnableHandoff")
                         .HasColumnType("bit");
 
                     b.Property<string>("FallbackMessage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("FreeShippingThreshold")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<string>("HandoffTriggerPhrase")
                         .HasColumnType("nvarchar(max)");
@@ -142,11 +169,32 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("LoyaltyDiscount")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("MaxDiscountPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("MinMarginPercent")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<string>("PaymentMethods")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Personality")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReturnPolicy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingTimes")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("WarrantyPolicy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -238,10 +286,25 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BusinessSector")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CompletionPercent")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Currency")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FacebookPageId")
@@ -261,6 +324,15 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Phone")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sector")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SocialMedia")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -277,6 +349,36 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Businesses");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.BusinessUser", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BusinessUsers");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.ChannelConfig", b =>
@@ -300,6 +402,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<int>("ChannelType")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("ConnectedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -312,7 +417,13 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<string>("PageId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PhoneNumberId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WabaId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WebhookVerifyToken")
@@ -350,6 +461,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<DateTime>("FirstSeenAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("LastPurchaseAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("LastSeenAt")
                         .HasColumnType("datetime2");
 
@@ -358,6 +472,12 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TotalPurchases")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalSpent")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -390,10 +510,22 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("LabelId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("LastMessageAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastMessagePreview")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("ResolvedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnreadCount")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -406,6 +538,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasIndex("BusinessId");
 
                     b.HasIndex("ContactId");
+
+                    b.HasIndex("LabelId");
 
                     b.ToTable("Conversations");
                 });
@@ -446,6 +580,110 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasIndex("BotConfigId");
 
                     b.ToTable("ConversationFlows");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ConversationLabel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("ConversationLabels");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.DeliveryZone", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("DeliveryZones");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.KnowledgeEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsFavorite")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("KnowledgeEntries");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.Message", b =>
@@ -491,6 +729,260 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.ToTable("Messages");
                 });
 
+            modelBuilder.Entity("InstaVende.Core.Entities.NotificationEmail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("NotificationEmails");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.OnboardingProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("BotConfigured")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("BotTested")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ChannelConnected")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("OnboardingCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("PaymentMethodsAdded")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("ProductsAdded")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId")
+                        .IsUnique();
+
+                    b.ToTable("OnboardingProgresses");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ChannelType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("Discount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("PaymentMethodName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingAddress")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubStatus")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Subtotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("VariantDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderItems");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.PaymentImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("PaymentImages");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.PaymentMethod", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountAlias")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Instructions")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("PaymentLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("PaymentMethods");
+                });
+
             modelBuilder.Entity("InstaVende.Core.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -527,6 +1019,15 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("PriceOriginal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Sku")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
 
                     b.Property<int>("Stock")
                         .HasColumnType("int");
@@ -569,6 +1070,294 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasIndex("BusinessId");
 
                     b.ToTable("ProductCategories");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ProductImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ProductVariant", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttributeName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AttributeValue")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("PriceModifier")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Sku")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Stock")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductVariants");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ChannelType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ContactId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ConversationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedByAgentId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScheduledAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TemplateKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("ContactId");
+
+                    b.HasIndex("CreatedByAgentId");
+
+                    b.ToTable("Reminders");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ReminderTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MediaUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Segment")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TimeWindow")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.ToTable("ReminderTemplates");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.UserInvitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.ToTable("UserInvitations");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.VendorConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AutoPauseOnHandoff")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("BusinessDescription")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BusinessId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CommunicationStyle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Country")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("EmojiPalette")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HandoffExampleMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HumanHandoffSituations")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PurchaseConfirmationMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ResponseLength")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Rules")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SalesStyle")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetAudience")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("UseEmojis")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("UseOpeningPunctuation")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("VendorGender")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VendorName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WelcomeMediaUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WelcomeMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WordsToAvoid")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BusinessId")
+                        .IsUnique();
+
+                    b.ToTable("VendorConfigs");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -748,6 +1537,25 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("InstaVende.Core.Entities.BusinessUser", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("BusinessUsers")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("InstaVende.Core.Entities.ChannelConfig", b =>
                 {
                     b.HasOne("InstaVende.Core.Entities.Business", "Business")
@@ -780,20 +1588,27 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasOne("InstaVende.Core.Entities.Business", "Business")
                         .WithMany("Conversations")
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("InstaVende.Core.Entities.Contact", "Contact")
                         .WithMany("Conversations")
                         .HasForeignKey("ContactId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.ConversationLabel", "Label")
+                        .WithMany("Conversations")
+                        .HasForeignKey("LabelId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("AssignedAgent");
 
                     b.Navigation("Business");
 
                     b.Navigation("Contact");
+
+                    b.Navigation("Label");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.ConversationFlow", b =>
@@ -807,6 +1622,39 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Navigation("BotConfig");
                 });
 
+            modelBuilder.Entity("InstaVende.Core.Entities.ConversationLabel", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("ConversationLabels")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.DeliveryZone", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("DeliveryZones")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.KnowledgeEntry", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("KnowledgeEntries")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
             modelBuilder.Entity("InstaVende.Core.Entities.Message", b =>
                 {
                     b.HasOne("InstaVende.Core.Entities.Conversation", "Conversation")
@@ -816,6 +1664,95 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.NotificationEmail", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("NotificationEmails")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.OnboardingProgress", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithOne("OnboardingProgress")
+                        .HasForeignKey("InstaVende.Core.Entities.OnboardingProgress", "BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Order", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("Orders")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.Contact", "Contact")
+                        .WithMany("Orders")
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.Conversation", "Conversation")
+                        .WithMany("Orders")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Business");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("Conversation");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.OrderItem", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Order", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.Product", "Product")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.PaymentImage", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("PaymentImages")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.PaymentMethod", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("PaymentMethods")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.Product", b =>
@@ -840,6 +1777,87 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasOne("InstaVende.Core.Entities.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ProductImage", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ProductVariant", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Product", "Product")
+                        .WithMany("Variants")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Reminder", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("Reminders")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.Contact", "Contact")
+                        .WithMany("Reminders")
+                        .HasForeignKey("ContactId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InstaVende.Core.Entities.ApplicationUser", "CreatedByAgent")
+                        .WithMany()
+                        .HasForeignKey("CreatedByAgentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Business");
+
+                    b.Navigation("Contact");
+
+                    b.Navigation("CreatedByAgent");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ReminderTemplate", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("ReminderTemplates")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.UserInvitation", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithMany("UserInvitations")
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Business");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.VendorConfig", b =>
+                {
+                    b.HasOne("InstaVende.Core.Entities.Business", "Business")
+                        .WithOne("VendorConfig")
+                        .HasForeignKey("InstaVende.Core.Entities.VendorConfig", "BusinessId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -915,21 +1933,72 @@ namespace InstaVende.Infrastructure.Data.Migrations
                 {
                     b.Navigation("BotConfig");
 
+                    b.Navigation("BusinessUsers");
+
                     b.Navigation("ChannelConfigs");
+
+                    b.Navigation("ConversationLabels");
 
                     b.Navigation("Conversations");
 
+                    b.Navigation("DeliveryZones");
+
+                    b.Navigation("KnowledgeEntries");
+
+                    b.Navigation("NotificationEmails");
+
+                    b.Navigation("OnboardingProgress");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("PaymentImages");
+
+                    b.Navigation("PaymentMethods");
+
                     b.Navigation("Products");
+
+                    b.Navigation("ReminderTemplates");
+
+                    b.Navigation("Reminders");
+
+                    b.Navigation("UserInvitations");
+
+                    b.Navigation("VendorConfig");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.Contact", b =>
                 {
                     b.Navigation("Conversations");
+
+                    b.Navigation("Orders");
+
+                    b.Navigation("Reminders");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.Conversation", b =>
                 {
                     b.Navigation("Messages");
+
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.ConversationLabel", b =>
+                {
+                    b.Navigation("Conversations");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Order", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("InstaVende.Core.Entities.Product", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("OrderItems");
+
+                    b.Navigation("Variants");
                 });
 
             modelBuilder.Entity("InstaVende.Core.Entities.ProductCategory", b =>

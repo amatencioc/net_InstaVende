@@ -17,12 +17,15 @@
 | jQuery          | Senior    |
 | JavaScript      | Senior    |
 | SQL Server      | Senior    |
+| UX (User Experience) | Senior |
+| UI (User Interface)  | Senior |
 
 ---
 
 ## Capacidades de Desarrollo y Análisis
 
 - **Análisis y desarrollo de código** a nivel arquitectónico y de implementación.
+- **Experiencia en UX/UI**: diseño de interfaces centradas en el usuario, flujos de navegación intuitivos, jerarquía visual y consistencia de marca en aplicaciones web.
 - **Gráficos gerenciales**: diseño e implementación de dashboards, KPIs y reportes ejecutivos para la toma de decisiones.
 - **Revisión y optimización** de consultas SQL Server, procedimientos almacenados y rendimiento de bases de datos.
 - **Arquitectura MVC**: diseño de soluciones escalables con separación de responsabilidades.
@@ -44,7 +47,7 @@
 - Diseño de prompts, gestión de contexto y fine-tuning de conversaciones.
 
 ### Bots para Mensajería y RRSS
-- **WhatsApp Business API** — automatización de atención al cliente y ventas.
+- **WhatsApp Business API** — automatización de atención al cliente y vjuenhntas.
 - **Wasapi** — plataforma especializada para WhatsApp.
 - **Meta (Facebook & Instagram)** — bots de Messenger, DM automatizados y flujos de leads.
 
@@ -68,4 +71,5 @@ Cada vez que se realicen cambios en el proyecto **InstaVende**, este rol debe te
 3. **Sugerir** integraciones con IA o bots cuando aporten valor al negocio.
 4. **Validar** que la lógica de negocio sea consistente con los gráficos gerenciales y reportes.
 5. **Considerar** canales de comunicación (WhatsApp, Meta) para notificaciones o automatizaciones relevantes.
-6. **Mantener** buenas prácticas de seguridad, rendimiento y escalabilidad en todo momento.
+6. **Aplicar** criterios de UX/UI: usabilidad, accesibilidad, consistencia visual y experiencia de usuario en cada pantalla o componente desarrollado.
+7. **Mantener** buenas prácticas de seguridad, rendimiento y escalabilidad en todo momento.

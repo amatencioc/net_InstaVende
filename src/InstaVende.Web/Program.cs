@@ -30,7 +30,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
     o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
 })
 .AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddErrorDescriber<SpanishIdentityErrorDescriber>();
 
 builder.Services.ConfigureApplicationCookie(o =>
 {
@@ -51,6 +52,7 @@ builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<DataProtectionService>();
 builder.Services.AddScoped<CurrentUserService>();
 builder.Services.AddScoped<ImageService>();
+builder.Services.AddSingleton<MasterPromptBuilder>();
 builder.Services.AddScoped<IBotEngineService, BotEngineService>();
 builder.Services.AddScoped<IChannelMessageSender, WhatsAppService>();
 builder.Services.AddScoped<IChannelMessageSender, MetaMessengerService>();
@@ -78,6 +80,6 @@ app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-app.MapControllerRoute("default", "{controller=Account}/{action=Login}/{id?}");
+app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 app.MapHub<InboxHub>("/inboxHub");
 app.Run();

@@ -1,0 +1,70 @@
+@model InstaVende.Web.ViewModels.BusinessProfileViewModel
+@{ ViewData["Title"] = "Perfil del negocio"; }
+
+<div class="row g-4">
+    <div class="col-lg-3">
+        <div class="a-card">
+            <div class="a-card-body p-0">
+                <nav class="py-2">
+                    <a asp-controller="Settings" asp-action="Account" class="sb-link"><i class="bi bi-person"></i> Mi perfil</a>
+                    <a asp-controller="Settings" asp-action="Business" class="sb-link active"><i class="bi bi-building"></i> Negocio</a>
+                    <a asp-controller="Settings" asp-action="Password" class="sb-link"><i class="bi bi-key"></i> Contraseña</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-9">
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-building"></i> Información del negocio</div></div>
+            <div class="a-card-body">
+                <form asp-action="Business" method="post">
+                    <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
+                    <div class="f-group">
+                        <label class="f-label">Nombre del negocio <span class="text-danger">*</span></label>
+                        <input asp-for="Name" class="f-input" placeholder="Mi Tienda Online" />
+                        <span asp-validation-for="Name" class="f-val-msg"></span>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Sector / Rubro</label>
+                        <select asp-for="Sector" class="f-input">
+                            <option value="">— Seleccionar —</option>
+                            <option>Ropa y calzado</option><option>Tecnología</option><option>Alimentos y bebidas</option>
+                            <option>Belleza y cuidado personal</option><option>Hogar y deco</option><option>Deportes</option>
+                            <option>Salud</option><option>Servicios</option><option>Educación</option><option>Otro</option>
+                        </select>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Descripción</label>
+                        <textarea asp-for="Description" class="f-input" rows="3" placeholder="Describe brevemente tu negocio..."></textarea>
+                    </div>
+                    <div class="f-row">
+                        <div class="f-group">
+                            <label class="f-label">Teléfono</label>
+                            <input asp-for="Phone" class="f-input" placeholder="+54 11 1234 5678" />
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">WhatsApp</label>
+                            <input asp-for="WhatsAppNumber" class="f-input" placeholder="+54 9 11 1234 5678" />
+                        </div>
+                    </div>
+                    <div class="f-row">
+                        <div class="f-group">
+                            <label class="f-label">Email de contacto</label>
+                            <input asp-for="Email" class="f-input" placeholder="ventas@minegocio.com" />
+                            <span asp-validation-for="Email" class="f-val-msg"></span>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Sitio web</label>
+                            <input asp-for="WebsiteUrl" class="f-input" placeholder="https://minegocio.com" />
+                        </div>
+                    </div>
+                    <div class="f-group">
+                        <label class="f-label">Logo URL</label>
+                        <input asp-for="LogoUrl" class="f-input" placeholder="https://..." />
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-2">Guardar cambios</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

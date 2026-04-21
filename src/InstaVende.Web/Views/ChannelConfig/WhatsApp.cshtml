@@ -1,0 +1,450 @@
+@{
+    ViewData["Title"] = "Conectar WhatsApp";
+    bool isConnected = ViewBag.IsConnected == true;
+    string phoneNumberId = ViewBag.PhoneNumberId ?? "";
+    string phoneNumber = ViewBag.PhoneNumber ?? "";
+    DateTime? connectedAt = ViewBag.ConnectedAt as DateTime?;
+    string metaAppId = ViewBag.MetaAppId ?? "";
+    string configId = ViewBag.EmbeddedSignupConfigId ?? "";
+}
+
+<!-- Breadcrumb -->
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-1" style="font-size:.78rem">
+            <li class="breadcrumb-item"><a href="/ChannelConfig" class="text-muted">Canales</a></li>
+            <li class="breadcrumb-item active">WhatsApp</li>
+        </ol>
+    </nav>
+    <h1 class="topbar-page-title mb-0">Conectar WhatsApp Business</h1>
+</div>
+
+@if (string.IsNullOrEmpty(metaAppId))
+{
+    <div class="app-alert app-alert-error mb-4">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <div>
+            <strong>Meta App no configurada.</strong>
+            Para habilitar la conexión, ingresa tu <code>Meta:AppId</code>, <code>Meta:AppSecret</code> y <code>Meta:EmbeddedSignupConfigId</code>
+            en <code>appsettings.json</code> (o en las variables de entorno del servidor).
+            <a href="https://developers.facebook.com/apps/" target="_blank" class="ms-2 fw-bold">Crear app en Meta ?</a>
+        </div>
+    </div>
+}
+
+<!-- ?? CONNECTING overlay (hidden by default) ?????????????????????????????? -->
+<div id="stateConnecting" style="display:none">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="a-card text-center" style="padding:3rem 2rem">
+                <div class="mb-4" style="position:relative;display:inline-block">
+                    <!-- Pulsing ring -->
+                    <div style="width:100px;height:100px;border-radius:50%;background:rgba(22,163,74,.08);display:flex;align-items:center;justify-content:center;margin:0 auto;animation:wa-pulse 1.8s ease-in-out infinite">
+                        <div style="width:72px;height:72px;border-radius:50%;background:rgba(22,163,74,.14);display:flex;align-items:center;justify-content:center">
+                            <i class="bi bi-whatsapp" style="font-size:2rem;color:#25D366"></i>
+                        </div>
+                    </div>
+                </div>
+                <h4 style="font-family:var(--font-heading);font-weight:700;color:#0f172a;margin-bottom:.5rem">Conectando tu cuenta</h4>
+                <p class="text-muted mb-4" style="font-size:.88rem">Esto puede tardar unos instantes...</p>
+                <div class="d-flex justify-content-center gap-2 mb-2">
+                    <span class="spinner-border spinner-border-sm text-success"></span>
+                    <span id="connectingMsg" style="font-size:.84rem;color:#475569">Verificando con Meta...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ?? SUCCESS state (hidden by default) ?????????????????????????????????? -->
+<div id="stateSuccess" style="display:none">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="a-card text-center" style="padding:3rem 2rem">
+                <div style="width:100px;height:100px;border-radius:50%;background:rgba(22,163,74,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+                    <div style="width:72px;height:72px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center">
+                        <i class="bi bi-check-circle-fill" style="font-size:2rem;color:#16a34a"></i>
+                    </div>
+                </div>
+                <h4 style="font-family:var(--font-heading);font-weight:700;color:#0f172a;margin-bottom:.5rem">
+                    Tu cuenta está conectada a InstaVende
+                </h4>
+                <p class="text-muted mb-4" style="font-size:.88rem">
+                    Antes de que puedas empezar a enviar mensajes, InstaVende tendrá que verificar tu empresa.
+                    Cuando haya finalizado este proceso, recibirás un correo electrónico.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/ChannelConfig" class="btn btn-outline-secondary">
+                        <i class="bi bi-gear me-2"></i>Ver configuración
+                    </a>
+                    <a href="/Dashboard" class="btn btn-primary">
+                        <i class="bi bi-house me-2"></i>Ir al dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ?? ERROR state (hidden by default) ?????????????????????????????????? -->
+<div id="stateError" style="display:none">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="a-card text-center" style="padding:3rem 2rem">
+                <div style="width:100px;height:100px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
+                    <div style="width:72px;height:72px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center">
+                        <i class="bi bi-x-circle-fill" style="font-size:2rem;color:#ef4444"></i>
+                    </div>
+                </div>
+                <h4 style="font-family:var(--font-heading);font-weight:700;color:#0f172a;margin-bottom:.5rem">
+                    No se pudo conectar
+                </h4>
+                <p id="errorMsg" class="text-muted mb-4" style="font-size:.88rem">
+                    Ocurrió un error durante la vinculación.
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <button class="btn btn-outline-secondary" onclick="showState('main')">
+                        <i class="bi bi-arrow-left me-2"></i>Volver
+                    </button>
+                    <button class="btn btn-primary" onclick="launchEmbeddedSignup()">
+                        <i class="bi bi-arrow-repeat me-2"></i>Reintentar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ?? MAIN state ?????????????????????????????????????????????????????????? -->
+<div id="stateMain">
+<div class="row g-4">
+    <!-- Hero card -->
+    <div class="col-lg-8">
+        <div class="a-card">
+            <div class="a-card-body" style="padding:2.5rem 2rem">
+
+                @if (isConnected)
+                {
+                    <!-- Success banner -->
+                    <div class="d-flex align-items-start gap-4 mb-4 p-4 rounded-3" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1px solid #bbf7d0">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:56px;height:56px;background:#16a34a">
+                            <i class="bi bi-check-lg text-white" style="font-size:1.5rem"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-1" style="color:#14532d">¡Perfecto! Tu canal está listo</h4>
+                            <p class="text-muted mb-3" style="font-size:.88rem">Ahora puedes empezar a recibir y gestionar conversaciones de tus clientes.</p>
+                            <a href="/Inbox" class="btn btn-primary">
+                                <i class="bi bi-chat-dots me-2"></i>Ir a Conversaciones
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Channel card -->
+                    <div class="d-flex align-items-center gap-3 p-3 rounded-3 mb-4" style="background:#fff;border:1px solid #e2e8f0">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px;height:48px;background:#dcfce7">
+                            <i class="bi bi-whatsapp" style="font-size:1.4rem;color:#25D366"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold" style="font-size:.9rem">WhatsApp Business API</div>
+                            <div class="text-muted" style="font-size:.8rem">
+                                @if (!string.IsNullOrEmpty(phoneNumber)) { <span>@phoneNumber</span> }
+                                else if (!string.IsNullOrEmpty(phoneNumberId)) { <span>ID: @phoneNumberId</span> }
+                                @if (connectedAt.HasValue) { <span class="ms-2">· Conectado el @connectedAt.Value.ToLocalTime().ToString("d 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-PE"))</span> }
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-success">Activo</span>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="launchEmbeddedSignup()">Probar vendedor</button>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button class="btn btn-outline-success btn-sm" onclick="launchEmbeddedSignup()">
+                            <i class="bi bi-arrow-repeat me-1"></i>Reconectar
+                        </button>
+                        <a href="/ChannelConfig" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-gear me-1"></i>Configuración manual
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex align-items-start gap-4 mb-4">
+                        <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:64px;height:64px;background:#dcfce7">
+                            <i class="bi bi-whatsapp" style="font-size:2rem;color:#25D366"></i>
+                        </div>
+                        <div>
+                            <h2 style="font-family:var(--font-heading);font-size:1.5rem;font-weight:800;color:#0f172a;margin-bottom:.3rem">
+                                Conecta tu WhatsApp Business
+                            </h2>
+                            <p class="text-muted mb-0" style="font-size:.9rem">
+                                Es el primer paso para empezar a vender con tu asistente inteligente.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 flex-wrap mb-5">
+                        <button id="btnConnect" class="btn btn-primary btn-lg px-4" onclick="launchEmbeddedSignup()">
+                            <i class="bi bi-whatsapp me-2"></i>Conectar WhatsApp
+                        </button>
+                        <a href="mailto:soporte@instavende.com" class="btn btn-outline-secondary btn-lg px-4">
+                            <i class="bi bi-headset me-2"></i>Contactar soporte
+                        </a>
+                    </div>
+
+                    <!-- Steps -->
+                    <h6 class="fw-bold text-uppercase mb-3" style="font-size:.72rem;letter-spacing:.1em;color:#94a3b8">Pasos para conectar</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 h-100" style="background:#f8fafc;border:1px solid #e2e8f0">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width:28px;height:28px;background:var(--brand);font-size:.8rem;flex-shrink:0">1</span>
+                                    <strong style="font-size:.85rem">Inicia sesión en Meta</strong>
+                                </div>
+                                <p class="mb-0 text-muted" style="font-size:.8rem">Conéctate con tu cuenta de Facebook Business.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 h-100" style="background:#f8fafc;border:1px solid #e2e8f0">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width:28px;height:28px;background:var(--brand);font-size:.8rem;flex-shrink:0">2</span>
+                                    <strong style="font-size:.85rem">Completa la información</strong>
+                                </div>
+                                <p class="mb-0 text-muted" style="font-size:.8rem">Nombre, sitio web y categoría del negocio.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 rounded-3 h-100" style="background:#f8fafc;border:1px solid #e2e8f0">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <span class="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold text-white" style="width:28px;height:28px;background:var(--brand);font-size:.8rem;flex-shrink:0">3</span>
+                                    <strong style="font-size:.85rem">Activa tu número</strong>
+                                </div>
+                                <p class="mb-0 text-muted" style="font-size:.8rem">Selecciona «Usar solo un nombre visible» y confirma.</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-question-circle"></i> Dudas frecuentes</div>
+            </div>
+            <div class="a-card-body p-0">
+                <div class="accordion accordion-flush" id="faqAccordion">
+                    @foreach (var (q, a, i) in new[] {
+                        ("¿Qué tipo de conexión elijo?",
+                         "Opción 1: Crear nueva cuenta WhatsApp Business (nombre de presentación vía Facebook/SMS). Opción 2 (RECOMENDADA): Vincular cuenta existente con QR — «Conexión Coexistencia». Importante: si tu número ya tiene verificación azul, el proceso puede tardar 24-72 h si tu Portfolio Meta es nuevo.", "faq1"),
+                        ("¿Necesito tener una cuenta en Meta Business?",
+                         "Sí, necesitas un Portfolio Comercial (antes Business Manager) en Meta. Puedes crearlo gratis en business.facebook.com. Si ya tienes uno, simplemente selecciónalo durante el proceso.", "faq2"),
+                        ("¿Qué es el Portfolio Meta y cómo dejarlo listo?",
+                         "El Portfolio Meta agrupa tus activos comerciales (páginas, cuentas de anuncios, WhatsApp). Para dejarlo listo: crea o selecciona un portfolio en Meta Business Suite, agrega tu número de teléfono y verifica tu empresa.", "faq3"),
+                        ("¿Qué pasa si no conecto mi WhatsApp?",
+                         "Sin conexión, el vendedor inteligente no podrá recibir ni responder mensajes. Todas las conversaciones y automatizaciones requieren que el canal esté activo.", "faq4"),
+                        ("¿Debo seleccionar 'Compartir chats'?",
+                         "Si eliges la conexión por Coexistencia (QR), Meta te pedirá compartir el acceso. Esto permite que InstaVende gestione las conversaciones sin que pierdas acceso desde la app de WhatsApp Business.", "faq5"),
+                        ("¿Cuánto cuesta usar la API de WhatsApp Business?",
+                         "Meta cobra por conversación (no por mensaje). Las primeras 1,000 conversaciones iniciadas por el usuario cada mes son gratis. Las conversaciones de servicio tienen tarifa diferente a las de marketing.", "faq6"),
+                        ("¿Puedo usar un WhatsApp normal?",
+                         "No directamente. La API de WhatsApp Business requiere un número que no esté activo en la app de WhatsApp normal. Si usas la Coexistencia (QR), mantienes acceso a WhatsApp Business App.", "faq7"),
+                        ("¿Qué pasa si cometo un error al conectar?",
+                         "Puedes reintentar el proceso sin penalización. Si un número ya está registrado en otra WABA, deberás desconectarlo primero desde Meta Business Suite. El soporte de InstaVende puede ayudarte paso a paso.", "faq8")
+                    })
+                    {
+                        <div class="accordion-item" style="border:none;border-bottom:1px solid #e2e8f0">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@i" style="font-size:.87rem;font-weight:600">
+                                    @q
+                                </button>
+                            </h2>
+                            <div id="@i" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body text-muted" style="font-size:.85rem">@a</div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side info -->
+    <div class="col-lg-4">
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-shield-check"></i> ¿Por qué usar API?</div></div>
+            <div class="a-card-body">
+                <ul class="list-unstyled mb-0" style="font-size:.84rem;line-height:2">
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Respuestas automáticas 24/7</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Manejo de miles de conversaciones</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Catálogo integrado de productos</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Recordatorios automáticos</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Métricas de ventas en tiempo real</li>
+                    <li><i class="bi bi-check2-circle text-success me-2"></i>Seguro y verificado por Meta</li>
+                </ul>
+            </div>
+        </div>
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-life-preserver"></i> ¿Necesitas ayuda?</div></div>
+            <div class="a-card-body">
+                <p class="text-muted mb-3" style="font-size:.85rem">Nuestro equipo puede guiarte paso a paso en la conexión.</p>
+                <a href="mailto:soporte@instavende.com" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-envelope me-2"></i>Escribir al soporte
+                </a>
+                <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started" target="_blank" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-box-arrow-up-right me-2"></i>Documentación Meta
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+</div><!-- /stateMain -->
+
+@section Scripts {
+@Html.AntiForgeryToken()
+
+<script>
+  /* ?? Meta config values ???????????????????????????????????? */
+  var META_APP_ID  = '@metaAppId';
+  var META_CFG_ID  = '@configId';
+  var META_READY   = false;
+
+  /* ?? Facebook SDK ?????????????????????????????????????????? */
+  window.fbAsyncInit = function() {
+    if (!META_APP_ID) return;
+    FB.init({ appId: META_APP_ID, cookie: true, xfbml: false, version: 'v20.0' });
+    META_READY = true;
+  };
+  (function(d, s, id) {
+    if (!META_APP_ID || d.getElementById(id)) return;
+    var js = d.createElement(s); js.id = id;
+    js.src = 'https://connect.facebook.net/es_LA/sdk.js';
+    js.onerror = function() { console.error('Error cargando el SDK de Facebook.'); };
+    d.getElementsByTagName(s)[0].parentNode.insertBefore(js, d.getElementsByTagName(s)[0]);
+  }(document, 'script', 'facebook-jssdk'));
+
+  /* ?? State switcher ???????????????????????????????????????? */
+  function showState(name) {
+    ['main','connecting','success','error'].forEach(function(s) {
+      var el = document.getElementById('state' + s.charAt(0).toUpperCase() + s.slice(1));
+      if (el) el.style.display = (s === name) ? '' : 'none';
+    });
+  }
+
+  /* ?? Reset connect button ?????????????????????????????????? */
+  function resetBtn() {
+    var btn = document.getElementById('btnConnect');
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-whatsapp me-2"></i>Conectar WhatsApp'; }
+  }
+
+  /* ?? Show error state ?????????????????????????????????????? */
+  function showError(msg) {
+    resetBtn();
+    showState('error');
+    var el = document.getElementById('errorMsg');
+    if (el) el.textContent = msg || 'Ocurrió un error durante la vinculación.';
+  }
+
+  /* ?? Launch Embedded Signup ???????????????????????????????? */
+  function launchEmbeddedSignup() {
+    /* 1. Check Meta is configured */
+    if (!META_APP_ID) {
+      alert('La app de Meta no está configurada en el servidor.\nContacta al administrador o agrega Meta:AppId en appsettings.json.');
+      return;
+    }
+
+    /* 2. Check SDK loaded */
+    if (typeof FB === 'undefined' || !META_READY) {
+      alert('El SDK de Facebook todavía no está listo. Espera unos segundos y vuelve a intentarlo.');
+      return;
+    }
+
+    /* 3. Disable button */
+    var btn = document.getElementById('btnConnect');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cargando...'; }
+
+    /* 4. Open Facebook Login */
+    try {
+      FB.login(function(response) {
+        if (!response || !response.authResponse) {
+          showError('Se canceló el proceso o no se otorgaron los permisos necesarios.');
+          return;
+        }
+
+        var code = response.authResponse.code;
+        if (!code) { showError('Meta no devolvió un código de autorización válido.'); return; }
+
+        /* 5. Extract WABA + phone_number_id from session_info */
+        var wabaId = null, phoneNumberId = null;
+        try {
+          var extras = response.authResponse.extra_data_list;
+          if (extras && extras.length) {
+            var info = extras[0];
+            wabaId        = info.waba_id        || info.wabaId        || null;
+            phoneNumberId = info.phone_number_id || info.phoneNumberId || null;
+          }
+        } catch(e) { console.warn('No se pudo leer session_info:', e); }
+
+        saveEmbeddedSignup(code, wabaId, phoneNumberId);
+
+      }, {
+        config_id: META_CFG_ID,
+        response_type: 'code',
+        override_default_response_type: true,
+        extras: { setup: {}, featureType: '', sessionInfoVersion: '3' }
+      });
+    } catch(e) {
+      showError('Error al abrir el diálogo de Facebook: ' + e.message);
+    }
+  }
+
+  /* ?? Send code to backend ?????????????????????????????????? */
+  function saveEmbeddedSignup(code, wabaId, phoneNumberId) {
+    showState('connecting');
+    setConnectingMsg('Verificando con Meta...');
+
+    var token = '';
+    var tokenInput = document.querySelector('[name="__RequestVerificationToken"]');
+    if (tokenInput) token = tokenInput.value;
+
+    setTimeout(function() { setConnectingMsg('Guardando configuración...'); }, 2000);
+
+    fetch('/ChannelConfig/EmbeddedSignup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'RequestVerificationToken': token
+      },
+      body: JSON.stringify({ code: code, wabaId: wabaId, phoneNumberId: phoneNumberId })
+    })
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'Error HTTP ' + r.status); });
+      return r.json();
+    })
+    .then(function(data) {
+      if (data.success) {
+        setConnectingMsg('¡Conexión establecida!');
+        setTimeout(function() { showState('success'); }, 600);
+      } else {
+        showError(data.error || 'Error al guardar la configuración.');
+      }
+    })
+    .catch(function(err) {
+      showError(err.message || 'Error de conexión con el servidor. Intenta de nuevo.');
+    });
+  }
+
+  function setConnectingMsg(text) {
+    var el = document.getElementById('connectingMsg');
+    if (el) el.textContent = text;
+  }
+</script>
+
+<style>
+@@keyframes wa-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1;   }
+  50%       { transform: scale(1.1); opacity: .75; }
+}
+</style>
+}
+

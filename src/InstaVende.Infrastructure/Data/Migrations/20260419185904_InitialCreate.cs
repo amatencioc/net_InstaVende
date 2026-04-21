@@ -174,6 +174,10 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     FacebookPageId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     InstagramAccountId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     WebsiteUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BusinessSector = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SocialMedia = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -205,7 +209,21 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     HandoffTriggerPhrase = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DiscountLevel1 = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    DiscountLevel2 = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    DiscountLevel3 = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    MaxDiscountPercent = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    MinMarginPercent = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    FreeShippingThreshold = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
+                    BundleDiscount = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    LoyaltyDiscount = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
+                    BusinessHours = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ReturnPolicy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WarrantyPolicy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShippingTimes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PaymentMethods = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ActivePromotions = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -396,14 +414,13 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         name: "FK_Conversations_Businesses_BusinessId",
                         column: x => x.BusinessId,
                         principalTable: "Businesses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Conversations_Contacts_ContactId",
                         column: x => x.ContactId,
                         principalTable: "Contacts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(

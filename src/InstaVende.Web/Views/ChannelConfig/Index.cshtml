@@ -1,50 +1,238 @@
 @model IEnumerable<InstaVende.Web.ViewModels.ChannelConfigViewModel>
-@{ ViewData["Title"] = "Configuración de Canales"; }
-<h2><i class="bi bi-gear me-2"></i>Configuración de Canales</h2>
-<ul class="nav nav-pills mb-4">
-    <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tabWA"><i class="bi bi-whatsapp me-1"></i>WhatsApp</a></li>
-    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabFB"><i class="bi bi-facebook me-1"></i>Messenger</a></li>
-    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabIG"><i class="bi bi-instagram me-1"></i>Instagram</a></li>
-</ul>
-<div class="tab-content">
-@foreach (var (ct, tid, cname) in new[] { (1, "tabWA", "WhatsApp"), (2, "tabFB", "Facebook Messenger"), (3, "tabIG", "Instagram DM") })
+@{ ViewData["Title"] = "Canales"; }
+
+<div class="mb-4">
+    <h1 class="topbar-page-title mb-0">Conexión de Canales</h1>
+    <p class="text-muted small mb-0">Conecta WhatsApp, Facebook e Instagram para que tu bot empiece a responder</p>
+</div>
+
+<!-- Estado general de canales -->
+<div class="row g-3 mb-4">
+@foreach (var (ct, label, icon, color, tid) in new[] {
+    (1,"WhatsApp","bi-whatsapp","#25D366","tabWA"),
+    (2,"Facebook Messenger","bi-facebook","#1877F2","tabFB"),
+    (3,"Instagram DM","bi-instagram","#E1306C","tabIG")
+})
 {
     var cfg = Model.FirstOrDefault(c => (int)c.ChannelType == ct);
-    <div class="tab-pane fade @(ct==1?"show active":"")" id="@tid">
-    <div class="card" style="max-width:600px"><div class="card-header">@cname</div><div class="card-body">
-    <form class="formChannel" data-channel="@ct">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="ChannelType" value="@ct" />
-        <input type="hidden" name="Id" value="@(cfg?.Id ?? 0)" />
-        @if (ct == 1) {<div class="mb-3"><label class="form-label">Phone Number ID</label><input name="PhoneNumberId" class="form-control" value="@cfg?.PhoneNumberId" /></div>}
-        @if (ct == 2) {<div class="mb-3"><label class="form-label">Page ID</label><input name="PageId" class="form-control" value="@cfg?.PageId" /></div>}
-        @if (ct == 3) {<div class="mb-3"><label class="form-label">Instagram Account ID</label><input name="InstagramAccountId" class="form-control" value="@cfg?.InstagramAccountId" /></div>}
-        <div class="mb-3"><label class="form-label">Access Token *</label><input name="AccessToken" class="form-control" type="password" value="@cfg?.AccessToken" required /></div>
-        <div class="mb-3"><label class="form-label">App Secret</label><input name="AppSecret" class="form-control" type="password" value="@cfg?.AppSecret" /></div>
-        <div class="mb-3"><label class="form-label">Webhook Verify Token *</label><input name="WebhookVerifyToken" class="form-control" value="@cfg?.WebhookVerifyToken" required /></div>
-        <div class="mb-3 form-check"><input name="IsActive" class="form-check-input" type="checkbox" @(cfg?.IsActive==true?"checked":"") value="true" /><label class="form-check-label">Activo</label></div>
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <small class="text-muted ms-3">Webhook: <code>/api/webhooks/@(ct==1?"whatsapp":"meta")/{businessId}</code></small>
-    </form>
-    </div></div>
+    <div class="col-md-4">
+        <div class="a-card" style="cursor:pointer" onclick="activateTab('@tid')">
+            <div class="a-card-body d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:@color20(color);flex-shrink:0">
+                    <i class="bi @icon" style="font-size:1.4rem;color:@color"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-semibold">@label</div>
+                    <small class="@(cfg?.IsActive == true ? "text-success" : "text-muted")">
+                        @(cfg?.IsActive == true ? "✓ Conectado" : "Sin configurar")
+                    </small>
+                </div>
+                <i class="bi bi-chevron-right text-muted"></i>
+            </div>
+        </div>
     </div>
 }
 </div>
+
+<!-- Tabs de configuración -->
+<ul class="nav nav-pills mb-4" id="channelTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="pill" href="#tabWA" id="tabWA-tab"><i class="bi bi-whatsapp me-1" style="color:#25D366"></i>WhatsApp</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabFB" id="tabFB-tab"><i class="bi bi-facebook me-1" style="color:#1877F2"></i>Messenger</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="pill" href="#tabIG" id="tabIG-tab"><i class="bi bi-instagram me-1" style="color:#E1306C"></i>Instagram</a></li>
+</ul>
+
+<div class="tab-content">
+@foreach (var (ct, tid, cname, idLabel, idPlaceholder, idField) in new[] {
+    (1,"tabWA","WhatsApp Business API","Phone Number ID","123456789012345","PhoneNumberId"),
+    (2,"tabFB","Facebook Messenger","Page ID","123456789012345","PageId"),
+    (3,"tabIG","Instagram DM","Instagram Account ID","123456789012345","InstagramAccountId")
+})
+{
+    var cfg = Model.FirstOrDefault(c => (int)c.ChannelType == ct);
+    <div class="tab-pane fade @(ct==1?"show active":"")" id="@tid">
+    @if (ct == 1)
+    {
+    <div class="alert d-flex align-items-center gap-3 mb-4" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
+        <i class="bi bi-whatsapp fs-4" style="color:#25D366;flex-shrink:0"></i>
+        <div class="flex-grow-1">
+            <strong style="font-size:.88rem">¿Primera vez conectando?</strong>
+            <span class="text-muted ms-1" style="font-size:.84rem">Usa nuestro asistente guiado para conectar en segundos.</span>
+        </div>
+        <a href="/ChannelConfig/WhatsApp" class="btn btn-success btn-sm text-nowrap">
+            <i class="bi bi-magic me-1"></i>Conectar con guía
+        </a>
+    </div>
+    }
+    <div class="row g-4">
+        <!-- Formulario -->
+        <div class="col-lg-7">
+            <div class="a-card">
+                <div class="a-card-header">
+                    <div class="a-card-title"><i class="bi bi-plug-fill"></i> Configuración @cname</div>
+                    @if (cfg?.IsActive == true)
+                    { <span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Activo</span> }
+                    else
+                    { <span class="badge bg-secondary">Sin configurar</span> }
+                </div>
+                <div class="a-card-body">
+                    <form class="formChannel" data-channel="@ct">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ChannelType" value="@ct" />
+                        <input type="hidden" name="Id" value="@(cfg?.Id ?? 0)" />
+                        <div class="f-group">
+                            <label class="f-label">@idLabel</label>
+                            <input name="@idField" class="f-input" value="@(ct==1?cfg?.PhoneNumberId:ct==2?cfg?.PageId:cfg?.InstagramAccountId)" placeholder="@idPlaceholder" />
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Access Token <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input name="AccessToken" class="f-input" type="password" id="token-@ct" value="@cfg?.AccessToken" placeholder="EAAxxxxxxx..." />
+                                <button type="button" class="btn btn-outline-secondary" onclick="toggleVis('token-@ct', this)"><i class="bi bi-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">App Secret</label>
+                            <input name="AppSecret" class="f-input" type="password" value="@cfg?.AppSecret" placeholder="Opcional" />
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">Webhook Verify Token <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input name="WebhookVerifyToken" class="f-input" id="wvt-@ct" value="@cfg?.WebhookVerifyToken" placeholder="Token personalizado que creaste" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="copyText('wvt-@ct')"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-label">URL de Webhook (copiar en Meta)</label>
+                            <div class="input-group">
+                                <input type="text" class="f-input" id="wurl-@ct" readonly value="/api/webhooks/@(ct==1?"whatsapp":"meta")/{TU-BUSINESS-ID}" style="font-size:.82rem;color:#475569" />
+                                <button type="button" class="btn btn-outline-secondary" onclick="copyText('wurl-@ct')"><i class="bi bi-clipboard"></i></button>
+                            </div>
+                        </div>
+                        <div class="f-group">
+                            <label class="f-check"><input name="IsActive" type="checkbox" @(cfg?.IsActive==true?"checked":"") value="true" /> Canal activo</label>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-floppy me-1"></i>Guardar</button>
+                            <button type="button" class="btn btn-outline-success" onclick="testConnection(@ct)"><i class="bi bi-wifi me-1"></i>Probar conexión</button>
+                        </div>
+                        <div id="testResult-@ct" class="mt-3" style="display:none"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Guía paso a paso -->
+        <div class="col-lg-5">
+            <div class="a-card">
+                <div class="a-card-header"><div class="a-card-title"><i class="bi bi-map"></i> Guía de configuración</div></div>
+                <div class="a-card-body">
+                    @if (ct == 1)
+                    {
+                    <ol class="ps-3" style="font-size:.85rem;line-height:1.8;color:#475569">
+                        <li>Ve a <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a></li>
+                        <li>Crea o selecciona tu app → <strong>WhatsApp → Configuración</strong></li>
+                        <li>Copia el <strong>Phone Number ID</strong> y pégalo arriba</li>
+                        <li>Genera un <strong>Token de acceso permanente</strong></li>
+                        <li>En <strong>Webhooks</strong>, pega la URL de webhook y el verify token</li>
+                        <li>Suscribete a: <code>messages</code>, <code>message_deliveries</code></li>
+                        <li>Presiona <strong>Guardar</strong> y luego <strong>Probar conexión</strong></li>
+                    </ol>
+                    <a href="https://developers.facebook.com/docs/whatsapp/cloud-api/get-started" target="_blank" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-box-arrow-up-right me-1"></i>Documentación oficial</a>
+                    }
+                    else if (ct == 2)
+                    {
+                    <ol class="ps-3" style="font-size:.85rem;line-height:1.8;color:#475569">
+                        <li>Ve a <a href="https://developers.facebook.com" target="_blank">developers.facebook.com</a></li>
+                        <li>Crea una app tipo <strong>Business</strong> → Agrega <strong>Messenger</strong></li>
+                        <li>En <strong>Configuración de Messenger</strong> → conecta tu página de Facebook</li>
+                        <li>Copia el <strong>Page ID</strong> y genera el <strong>Token de página</strong></li>
+                        <li>Configura el Webhook con la URL y el verify token</li>
+                        <li>Suscribete a: <code>messages</code>, <code>messaging_postbacks</code></li>
+                    </ol>
+                    }
+                    else
+                    {
+                    <ol class="ps-3" style="font-size:.85rem;line-height:1.8;color:#475569">
+                        <li>Necesitas una cuenta de <strong>Instagram Business</strong> vinculada a una página de Facebook</li>
+                        <li>En tu app de Meta Developers, agrega <strong>Instagram Graph API</strong></li>
+                        <li>En <strong>Messenger → Configuración de Instagram</strong></li>
+                        <li>Copia el <strong>Instagram Account ID</strong></li>
+                        <li>Configura el Webhook igual que en Messenger</li>
+                        <li>Suscribete a: <code>messages</code></li>
+                    </ol>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+}
+</div>
+
 @section Scripts {
 <script>
 $(function() {
     var token = $('[name="__RequestVerificationToken"]').first().val();
     $('.formChannel').on('submit', function(e) {
         e.preventDefault();
+        var btn = $(this).find('[type=submit]');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Guardando...');
         var data = {};
-        $(this).serializeArray().forEach(function(f){data[f.name]=f.value;});
+        $(this).serializeArray().forEach(function(f){ data[f.name] = f.value; });
         data.IsActive = $(this).find('[name=IsActive]').is(':checked');
         data.ChannelType = parseInt(data.ChannelType);
-        $.ajax({ url:'/ChannelConfig/Save', method:'POST', contentType:'application/json', headers:{'RequestVerificationToken':token}, data:JSON.stringify(data),
-            success:function(){alert('Configuración guardada.');},
-            error:function(){alert('Error al guardar.');}
+        $.ajax({ url:'/ChannelConfig/Save', method:'POST', contentType:'application/json',
+            headers:{'RequestVerificationToken':token}, data:JSON.stringify(data),
+            success: function() {
+                btn.prop('disabled',false).html('<i class="bi bi-floppy me-1"></i>Guardar');
+                showToast('Configuración guardada correctamente.', 'success');
+            },
+            error: function() {
+                btn.prop('disabled',false).html('<i class="bi bi-floppy me-1"></i>Guardar');
+                showToast('Error al guardar la configuración.', 'danger');
+            }
         });
     });
 });
+
+function activateTab(id) {
+    var tab = document.getElementById(id + '-tab');
+    if (tab) bootstrap.Tab.getOrCreateInstance(tab).show();
+    document.getElementById(id).scrollIntoView({behavior:'smooth'});
+}
+
+function toggleVis(id, btn) {
+    var inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.innerHTML = '<i class="bi bi-eye-slash"></i>'; }
+    else { inp.type = 'password'; btn.innerHTML = '<i class="bi bi-eye"></i>'; }
+}
+
+function copyText(id) {
+    var val = document.getElementById(id).value;
+    navigator.clipboard.writeText(val).then(function() { showToast('Copiado al portapapeles', 'success'); });
+}
+
+function testConnection(ct) {
+    var result = document.getElementById('testResult-' + ct);
+    result.style.display = 'block';
+    result.innerHTML = '<div class="alert alert-info py-2 small"><span class="spinner-border spinner-border-sm me-2"></span>Probando conexión...</div>';
+    setTimeout(function() {
+        result.innerHTML = '<div class="alert alert-warning py-2 small"><i class="bi bi-exclamation-triangle me-2"></i>Guarda la configuración primero y luego envía un mensaje de prueba al número conectado.</div>';
+    }, 1500);
+}
+
+function showToast(msg, type) {
+    var t = document.createElement('div');
+    t.className = 'app-alert app-alert-' + (type === 'success' ? 'success' : 'error') + ' position-fixed';
+    t.style.cssText = 'bottom:1.5rem;right:1.5rem;z-index:9999;min-width:280px';
+    t.innerHTML = '<i class="bi bi-' + (type==='success'?'check-circle-fill':'exclamation-circle-fill') + '"></i> ' + msg;
+    document.body.appendChild(t);
+    setTimeout(function() { t.remove(); }, 3000);
+}
 </script>
+}
+
+@functions {
+    static string color20(string hex) {
+        return hex + "20";
+    }
 }
