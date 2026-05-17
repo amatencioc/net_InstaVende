@@ -73,6 +73,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(o => o.ShippingCost).HasColumnType("decimal(18,2)");
             e.Property(o => o.Total).HasColumnType("decimal(18,2)");
             e.Property(o => o.OrderNumber).HasMaxLength(50).IsRequired();
+            e.HasIndex(o => new { o.ConversationId, o.Status });
+            e.HasIndex(o => new { o.BusinessId, o.Status });
             e.HasOne(o => o.Business).WithMany(b => b.Orders)
                 .HasForeignKey(o => o.BusinessId).OnDelete(DeleteBehavior.NoAction);
             e.HasOne(o => o.Contact).WithMany(c => c.Orders)
@@ -97,6 +99,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(r => r.ContactId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(r => r.CreatedByAgent).WithMany()
                 .HasForeignKey(r => r.CreatedByAgentId).OnDelete(DeleteBehavior.SetNull);
+            e.HasIndex(r => new { r.BusinessId, r.Status });
+            e.HasIndex(r => r.ScheduledAt);
         });
 
         builder.Entity<OnboardingProgress>(e =>
@@ -108,6 +112,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Contact>(e =>
         {
             e.Property(c => c.TotalSpent).HasColumnType("decimal(18,2)");
+            e.HasIndex(c => new { c.BusinessId, c.ChannelType, c.ExternalId }).IsUnique();
+            // Evita multiples rutas de cascada hacia Conversations
+            e.HasMany(c => c.Conversations).WithOne(cv => cv.Contact)
+                .HasForeignKey(cv => cv.ContactId).OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<BotConfig>(e =>
@@ -125,16 +133,27 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(b => b.LoyaltyDiscount).HasColumnType("decimal(5,2)");
         });
 
-        builder.Entity<Contact>(e =>
+        builder.Entity<Message>(e =>
         {
-            e.HasIndex(c => new { c.BusinessId, c.ChannelType, c.ExternalId }).IsUnique();
-            // Evita múltiples rutas de cascada hacia Conversations
-            e.HasMany(c => c.Conversations).WithOne(cv => cv.Contact)
-                .HasForeignKey(cv => cv.ContactId).OnDelete(DeleteBehavior.Restrict);
+            e.HasIndex(m => m.ConversationId);
+            e.HasIndex(m => new { m.ConversationId, m.SentAt });
+        });
+
+        builder.Entity<BotIntent>(e =>
+        {
+            e.HasIndex(i => i.BotConfigId);
+            e.Property(i => i.IntentName).HasMaxLength(200).IsRequired();
+        });
+
+        builder.Entity<BotKnowledge>(e =>
+        {
+            e.HasIndex(k => k.BotConfigId);
         });
 
         builder.Entity<Conversation>(e =>
         {
+            e.HasIndex(c => new { c.ContactId, c.Status });
+            e.HasIndex(c => new { c.BusinessId, c.Status });
             e.HasOne(c => c.AssignedAgent).WithMany()
                 .HasForeignKey(c => c.AssignedAgentId).OnDelete(DeleteBehavior.SetNull);
             // Business ? Conversation: NoAction para no crear ciclo con Business ? Contact ? Conversation
@@ -198,6 +217,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(r => r.Message).HasMaxLength(500);
             e.HasOne(r => r.Business).WithMany(b => b.ReminderTemplates)
                 .HasForeignKey(r => r.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(r => new { r.BusinessId, r.Segment });
         });
 
         builder.Entity<ConversationLabel>(e =>
@@ -206,6 +226,20 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(cl => cl.BusinessId).OnDelete(DeleteBehavior.Cascade);
             e.HasMany(cl => cl.Conversations).WithOne(c => c.Label)
                 .HasForeignKey(c => c.LabelId).OnDelete(DeleteBehavior.NoAction);
+            e.Property(cl => cl.Name).HasMaxLength(100).IsRequired();
+        });
+
+        builder.Entity<ProductCategory>(e =>
+        {
+            e.Property(pc => pc.Name).HasMaxLength(100).IsRequired();
+            e.HasIndex(pc => pc.BusinessId);
+            e.HasOne(pc => pc.Business).WithMany()
+                .HasForeignKey(pc => pc.BusinessId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<ProductImage>(e =>
+        {
+            e.HasIndex(pi => pi.ProductId);
         });
     }
 }

@@ -104,27 +104,36 @@ public class ReminderTemplatesController : Controller
 
     private async Task EnsureDefaultTemplates(int bizId)
     {
+        var existing = await _db.ReminderTemplates
+            .Where(t => t.BusinessId == bizId)
+            .Select(t => new { t.Segment, t.Order })
+            .ToListAsync();
+
+        var toAdd = new List<ReminderTemplate>();
         foreach (var (segment, defaults) in DefaultTemplates)
         {
             foreach (var (order, message, window) in defaults)
             {
-                var exists = await _db.ReminderTemplates
-                    .AnyAsync(t => t.BusinessId == bizId && t.Segment == segment && t.Order == order);
-                if (!exists)
+                if (!existing.Any(e => e.Segment == segment && e.Order == order))
                 {
-                    _db.ReminderTemplates.Add(new ReminderTemplate
+                    toAdd.Add(new ReminderTemplate
                     {
                         BusinessId = bizId,
-                        Segment = segment,
-                        Order = order,
-                        Message = message,
+                        Segment    = segment,
+                        Order      = order,
+                        Message    = message,
                         TimeWindow = window,
-                        IsActive = true
+                        IsActive   = true,
                     });
                 }
             }
         }
-        await _db.SaveChangesAsync();
+
+        if (toAdd.Count > 0)
+        {
+            _db.ReminderTemplates.AddRange(toAdd);
+            await _db.SaveChangesAsync();
+        }
     }
 }
 

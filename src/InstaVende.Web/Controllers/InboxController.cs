@@ -36,16 +36,24 @@ public class InboxController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return Unauthorized();
-        var q = _db.Conversations.Include(c => c.Contact).Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1)).Where(c => c.BusinessId == bid);
+        var q = _db.Conversations
+            .AsNoTracking()
+            .Include(c => c.Contact)
+            .Where(c => c.BusinessId == bid);
         if (channel.HasValue) q = q.Where(c => c.ChannelType == channel.Value);
         if (status.HasValue) q = q.Where(c => c.Status == status.Value);
         var list = await q.OrderByDescending(c => c.UpdatedAt).Take(100).ToListAsync();
         return Json(list.Select(c => new ConversationListItemViewModel
         {
-            Id = c.Id, ContactName = c.Contact.Name ?? c.Contact.ExternalId, ContactPhone = c.Contact.Phone,
-            AvatarUrl = c.Contact.AvatarUrl, Channel = c.ChannelType, Status = c.Status,
-            LastMessage = c.Messages.FirstOrDefault()?.Content, UpdatedAt = c.UpdatedAt,
-            UnreadCount = c.Messages.Count(m => !m.IsRead && m.Direction == MessageDirection.Inbound)
+            Id          = c.Id,
+            ContactName = c.Contact.Name ?? c.Contact.ExternalId,
+            ContactPhone = c.Contact.Phone,
+            AvatarUrl   = c.Contact.AvatarUrl,
+            Channel     = c.ChannelType,
+            Status      = c.Status,
+            LastMessage = c.LastMessagePreview,
+            UpdatedAt   = c.UpdatedAt,
+            UnreadCount = c.UnreadCount,
         }));
     }
 
@@ -53,12 +61,38 @@ public class InboxController : Controller
     public async Task<IActionResult> GetMessages(int conversationId)
     {
         var bid = await _cu.GetBusinessIdAsync();
-        var conv = await _db.Conversations.Include(c => c.Messages.OrderBy(m => m.SentAt))
+        // Verify ownership without loading all messages into memory
+        var conv = await _db.Conversations
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == conversationId && c.BusinessId == bid);
         if (conv == null) return NotFound();
-        foreach (var m in conv.Messages.Where(m => !m.IsRead && m.Direction == MessageDirection.Inbound)) m.IsRead = true;
-        await _db.SaveChangesAsync();
-        return Json(conv.Messages.Select(m => new MessageViewModel { Id = m.Id, Content = m.Content, MediaUrl = m.MediaUrl, Direction = m.Direction, SentByBot = m.SentByBot, SentAt = m.SentAt }));
+
+        // Mark all unread inbound as read in a single UPDATE + reset UnreadCount
+        await _db.Messages
+            .Where(m => m.ConversationId == conversationId
+                     && !m.IsRead
+                     && m.Direction == MessageDirection.Inbound)
+            .ExecuteUpdateAsync(s => s.SetProperty(m => m.IsRead, true));
+
+        await _db.Conversations
+            .Where(c => c.Id == conversationId)
+            .ExecuteUpdateAsync(s => s.SetProperty(c => c.UnreadCount, 0));
+
+        var messages = await _db.Messages
+            .AsNoTracking()
+            .Where(m => m.ConversationId == conversationId)
+            .OrderBy(m => m.SentAt)
+            .ToListAsync();
+
+        return Json(messages.Select(m => new MessageViewModel
+        {
+            Id        = m.Id,
+            Content   = m.Content,
+            MediaUrl  = m.MediaUrl,
+            Direction = m.Direction,
+            SentByBot = m.SentByBot,
+            SentAt    = m.SentAt,
+        }));
     }
 
     [HttpPost][ValidateAntiForgeryToken]
@@ -67,8 +101,19 @@ public class InboxController : Controller
         var bid = await _cu.GetBusinessIdAsync();
         var conv = await _db.Conversations.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == model.ConversationId && c.BusinessId == bid);
         if (conv == null) return NotFound();
-        var msg = new Message { ConversationId = conv.Id, Direction = MessageDirection.Outbound, Content = model.Message, IsRead = true, SentByBot = false };
-        _db.Messages.Add(msg); conv.UpdatedAt = DateTime.UtcNow; await _db.SaveChangesAsync();
+        var msg = new Message
+        {
+            ConversationId = conv.Id,
+            Direction      = MessageDirection.Outbound,
+            Content        = model.Message,
+            IsRead         = true,
+            SentByBot      = false,
+        };
+        _db.Messages.Add(msg);
+        conv.UpdatedAt          = DateTime.UtcNow;
+        conv.LastMessageAt      = DateTime.UtcNow;
+        conv.LastMessagePreview = model.Message.Length > 120 ? model.Message[..120] + "..." : model.Message;
+        await _db.SaveChangesAsync();
         var sender = _senders.FirstOrDefault(s => s.Channel == conv.ChannelType);
         if (sender != null) await sender.SendTextAsync(bid!.Value, conv.Contact.ExternalId, model.Message);
         await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new { conversationId = conv.Id, messageId = msg.Id, content = msg.Content, direction = (int)msg.Direction, sentAt = msg.SentAt });

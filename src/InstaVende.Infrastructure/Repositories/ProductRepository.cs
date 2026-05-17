@@ -11,14 +11,14 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
     public async Task<IEnumerable<Product>> GetByBusinessIdAsync(int businessId, bool activeOnly = true)
     {
-        var query = _context.Products.Include(p => p.Category).Where(p => p.BusinessId == businessId);
+        var query = _context.Products.AsNoTracking().Include(p => p.Category).Where(p => p.BusinessId == businessId);
         if (activeOnly) query = query.Where(p => p.IsActive);
         return await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
     }
 
     public async Task<IEnumerable<Product>> SearchAsync(int businessId, string? search, int? categoryId)
     {
-        var query = _context.Products.Include(p => p.Category)
+        var query = _context.Products.AsNoTracking().Include(p => p.Category)
             .Where(p => p.BusinessId == businessId && p.IsActive);
         if (!string.IsNullOrWhiteSpace(search))
             query = query.Where(p => p.Name.Contains(search) || (p.Description != null && p.Description.Contains(search)));

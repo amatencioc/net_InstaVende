@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Text.Json;
 using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
@@ -9,7 +8,6 @@ using InstaVende.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
 namespace InstaVende.Web.Controllers;
 
@@ -21,16 +19,31 @@ public class ChannelConfigController : Controller
     private readonly DataProtectionService _dp;
     private readonly IConfiguration _config;
     private readonly IHttpClientFactory _http;
+    private readonly ILogger<ChannelConfigController> _logger;
 
-    public ChannelConfigController(AppDbContext db, CurrentUserService cu, DataProtectionService dp, IConfiguration config, IHttpClientFactory http)
-    { _db = db; _cu = cu; _dp = dp; _config = config; _http = http; }
+    public ChannelConfigController(AppDbContext db, CurrentUserService cu, DataProtectionService dp, IConfiguration config, IHttpClientFactory http, ILogger<ChannelConfigController> logger)
+    { _db = db; _cu = cu; _dp = dp; _config = config; _http = http; _logger = logger; }
 
     public async Task<IActionResult> Index()
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return RedirectToAction("Register", "Account");
-        var cfgs = await _db.ChannelConfigs.Where(c => c.BusinessId == bid).ToListAsync();
-        return View(cfgs.Select(c => new ChannelConfigViewModel { Id = c.Id, ChannelType = c.ChannelType, PhoneNumberId = c.PhoneNumberId, PageId = c.PageId, InstagramAccountId = c.InstagramAccountId, AccessToken = "***", AppSecret = string.IsNullOrEmpty(c.AppSecretEncrypted) ? null : "***", WebhookVerifyToken = c.WebhookVerifyToken ?? string.Empty, IsActive = c.IsActive }));
+        var cfgs = await _db.ChannelConfigs
+            .AsNoTracking()
+            .Where(c => c.BusinessId == bid)
+            .ToListAsync();
+        return View(cfgs.Select(c => new ChannelConfigViewModel
+        {
+            Id                  = c.Id,
+            ChannelType         = c.ChannelType,
+            PhoneNumberId       = c.PhoneNumberId,
+            PageId              = c.PageId,
+            InstagramAccountId  = c.InstagramAccountId,
+            AccessToken         = "***",
+            AppSecret           = string.IsNullOrEmpty(c.AppSecretEncrypted) ? null : "***",
+            WebhookVerifyToken  = c.WebhookVerifyToken ?? string.Empty,
+            IsActive            = c.IsActive,
+        }));
     }
 
     [HttpPost][ValidateAntiForgeryToken]
@@ -41,13 +54,33 @@ public class ChannelConfigController : Controller
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var existing = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == model.ChannelType);
         if (existing == null)
-            _db.ChannelConfigs.Add(new ChannelConfig { BusinessId = bid.Value, ChannelType = model.ChannelType, PhoneNumberId = model.PhoneNumberId, PageId = model.PageId, InstagramAccountId = model.InstagramAccountId, AccessTokenEncrypted = _dp.Encrypt(model.AccessToken), AppSecretEncrypted = model.AppSecret != null ? _dp.Encrypt(model.AppSecret) : null, WebhookVerifyToken = model.WebhookVerifyToken, IsActive = model.IsActive });
+        {
+            if (string.IsNullOrWhiteSpace(model.AccessToken) || model.AccessToken == "***")
+                return BadRequest(new { error = "El token de acceso es obligatorio al crear un canal." });
+            _db.ChannelConfigs.Add(new ChannelConfig
+            {
+                BusinessId           = bid.Value,
+                ChannelType          = model.ChannelType,
+                PhoneNumberId        = model.PhoneNumberId,
+                PageId               = model.PageId,
+                InstagramAccountId   = model.InstagramAccountId,
+                AccessTokenEncrypted = _dp.Encrypt(model.AccessToken),
+                AppSecretEncrypted   = model.AppSecret != null ? _dp.Encrypt(model.AppSecret) : null,
+                WebhookVerifyToken   = model.WebhookVerifyToken,
+                IsActive             = model.IsActive,
+            });
+        }
         else
         {
-            existing.PhoneNumberId = model.PhoneNumberId; existing.PageId = model.PageId; existing.InstagramAccountId = model.InstagramAccountId;
-            if (model.AccessToken != "***") existing.AccessTokenEncrypted = _dp.Encrypt(model.AccessToken);
-            if (model.AppSecret != null && model.AppSecret != "***") existing.AppSecretEncrypted = _dp.Encrypt(model.AppSecret);
-            existing.WebhookVerifyToken = model.WebhookVerifyToken; existing.IsActive = model.IsActive;
+            existing.PhoneNumberId       = model.PhoneNumberId;
+            existing.PageId              = model.PageId;
+            existing.InstagramAccountId  = model.InstagramAccountId;
+            if (!string.IsNullOrWhiteSpace(model.AccessToken) && model.AccessToken != "***")
+                existing.AccessTokenEncrypted = _dp.Encrypt(model.AccessToken);
+            if (!string.IsNullOrWhiteSpace(model.AppSecret) && model.AppSecret != "***")
+                existing.AppSecretEncrypted = _dp.Encrypt(model.AppSecret);
+            existing.WebhookVerifyToken = model.WebhookVerifyToken;
+            existing.IsActive           = model.IsActive;
         }
         await _db.SaveChangesAsync();
         return Json(new { success = true });
@@ -58,93 +91,139 @@ public class ChannelConfigController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return Json(new { connected = false });
+
+        // Check live status first (most accurate)
+        var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
+        try
+        {
+            using var http = _http.CreateClient();
+            http.Timeout = TimeSpan.FromSeconds(3);
+            using var resp = await http.GetAsync($"{waUrl}/status");
+            if (resp.IsSuccessStatusCode)
+            {
+                var json = await resp.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.TryGetProperty("connected", out var c) && c.GetBoolean())
+                    return Json(new { connected = true, source = "live" });
+            }
+        }
+        catch { /* WA client offline — fall back to DB */ }
+
+        // Fallback: DB flag
         var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
-        return Json(new { connected = cfg?.IsActive == true });
+        return Json(new { connected = cfg?.IsActive == true, source = "db" });
     }
 
-    // ?? Embedded Signup landing page
+    // QR-based WhatsApp connection page (uses local whatsapp-web.js client)
     [HttpGet]
     public async Task<IActionResult> WhatsApp()
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return RedirectToAction("Register", "Account");
         var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
             .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
         ViewBag.IsConnected = cfg?.IsActive == true;
-        ViewBag.PhoneNumberId = cfg?.PhoneNumberId;
-        ViewBag.PhoneNumber = cfg?.PhoneNumber;
-        ViewBag.ConnectedAt = cfg?.ConnectedAt;
-        ViewBag.MetaAppId = _config["Meta:AppId"] ?? "";
-        ViewBag.EmbeddedSignupConfigId = _config["Meta:EmbeddedSignupConfigId"] ?? "";
+        ViewBag.PhoneNumber  = cfg?.PhoneNumber;
+        ViewBag.ConnectedAt  = cfg?.ConnectedAt;
         return View();
     }
 
-    // ?? Receive code from Embedded Signup JS and persist the channel ????????
-    [HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> EmbeddedSignup([FromBody] EmbeddedSignupCallbackViewModel model)
+    /// <summary>
+    /// Server-side proxy to the local whatsapp-web.js Node client.
+    /// Avoids CORS — the browser calls this endpoint, .NET calls Node.
+    /// GET /ChannelConfig/WaStatus
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> WaStatus()
     {
-        var bid = await _cu.GetBusinessIdAsync();
-        if (bid == null) return Unauthorized();
-        if (string.IsNullOrWhiteSpace(model.Code))
-            return BadRequest(new { error = "No se recibió el código de autorización." });
-
-        var appId = _config["Meta:AppId"];
-        var appSecret = _config["Meta:AppSecret"];
-        if (string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(appSecret))
-            return BadRequest(new { error = "Meta App no configurada en el servidor." });
-
+        var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
         try
         {
-            var client = _http.CreateClient();
-
-            // 1. Exchange code ? access token
-            var tokenUrl = $"https://graph.facebook.com/v20.0/oauth/access_token" +
-                           $"?client_id={appId}&client_secret={appSecret}&code={Uri.EscapeDataString(model.Code)}";
-            var tokenResp = await client.GetStringAsync(tokenUrl);
-            using var tokenDoc = JsonDocument.Parse(tokenResp);
-            if (!tokenDoc.RootElement.TryGetProperty("access_token", out var tokenEl))
-                return BadRequest(new { error = "No se pudo obtener el access token de Meta." });
-            var accessToken = tokenEl.GetString()!;
-
-            // 2. Resolve phone number id — prefer what JS already gave us
-            var phoneNumberId = model.PhoneNumberId;
-            if (string.IsNullOrEmpty(phoneNumberId) && !string.IsNullOrEmpty(model.WabaId))
-            {
-                var phoneUrl = $"https://graph.facebook.com/v20.0/{model.WabaId}/phone_numbers?access_token={accessToken}";
-                var phoneResp = await client.GetStringAsync(phoneUrl);
-                using var phoneDoc = JsonDocument.Parse(phoneResp);
-                if (phoneDoc.RootElement.TryGetProperty("data", out var dataEl) && dataEl.GetArrayLength() > 0)
-                    phoneNumberId = dataEl[0].GetProperty("id").GetString();
-            }
-
-            // 3. Persist ChannelConfig
-            var existing = await _db.ChannelConfigs
-                .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
-            if (existing == null)
-            {
-                _db.ChannelConfigs.Add(new ChannelConfig
-                {
-                    BusinessId = bid.Value,
-                    ChannelType = ChannelType.WhatsApp,
-                    PhoneNumberId = phoneNumberId,
-                    AccessTokenEncrypted = _dp.Encrypt(accessToken),
-                    WebhookVerifyToken = Guid.NewGuid().ToString("N")[..16],
-                    IsActive = true
-                });
-            }
-            else
-            {
-                if (!string.IsNullOrEmpty(phoneNumberId)) existing.PhoneNumberId = phoneNumberId;
-                existing.AccessTokenEncrypted = _dp.Encrypt(accessToken);
-                existing.IsActive = true;
-            }
-            await _db.SaveChangesAsync();
-            return Json(new { success = true });
+            using var http = _http.CreateClient();
+            http.Timeout = TimeSpan.FromSeconds(12);
+            using var cts  = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+            using var resp = await http.GetAsync($"{waUrl}/status", cts.Token);
+            var body = await resp.Content.ReadAsStringAsync(cts.Token);
+            return Content(body, "application/json");
         }
         catch (Exception ex)
         {
-            return BadRequest(new { error = ex.Message });
+            _logger.LogWarning(ex, "WA client unreachable at {Url}", waUrl);
+            return Content(
+                """{"state":"disconnected","connected":false,"qrDataUrl":null,"qrExpiresAt":null,"info":null,"error":"WA client offline"}""",
+                "application/json");
         }
+    }
+
+    // Disconnect the local WA session and mark ChannelConfig inactive
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Disconnect()
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
+
+        // Tell the local WA client to log out (best-effort)
+        try
+        {
+            var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
+            using var http = _http.CreateClient();
+            http.Timeout = TimeSpan.FromSeconds(6);
+            using var content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
+            await http.PostAsync($"{waUrl}/disconnect", content);
+        }
+        catch { /* ignore — Node may be offline */ }
+
+        // Mark inactive in DB
+        var existing = await _db.ChannelConfigs
+            .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
+        if (existing != null) { existing.IsActive = false; await _db.SaveChangesAsync(); }
+
+        TempData["Success"] = "WhatsApp desconectado correctamente.";
+        return RedirectToAction("WhatsApp");
+    }
+
+    // Called by the QR page JS when the local WA client reports connected
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveQrConnection([FromBody] QrConnectionViewModel model)
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
+
+        var existing = await _db.ChannelConfigs
+            .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
+
+        // Normalize phone: strip +, spaces, @c.us suffix that Node may include
+        var phone = model.Phone?
+            .Replace("@c.us", "")
+            .Replace("+", "")
+            .Replace(" ", "")
+            .Trim();
+        if (string.IsNullOrWhiteSpace(phone)) phone = null;
+
+        if (existing == null)
+        {
+            _db.ChannelConfigs.Add(new ChannelConfig
+            {
+                BusinessId           = bid.Value,
+                ChannelType          = ChannelType.WhatsApp,
+                PhoneNumber          = phone,
+                AccessTokenEncrypted = string.Empty,   // QR-based — no Meta token needed
+                WebhookVerifyToken   = Guid.NewGuid().ToString("N")[..16],
+                ConnectedAt          = DateTime.UtcNow,
+                IsActive             = true,
+            });
+        }
+        else
+        {
+            if (phone != null) existing.PhoneNumber = phone;
+            existing.ConnectedAt = DateTime.UtcNow;
+            existing.IsActive    = true;
+        }
+
+        await _db.SaveChangesAsync();
+        return Json(new { success = true });
     }
 }

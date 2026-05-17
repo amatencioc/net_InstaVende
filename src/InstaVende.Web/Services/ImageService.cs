@@ -14,9 +14,12 @@ public class ImageService
         if (!allowedExt.Contains(ext) || file.Length > 5 * 1024 * 1024) return null;
 
         // Validate magic bytes to prevent extension spoofing
-        using var peek = file.OpenReadStream();
-        var header = new byte[4];
-        if (await peek.ReadAsync(header) < 4) return null;
+        byte[] header;
+        using (var peek = file.OpenReadStream())
+        {
+            header = new byte[4];
+            if (await peek.ReadAsync(header) < 4) return null;
+        }
         if (!IsAllowedImageHeader(header)) return null;
 
         var dir = Path.Combine(_env.WebRootPath, "uploads", folder);

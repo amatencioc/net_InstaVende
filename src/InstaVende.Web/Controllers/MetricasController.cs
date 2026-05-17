@@ -24,15 +24,22 @@ public class MetricasController : Controller
         var biz = await _cu.GetBusinessAsync();
         if (biz == null) return RedirectToAction("Register", "Account");
 
-        // Plan free: no access to detailed metrics (paywall)
+        var totalConv   = await _db.Conversations.CountAsync(c => c.BusinessId == biz.Id);
+        var totalOrders = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id);
+        var totalRevenue = await _db.Orders
+            .Where(o => o.BusinessId == biz.Id && o.Status != InstaVende.Core.Enums.OrderStatus.Cancelled)
+            .SumAsync(o => (decimal?)o.Total) ?? 0;
+        var completedOrders = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == InstaVende.Core.Enums.OrderStatus.Delivered);
+        var convRate = totalConv > 0 ? (double)completedOrders / totalConv : 0;
+
         var vm = new MetricasViewModel
         {
-            HasAccess = false,
-            TotalConversations = await _db.Conversations.CountAsync(c => c.BusinessId == biz.Id),
-            TotalOrders = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id),
-            TotalRevenue = await _db.Orders
-                .Where(o => o.BusinessId == biz.Id && o.Status != InstaVende.Core.Enums.OrderStatus.Cancelled)
-                .SumAsync(o => (decimal?)o.Total) ?? 0
+            HasAccess         = true,
+            TotalConversations = totalConv,
+            TotalOrders        = totalOrders,
+            TotalRevenue       = totalRevenue,
+            ConversionRate     = convRate,
+            CompletedOrders    = completedOrders,
         };
 
         return View(vm);

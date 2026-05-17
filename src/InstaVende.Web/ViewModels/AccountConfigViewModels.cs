@@ -27,7 +27,7 @@ public class BusinessUserItemViewModel
     public string? Email { get; set; }
     public string? Phone { get; set; }
     public UserRole Role { get; set; }
-    public string? AvatarInitial => Email?.Substring(0, 1).ToUpper();
+    public string? AvatarInitial => string.IsNullOrEmpty(Email) ? null : Email[0].ToString().ToUpper();
 }
 
 public class PendingInvitationViewModel

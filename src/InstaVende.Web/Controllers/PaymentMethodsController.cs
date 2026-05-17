@@ -27,6 +27,7 @@ public class PaymentMethodsController : Controller
         if (biz == null) return RedirectToAction("Index", "Dashboard");
 
         var methods = await _db.PaymentMethods
+            .AsNoTracking()
             .Where(p => p.BusinessId == biz.Id)
             .OrderBy(p => p.SortOrder).ThenBy(p => p.Id)
             .ToListAsync();
@@ -36,7 +37,7 @@ public class PaymentMethodsController : Controller
         return View(vms);
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Save([FromBody] PaymentMethodViewModel vm)
     {
         var biz = await _user.GetBusinessAsync();
@@ -68,22 +69,24 @@ public class PaymentMethodsController : Controller
         return Json(new { ok = true, id = entity.Id });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         var biz = await _user.GetBusinessAsync();
-        var entity = await _db.PaymentMethods.FirstOrDefaultAsync(p => p.Id == id && p.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var entity = await _db.PaymentMethods.FirstOrDefaultAsync(p => p.Id == id && p.BusinessId == biz.Id);
         if (entity == null) return Json(new { ok = false });
         _db.PaymentMethods.Remove(entity);
         await _db.SaveChangesAsync();
         return Json(new { ok = true });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ToggleActive(int id)
     {
         var biz = await _user.GetBusinessAsync();
-        var entity = await _db.PaymentMethods.FirstOrDefaultAsync(p => p.Id == id && p.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var entity = await _db.PaymentMethods.FirstOrDefaultAsync(p => p.Id == id && p.BusinessId == biz.Id);
         if (entity == null) return Json(new { ok = false });
         entity.IsActive = !entity.IsActive;
         await _db.SaveChangesAsync();

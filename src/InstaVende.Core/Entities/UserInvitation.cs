@@ -11,7 +11,7 @@ public class UserInvitation
     public UserRole Role { get; set; } = UserRole.Member;
     public InvitationStatus Status { get; set; } = InvitationStatus.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddDays(7);
+    public DateTime ExpiresAt  { get; set; }
 
     public Business Business { get; set; } = null!;
 }

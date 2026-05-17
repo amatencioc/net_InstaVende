@@ -3,7 +3,7 @@
 
 <div class="mb-4">
     <h1 class="topbar-page-title mb-0">Conexión de Canales</h1>
-    <p class="text-muted small mb-0">Conecta WhatsApp, Facebook e Instagram para que tu bot empiece a responder</p>
+    <p class="text-muted small mb-0">Conecta WhatsApp por QR o configura manualmente los tokens de Facebook e Instagram</p>
 </div>
 
 <!-- Estado general de canales -->
@@ -43,7 +43,7 @@
 
 <div class="tab-content">
 @foreach (var (ct, tid, cname, idLabel, idPlaceholder, idField) in new[] {
-    (1,"tabWA","WhatsApp Business API","Phone Number ID","123456789012345","PhoneNumberId"),
+    (1,"tabWA","WhatsApp (QR)","Phone Number ID","123456789012345","PhoneNumberId"),
     (2,"tabFB","Facebook Messenger","Page ID","123456789012345","PageId"),
     (3,"tabIG","Instagram DM","Instagram Account ID","123456789012345","InstagramAccountId")
 })
@@ -55,14 +55,20 @@
     <div class="alert d-flex align-items-center gap-3 mb-4" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
         <i class="bi bi-whatsapp fs-4" style="color:#25D366;flex-shrink:0"></i>
         <div class="flex-grow-1">
-            <strong style="font-size:.88rem">¿Primera vez conectando?</strong>
-            <span class="text-muted ms-1" style="font-size:.84rem">Usa nuestro asistente guiado para conectar en segundos.</span>
+            <strong style="font-size:.88rem">WhatsApp se conecta por código QR.</strong>
+            <span class="text-muted ms-1" style="font-size:.84rem">Escanea el QR desde tu teléfono para vincular el bot.</span>
         </div>
         <a href="/ChannelConfig/WhatsApp" class="btn btn-success btn-sm text-nowrap">
-            <i class="bi bi-magic me-1"></i>Conectar con guía
+            <i class="bi bi-qr-code me-1"></i>Ir a conectar QR
         </a>
     </div>
     }
+    @if (ct == 1)
+    {
+        <!-- WhatsApp uses QR page, skip manual form -->
+    }
+    else
+    {
     <div class="row g-4">
         <!-- Formulario -->
         <div class="col-lg-7">
@@ -164,7 +170,8 @@
             </div>
         </div>
     </div>
-    </div>
+    } @* end else ct != 1 *@
+    </div>@* tab-pane *@
 }
 </div>
 

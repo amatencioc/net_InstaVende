@@ -23,9 +23,16 @@ public class BotController : Controller
     {
         var biz = await _cu.GetBusinessAsync();
         if (biz == null) return RedirectToAction("Register", "Account");
-        var cfg = await _db.BotConfigs.Include(b => b.Intents).Include(b => b.KnowledgeBase).Include(b => b.Flows)
+        var cfg = await _db.BotConfigs.AsNoTracking().Include(b => b.Intents).Include(b => b.KnowledgeBase).Include(b => b.Flows)
             .FirstOrDefaultAsync(b => b.BusinessId == biz.Id);
-        if (cfg == null) { cfg = new BotConfig { BusinessId = biz.Id }; _db.BotConfigs.Add(cfg); await _db.SaveChangesAsync(); }
+        if (cfg == null)
+        {
+            var newCfg = new BotConfig { BusinessId = biz.Id };
+            _db.BotConfigs.Add(newCfg);
+            await _db.SaveChangesAsync();
+            cfg = await _db.BotConfigs.AsNoTracking().Include(b => b.Intents).Include(b => b.KnowledgeBase).Include(b => b.Flows)
+                .FirstOrDefaultAsync(b => b.BusinessId == biz.Id) ?? newCfg;
+        }
         ViewBag.Intents = cfg.Intents.OrderByDescending(i => i.Priority).Select(MapIntent).ToList();
         ViewBag.Knowledge = cfg.KnowledgeBase.OrderBy(k => k.Category).Select(MapKb).ToList();
         ViewBag.Flows = cfg.Flows.Select(f => new { f.Id, f.Name, f.Description, f.IsActive, f.IsEntryFlow }).ToList();
@@ -64,7 +71,8 @@ public class BotController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
-        var intent = await _db.BotIntents.FirstOrDefaultAsync(i => i.Id == req.Id && i.BotConfigId == cfg!.Id);
+        if (cfg == null) return NotFound();
+        var intent = await _db.BotIntents.FirstOrDefaultAsync(i => i.Id == req.Id && i.BotConfigId == cfg.Id);
         if (intent == null) return NotFound();
         _db.BotIntents.Remove(intent); await _db.SaveChangesAsync();
         return Json(new { success = true });
@@ -87,7 +95,8 @@ public class BotController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
-        var kb = await _db.BotKnowledges.FirstOrDefaultAsync(k => k.Id == req.Id && k.BotConfigId == cfg!.Id);
+        if (cfg == null) return NotFound();
+        var kb = await _db.BotKnowledges.FirstOrDefaultAsync(k => k.Id == req.Id && k.BotConfigId == cfg.Id);
         if (kb == null) return NotFound();
         _db.BotKnowledges.Remove(kb); await _db.SaveChangesAsync();
         return Json(new { success = true });

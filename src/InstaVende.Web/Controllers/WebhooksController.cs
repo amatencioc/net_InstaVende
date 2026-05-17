@@ -31,7 +31,9 @@ public class WebhooksController : ControllerBase
     [HttpGet("whatsapp/{merchantId:int}")]
     public async Task<IActionResult> VerifyWhatsApp(int merchantId, [FromQuery(Name = "hub.mode")] string mode, [FromQuery(Name = "hub.challenge")] string challenge, [FromQuery(Name = "hub.verify_token")] string verifyToken)
     {
-        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == merchantId && c.ChannelType == ChannelType.WhatsApp);
+        var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.BusinessId == merchantId && c.ChannelType == ChannelType.WhatsApp);
         if (cfg == null || cfg.WebhookVerifyToken != verifyToken || mode != "subscribe") return Forbid();
         return Ok(challenge);
     }
@@ -42,7 +44,11 @@ public class WebhooksController : ControllerBase
         Request.EnableBuffering();
         using var sr = new StreamReader(Request.Body, leaveOpen: true);
         var body = await sr.ReadToEndAsync(); Request.Body.Position = 0;
-        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == merchantId && c.ChannelType == ChannelType.WhatsApp && c.IsActive);
+        var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.BusinessId == merchantId
+                                   && c.ChannelType == ChannelType.WhatsApp
+                                   && c.IsActive);
         if (cfg == null) return Ok();
         if (!string.IsNullOrWhiteSpace(cfg.AppSecretEncrypted))
         {
@@ -54,10 +60,51 @@ public class WebhooksController : ControllerBase
         return Ok();
     }
 
+    // Local whatsapp-web.js client webhook
+    // Expected payload: { "from": "521234567890", "body": "text", "businessId": 1, "pushname": "Juan" }
+    [HttpPost("whatsapp-local/{merchantId:int}")]
+    public async Task<IActionResult> WhatsAppLocalEvent(int merchantId)
+    {
+        try
+        {
+            using var sr  = new StreamReader(Request.Body);
+            var raw       = await sr.ReadToEndAsync();
+            using var doc = JsonDocument.Parse(raw);
+            var root      = doc.RootElement;
+
+            var from     = root.TryGetProperty("from",     out var f) ? f.GetString()?.Trim() : null;
+            var text     = root.TryGetProperty("body",     out var b) ? b.GetString()?.Trim() : null;
+            var pushname = root.TryGetProperty("pushname", out var p) ? p.GetString()?.Trim() : null;
+
+            if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(text))
+                return Ok();
+
+            // Verify the channel is active — use AsNoTracking since we don't modify cfg here
+            var active = await _db.ChannelConfigs
+                .AsNoTracking()
+                .AnyAsync(c => c.BusinessId == merchantId
+                            && c.ChannelType == ChannelType.WhatsApp
+                            && c.IsActive);
+            if (!active) return Ok();
+
+            await HandleIncoming(merchantId, ChannelType.WhatsApp, from, text, pushname);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "WhatsApp local event error for business {Id}", merchantId);
+        }
+        return Ok();
+    }
+
     [HttpGet("meta/{merchantId:int}")]
     public async Task<IActionResult> VerifyMeta(int merchantId, [FromQuery(Name = "hub.mode")] string mode, [FromQuery(Name = "hub.challenge")] string challenge, [FromQuery(Name = "hub.verify_token")] string verifyToken)
     {
-        var cfg = await _db.ChannelConfigs.Where(c => c.BusinessId == merchantId && (c.ChannelType == ChannelType.FacebookMessenger || c.ChannelType == ChannelType.Instagram)).FirstOrDefaultAsync(c => c.WebhookVerifyToken == verifyToken);
+        var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
+            .Where(c => c.BusinessId == merchantId
+                     && (c.ChannelType == ChannelType.FacebookMessenger
+                      || c.ChannelType == ChannelType.Instagram))
+            .FirstOrDefaultAsync(c => c.WebhookVerifyToken == verifyToken);
         if (cfg == null || mode != "subscribe") return Forbid();
         return Ok(challenge);
     }
@@ -69,8 +116,11 @@ public class WebhooksController : ControllerBase
         using var sr = new StreamReader(Request.Body, leaveOpen: true);
         var body = await sr.ReadToEndAsync(); Request.Body.Position = 0;
 
-        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == merchantId
-            && (c.ChannelType == ChannelType.FacebookMessenger || c.ChannelType == ChannelType.Instagram) && c.IsActive);
+        var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.BusinessId == merchantId
+                && (c.ChannelType == ChannelType.FacebookMessenger || c.ChannelType == ChannelType.Instagram)
+                && c.IsActive);
         if (cfg != null && !string.IsNullOrWhiteSpace(cfg.AppSecretEncrypted))
         {
             var secret = _dp.Decrypt(cfg.AppSecretEncrypted);
@@ -78,10 +128,10 @@ public class WebhooksController : ControllerBase
             if (!ValidateHmac(body, secret, sig)) { _logger.LogWarning("Bad HMAC for Meta {Id}", merchantId); return Forbid(); }
         }
 
-        var doc = JsonDocument.Parse(body).RootElement;
-        var obj = doc.TryGetProperty("object", out var o) ? o.GetString() : null;
         try
         {
+            var doc = JsonDocument.Parse(body).RootElement;
+            var obj = doc.TryGetProperty("object", out var o) ? o.GetString() : null;
             if (obj == "page") await ProcessMessenger(merchantId, doc);
             else if (obj == "instagram") await ProcessInstagram(merchantId, doc);
         }
@@ -129,31 +179,117 @@ public class WebhooksController : ControllerBase
         }
     }
 
-    private async Task HandleIncoming(int bid, ChannelType channel, string externalId, string text)
+    private async Task HandleIncoming(
+        int bid, ChannelType channel, string externalId, string text, string? pushname = null)
     {
-        var contact = await _db.Contacts.FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == channel && c.ExternalId == externalId);
-        if (contact == null) { contact = new Contact { BusinessId = bid, ChannelType = channel, ExternalId = externalId }; _db.Contacts.Add(contact); await _db.SaveChangesAsync(); }
-        else { contact.LastSeenAt = DateTime.UtcNow; }
-
-        var conv = await _db.Conversations.Where(c => c.ContactId == contact.Id && c.ChannelType == channel && c.Status != ConversationStatus.Resolved).OrderByDescending(c => c.UpdatedAt).FirstOrDefaultAsync();
-        if (conv == null) { conv = new Conversation { BusinessId = bid, ContactId = contact.Id, ChannelType = channel }; _db.Conversations.Add(conv); await _db.SaveChangesAsync(); }
-
-        var inMsg = new Message { ConversationId = conv.Id, Direction = MessageDirection.Inbound, Content = text };
-        _db.Messages.Add(inMsg); conv.UpdatedAt = DateTime.UtcNow; await _db.SaveChangesAsync();
-
-        await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new { conversationId = conv.Id, messageId = inMsg.Id, content = inMsg.Content, direction = (int)inMsg.Direction, sentAt = inMsg.SentAt, contactName = contact.Name ?? contact.ExternalId, channel = (int)channel });
-
-        if (conv.Status == ConversationStatus.BotActive)
+        // ?? 1. Upsert contact ????????????????????????????????????????????????
+        var contact = await _db.Contacts
+            .FirstOrDefaultAsync(c => c.BusinessId == bid
+                                   && c.ChannelType  == channel
+                                   && c.ExternalId   == externalId);
+        if (contact == null)
         {
-            var reply = await _engine.ProcessMessageAsync(bid, conv.Id, text);
-            var outMsg = new Message { ConversationId = conv.Id, Direction = MessageDirection.Outbound, Content = reply, IsRead = true, SentByBot = true };
-            _db.Messages.Add(outMsg); conv.UpdatedAt = DateTime.UtcNow;
-            if (reply.Contains("Transferiendo con un agente humano")) conv.Status = ConversationStatus.WaitingHuman;
-            await _db.SaveChangesAsync();
-            var sender = _senders.FirstOrDefault(s => s.Channel == channel);
-            if (sender != null) await sender.SendTextAsync(bid, externalId, reply);
-            await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new { conversationId = conv.Id, messageId = outMsg.Id, content = outMsg.Content, direction = (int)outMsg.Direction, sentAt = outMsg.SentAt, sentByBot = true });
+            contact = new Contact
+            {
+                BusinessId = bid,
+                ChannelType = channel,
+                ExternalId  = externalId,
+                Name        = pushname,
+                Phone       = channel == ChannelType.WhatsApp ? externalId : null,
+            };
+            _db.Contacts.Add(contact);
         }
+        else
+        {
+            contact.LastSeenAt = DateTime.UtcNow;
+            // Update display name from pushname if we didn't have one yet
+            if (!string.IsNullOrWhiteSpace(pushname) && string.IsNullOrWhiteSpace(contact.Name))
+                contact.Name = pushname;
+        }
+
+        // ?? 2. Upsert conversation ???????????????????????????????????????????
+        var conv = await _db.Conversations
+            .Where(c => c.ContactId   == contact.Id
+                     && c.ChannelType == channel
+                     && c.Status      != ConversationStatus.Resolved)
+            .OrderByDescending(c => c.UpdatedAt)
+            .FirstOrDefaultAsync();
+
+        if (conv == null)
+        {
+            // SaveChanges first to get contact.Id if it was just inserted
+            await _db.SaveChangesAsync();
+            conv = new Conversation { BusinessId = bid, ContactId = contact.Id, ChannelType = channel };
+            _db.Conversations.Add(conv);
+        }
+
+        // ?? 3. Save inbound message ??????????????????????????????????????????
+        var inMsg = new Message
+        {
+            ConversationId = conv.Id,
+            Direction      = MessageDirection.Inbound,
+            Content        = text,
+        };
+        _db.Messages.Add(inMsg);
+        conv.UpdatedAt          = DateTime.UtcNow;
+        conv.LastMessageAt      = DateTime.UtcNow;
+        conv.LastMessagePreview = text.Length > 120 ? text[..120] + "..." : text;
+        conv.UnreadCount++;
+        await _db.SaveChangesAsync();   // single save for contact + conv + inMsg
+
+        // ?? 4. Push inbound to SignalR ???????????????????????????????????????
+        await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new
+        {
+            conversationId = conv.Id,
+            messageId      = inMsg.Id,
+            content        = inMsg.Content,
+            direction      = (int)inMsg.Direction,
+            sentAt         = inMsg.SentAt,
+            contactName    = contact.Name ?? contact.ExternalId,
+            channel        = (int)channel,
+        });
+
+        // ?? 5. Bot reply (only when bot is active) ???????????????????????????
+        if (conv.Status != ConversationStatus.BotActive) return;
+
+        var reply = await _engine.ProcessMessageAsync(bid, conv.Id, text);
+
+        var outMsg = new Message
+        {
+            ConversationId = conv.Id,
+            Direction      = MessageDirection.Outbound,
+            Content        = reply,
+            IsRead         = true,
+            SentByBot      = true,
+        };
+        _db.Messages.Add(outMsg);
+        // TransferirAHumanoAsync already called SaveChangesAsync and updated conv.Status
+        // in the DB. Reload the tracked entity to pick up any status change made by tools.
+        await _db.Entry(conv).ReloadAsync();
+        // Reassign UpdatedAt after reload — ReloadAsync overwrites it with the stale DB value
+        conv.UpdatedAt          = DateTime.UtcNow;
+        conv.LastMessageAt      = DateTime.UtcNow;
+        conv.LastMessagePreview = reply.Length > 120 ? reply[..120] + "..." : reply;
+        await _db.SaveChangesAsync();
+
+        // Send outbound via channel
+        var sender = _senders.FirstOrDefault(s => s.Channel == channel);
+        if (sender != null)
+        {
+            try   { await sender.SendTextAsync(bid, externalId, reply); }
+            catch (Exception ex) { _logger.LogError(ex, "Send failed for {Channel} business {Id}", channel, bid); }
+        }
+
+        // Push outbound to SignalR
+        await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new
+        {
+            conversationId = conv.Id,
+            messageId      = outMsg.Id,
+            content        = outMsg.Content,
+            direction      = (int)outMsg.Direction,
+            sentAt         = outMsg.SentAt,
+            sentByBot      = true,
+        });
     }
 
     private static bool ValidateHmac(string payload, string secret, string signature)

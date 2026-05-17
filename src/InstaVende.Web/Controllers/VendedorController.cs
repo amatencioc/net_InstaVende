@@ -106,7 +106,7 @@ public class VendedorController : Controller
         var q = _db.KnowledgeEntries.Where(k => k.BusinessId == biz.Id);
         if (categoria.HasValue) q = q.Where(k => k.Category == categoria.Value);
 
-        var entries = await q.OrderByDescending(k => k.IsFavorite).ThenByDescending(k => k.CreatedAt).ToListAsync();
+        var entries = await q.AsNoTracking().OrderByDescending(k => k.IsFavorite).ThenByDescending(k => k.CreatedAt).ToListAsync();
 
         var vm = new BaseConocimientoViewModel
         {
@@ -182,6 +182,7 @@ public class VendedorController : Controller
         if (biz == null) return RedirectToAction("Register", "Account");
 
         var zones = await _db.DeliveryZones
+            .AsNoTracking()
             .Where(d => d.BusinessId == biz.Id)
             .OrderBy(d => d.SortOrder)
             .ToListAsync();
@@ -256,8 +257,8 @@ public class VendedorController : Controller
         var biz = await _cu.GetBusinessAsync();
         if (biz == null) return RedirectToAction("Register", "Account");
 
-        var methods = await _db.PaymentMethods.Where(p => p.BusinessId == biz.Id).OrderBy(p => p.SortOrder).ToListAsync();
-        var images = await _db.PaymentImages.Where(p => p.BusinessId == biz.Id).OrderBy(p => p.SortOrder).ToListAsync();
+        var methods = await _db.PaymentMethods.AsNoTracking().Where(p => p.BusinessId == biz.Id).OrderBy(p => p.SortOrder).ToListAsync();
+        var images = await _db.PaymentImages.AsNoTracking().Where(p => p.BusinessId == biz.Id).OrderBy(p => p.SortOrder).ToListAsync();
 
         var vm = new VendedorPagoViewModel
         {

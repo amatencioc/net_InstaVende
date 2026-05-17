@@ -132,17 +132,17 @@ public class OrdersController : Controller
         var biz = await _user.GetBusinessAsync();
         if (biz == null) return Json(new { });
 
-        var now = DateTime.UtcNow;
-        var monthStart = new DateTime(now.Year, now.Month, 1);
-        var orders = await _db.Orders.Where(o => o.BusinessId == biz.Id).ToListAsync();
+        var now        = DateTime.UtcNow;
+        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        return Json(new
-        {
-            totalMonth = orders.Count(o => o.CreatedAt >= monthStart),
-            revenueMonth = orders.Where(o => o.CreatedAt >= monthStart && o.Status != OrderStatus.Cancelled).Sum(o => o.Total),
-            pending = orders.Count(o => o.Status == OrderStatus.Pending),
-            delivered = orders.Count(o => o.Status == OrderStatus.Delivered)
-        });
+        var totalMonth   = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.CreatedAt >= monthStart);
+        var revenueMonth = await _db.Orders
+            .Where(o => o.BusinessId == biz.Id && o.CreatedAt >= monthStart && o.Status != OrderStatus.Cancelled)
+            .SumAsync(o => (decimal?)o.Total) ?? 0m;
+        var pending   = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == OrderStatus.Pending);
+        var delivered = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == OrderStatus.Delivered);
+
+        return Json(new { totalMonth, revenueMonth, pending, delivered });
     }
 
     [HttpPost]
@@ -176,11 +176,11 @@ public class OrdersController : Controller
         }
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
-        return File(bytes, "text/csv", $"pedidos-{DateTime.Now:yyyyMMdd}.csv");
+        return File(bytes, "text/csv", $"pedidos-{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 
     private static string GenerateOrderNumber() =>
-        $"ORD-{DateTime.UtcNow:yyyyMMdd}-{new Random().Next(1000, 9999)}";
+        $"ORD-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
 
     private static OrderViewModel MapToVm(Order o) => new()
     {

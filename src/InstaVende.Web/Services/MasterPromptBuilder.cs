@@ -16,6 +16,7 @@ public class MasterPromptBuilder
     private string? _systemPromptTemplate;
     private string? _dynamicContextTemplate;
     private IReadOnlyList<ChatTool>? _cachedTools;
+    private LlmConfig? _cachedLlmConfig;
     private readonly object _lock = new();
 
     public MasterPromptBuilder(IWebHostEnvironment env, ILogger<MasterPromptBuilder> logger)
@@ -119,4 +120,53 @@ public class MasterPromptBuilder
 
         return template;
     }
+
+    /// <summary>
+    /// Loads LLM configuration from MasterBot_LLMConfig.json.
+    /// Returns safe defaults if the file is missing or malformed.
+    /// </summary>
+    public LlmConfig LoadLlmConfig()
+    {
+        if (_cachedLlmConfig != null) return _cachedLlmConfig;
+
+        lock (_lock)
+        {
+            if (_cachedLlmConfig != null) return _cachedLlmConfig;
+
+            var path = Path.Combine(_basePath, "MasterBot_LLMConfig.json");
+            if (!File.Exists(path))
+            {
+                _logger.LogWarning("MasterBot_LLMConfig.json not found, using defaults.");
+                return _cachedLlmConfig = new LlmConfig();
+            }
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(path));
+                var r = doc.RootElement;
+                return _cachedLlmConfig = new LlmConfig
+                {
+                    Temperature      = r.TryGetProperty("temperature",       out var t)  ? (float)t.GetDouble()  : 0.4f,
+                    MaxTokens        = r.TryGetProperty("max_tokens",        out var mt) ? mt.GetInt32()          : 500,
+                    TopP             = r.TryGetProperty("top_p",             out var tp) ? (float)tp.GetDouble() : 0.9f,
+                    FrequencyPenalty = r.TryGetProperty("frequency_penalty", out var fp) ? (float)fp.GetDouble() : 0.3f,
+                    PresencePenalty  = r.TryGetProperty("presence_penalty",  out var pp) ? (float)pp.GetDouble() : 0.1f,
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse MasterBot_LLMConfig.json, using defaults.");
+                return _cachedLlmConfig = new LlmConfig();
+            }
+        }
+    }
+}
+
+/// <summary>Typed representation of MasterBot_LLMConfig.json.</summary>
+public sealed class LlmConfig
+{
+    public float Temperature      { get; init; } = 0.4f;
+    public int   MaxTokens        { get; init; } = 500;
+    public float TopP             { get; init; } = 0.9f;
+    public float FrequencyPenalty { get; init; } = 0.3f;
+    public float PresencePenalty  { get; init; } = 0.1f;
 }

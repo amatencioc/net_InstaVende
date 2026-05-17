@@ -6,14 +6,15 @@
   --brand-l:      #22c55e;
   --brand-bg:     rgba(22,163,74,.08);
   --purple:       #7c3aed;
-  --sb-w:         72px;
+  --sb-w:         220px;
+  --sb-w-col:     58px;
   --topbar-h:     52px;
-  --admin-radius: 12px;
+  --admin-radius: 10px;
   --admin-border: #e2e8f0;
-  --admin-shadow: 0 1px 3px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.04);
-  --admin-shadow-h: 0 4px 24px rgba(0,0,0,.10);
+  --admin-shadow: 0 1px 2px rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.04);
+  --admin-shadow-h: 0 4px 20px rgba(0,0,0,.10);
   --font-body:    'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Space Grotesk', 'Inter', sans-serif;
+  --font-heading: 'Inter', system-ui, sans-serif;
   /* Bootstrap overrides */
   --bs-primary:       var(--brand);
   --bs-primary-rgb:   22,163,74;
@@ -92,7 +93,7 @@ textarea.f-input { resize: vertical; min-height: 88px }
 .f-val-box{ background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: .65rem .9rem; font-size: .83rem; color: #b91c1c; margin-bottom: 1rem }
 
 /* ================================================================
-   SIDEBAR — icon-only (72px), matches reference design
+   SIDEBAR — expandida (220px) con texto + colapsable (58px)
    ================================================================ */
 .app-sidebar {
   position: fixed; top: 0; left: 0;
@@ -101,75 +102,104 @@ textarea.f-input { resize: vertical; min-height: 88px }
   display: flex; flex-direction: column;
   overflow: hidden; z-index: 200;
   border-right: 1px solid rgba(255,255,255,.06);
+  transition: width .22s ease;
 }
+/* Collapsed state */
+.app-sidebar.collapsed { width: var(--sb-w-col) }
+.app-sidebar.collapsed .sb-link-text,
+.app-sidebar.collapsed .sb-section,
+.app-sidebar.collapsed .sb-user-info,
+.app-sidebar.collapsed .sb-logo-text,
+.app-sidebar.collapsed .sb-logout .sb-link-text { display: none }
+.app-sidebar.collapsed .sb-logo { justify-content: center; padding: .9rem 0 .8rem }
+.app-sidebar.collapsed .sb-collapse-btn { margin-left: 0 }
+.app-sidebar.collapsed .sb-link { justify-content: center; padding: .7rem 0 }
+.app-sidebar.collapsed .sb-link i { margin: 0; width: auto }
+.app-sidebar.collapsed .sb-bottom { align-items: center }
+.app-sidebar.collapsed .sb-user { justify-content: center }
+.app-sidebar.collapsed .sb-logout { justify-content: center }
+.app-sidebar.collapsed .sb-badge { position: absolute; top: .3rem; right: .25rem }
+
 .sb-logo {
-  display: flex; align-items: center; justify-content: center;
-  padding: .95rem 0 .8rem;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem .85rem;
   border-bottom: 1px solid rgba(255,255,255,.07);
-  flex-shrink: 0;
+  flex-shrink: 0; gap: .5rem;
 }
 .sb-logo-text {
   font-family: var(--font-heading);
-  font-size: .95rem; font-weight: 800;
-  color: #fff; letter-spacing: -.02em;
+  font-size: 1.1rem; font-weight: 700;
+  color: #fff; letter-spacing: -.02em; white-space: nowrap;
 }
 .sb-logo-text span { color: var(--brand-l) }
-.sb-nav {
-  flex: 1; display: flex; flex-direction: column;
-  padding: .4rem 0; overflow-y: auto; overflow-x: hidden;
+.sb-collapse-btn {
+  background: none; border: none;
+  color: rgba(255,255,255,.3); cursor: pointer;
+  padding: .25rem; border-radius: 5px;
+  font-size: .95rem; flex-shrink: 0;
+  transition: color .18s, background .18s;
+  margin-left: auto;
+}
+.sb-collapse-btn:hover { color: rgba(255,255,255,.8); background: rgba(255,255,255,.08) }
+
+.sb-nav { flex: 1; display: flex; flex-direction: column; padding: .35rem 0; overflow-y: auto; overflow-x: hidden }
+.sb-section {
+  padding: .7rem 1.25rem .2rem;
+  font-size: .62rem; font-weight: 700;
+  color: rgba(255,255,255,.22);
+  text-transform: uppercase; letter-spacing: .12em;
+  white-space: nowrap; overflow: hidden;
 }
 .sb-link {
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: .7rem .25rem;
-  color: rgba(255,255,255,.38);
+  display: flex; align-items: center; gap: .7rem;
+  padding: .55rem 1.25rem;
+  font-size: .84rem; font-weight: 500;
+  color: rgba(255,255,255,.45);
   transition: all .18s; position: relative;
-  gap: .2rem; text-align: center;
+  white-space: nowrap;
 }
-.sb-link i { font-size: 1.2rem; display: block }
-.sb-label { font-size: .58rem; font-weight: 600; letter-spacing: .01em; line-height: 1.2; display: block }
-.sb-link:hover { color: rgba(255,255,255,.85); background: rgba(255,255,255,.07) }
-.sb-link.active { color: #fff; background: rgba(22,163,74,.16) }
+.sb-link i { font-size: .95rem; width: 18px; text-align: center; flex-shrink: 0 }
+.sb-link-text { overflow: hidden; text-overflow: ellipsis }
+.sb-link:hover { color: rgba(255,255,255,.88); background: rgba(255,255,255,.06) }
+.sb-link.active { color: #fff; background: rgba(22,163,74,.14); font-weight: 600 }
 .sb-link.active::before {
-  content: ''; position: absolute;
-  left: 0; top: 0; bottom: 0;
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
   width: 3px; background: var(--brand-l);
   border-radius: 0 3px 3px 0;
 }
 .sb-link.active i { color: var(--brand-l) }
 .sb-badge {
-  position: absolute; top: .35rem; right: .45rem;
-  background: #ef4444; color: #fff;
-  font-size: .52rem; font-weight: 700;
-  min-width: 14px; height: 14px;
-  border-radius: 50px; line-height: 14px;
-  text-align: center; padding: 0 3px;
-}
-.sb-bottom {
-  padding: .7rem 0 .9rem;
-  border-top: 1px solid rgba(255,255,255,.07);
-  display: flex; flex-direction: column;
-  align-items: center; gap: .5rem;
+  margin-left: auto;
+  background: var(--brand); color: #fff;
+  font-size: .6rem; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 50px; line-height: 16px;
+  text-align: center; padding: 0 4px;
   flex-shrink: 0;
 }
+.sb-bottom {
+  padding: .85rem 1.25rem 1rem;
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; flex-direction: column; gap: .6rem;
+  flex-shrink: 0; overflow: hidden;
+}
+.sb-user { display: flex; align-items: center; gap: .65rem; min-width: 0 }
 .sb-avatar {
-  width: 34px; height: 34px; border-radius: 10px;
+  width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
   background: linear-gradient(135deg, var(--brand), #7c3aed);
   display: flex; align-items: center; justify-content: center;
-  font-size: .84rem; color: #fff; font-weight: 700;
-  cursor: pointer; flex-shrink: 0;
-  transition: opacity .18s;
+  font-size: .8rem; color: #fff; font-weight: 700;
 }
-.sb-avatar:hover { opacity: .85 }
+.sb-user-info { min-width: 0; overflow: hidden }
+.sb-user-name { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.sb-user-role { font-size: .67rem; color: rgba(255,255,255,.3); white-space: nowrap }
 .sb-logout {
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: rgba(255,255,255,.28);
+  display: flex; align-items: center; gap: .6rem;
+  font-size: .82rem; color: rgba(255,255,255,.35);
   transition: color .2s; cursor: pointer;
-  background: none; border: none; padding: .25rem;
+  background: none; border: none; padding: 0; width: 100%;
 }
 .sb-logout:hover { color: #f87171 }
-/* Hide old elements not used in icon sidebar */
-.sb-section, .sb-user, .sb-user-info, .sb-user-name, .sb-user-role { display: none }
 
 /* ================================================================
    TOPBAR
@@ -183,7 +213,15 @@ textarea.f-input { resize: vertical; min-height: 88px }
   position: sticky; top: 0; z-index: 90;
   min-height: var(--topbar-h);
   box-shadow: 0 1px 0 #edf2f7;
+  transition: margin-left .22s ease;
 }
+/* When sidebar is collapsed */
+.sb-collapsed-offset .app-topbar,
+body.sb-collapsed .app-topbar { margin-left: var(--sb-w-col) }
+.app-sidebar.collapsed ~ .app-topbar { margin-left: var(--sb-w-col) }
+body.sb-collapsed .app-topbar { margin-left: var(--sb-w-col) }
+body.sb-collapsed .app-content { margin-left: var(--sb-w-col) }
+
 .topbar-left  { display: flex; align-items: center; gap: .75rem }
 .topbar-right { display: flex; align-items: center; gap: 1rem }
 .topbar-badge {
@@ -201,22 +239,21 @@ textarea.f-input { resize: vertical; min-height: 88px }
 @keyframes dot-pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }
 .topbar-page-title {
   font-family: var(--font-heading);
-  font-size: 1.25rem; font-weight: 800;
-  color: #0f172a; letter-spacing: -.025em; line-height: 1.2;
+  font-size: 1.2rem; font-weight: 700;
+  color: #0f172a; letter-spacing: -.015em; line-height: 1.25;
 }
-.topbar-subtitle { font-size: .78rem; color: #94a3b8; margin-top: .05rem }
+.topbar-subtitle { font-size: .75rem; color: #94a3b8; margin-top: .05rem }
 .sb-toggle { display: none; background: none; border: none; color: #475569; padding: .4rem; border-radius: 7px; cursor: pointer; font-size: 1.2rem }
 .sb-toggle:hover { color: #0f172a }
-
-/* ================================================================
-   MAIN CONTENT
-   ================================================================ */
 .app-content {
   margin-left: var(--sb-w);
   padding: 1.75rem 2rem;
   min-height: calc(100vh - var(--topbar-h));
   background: #f8fafc;
+  transition: margin-left .22s ease;
 }
+.app-sidebar.collapsed ~ .app-topbar ~ .app-content,
+.app-sidebar.collapsed ~ .app-content { margin-left: var(--sb-w-col) }
 
 /* ================================================================
    CARDS
@@ -375,11 +412,12 @@ textarea.f-input { resize: vertical; min-height: 88px }
 /* ================================================================
    RESPONSIVE — sidebar oculto solo en mobile (<768px)
    ================================================================ */
-@media(max-width:768px) {
-  .app-sidebar { transform: translateX(-100%); transition: transform .25s }
+@media(max-width:900px) {
+  .app-sidebar { transform: translateX(-100%); transition: width .22s ease, transform .25s }
   .app-sidebar.open { transform: translateX(0) }
-  .app-topbar, .app-content { margin-left: 0 }
+  .app-topbar, .app-content { margin-left: 0 !important }
   .sb-toggle { display: inline-flex; align-items: center }
+  .sb-collapse-btn { display: none }
   .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 199 }
   .sb-overlay.open { display: block }
   .stat-grid { grid-template-columns: repeat(2,1fr) }

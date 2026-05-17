@@ -1,39 +1,74 @@
-using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using InstaVende.Core.Enums;
 using InstaVende.Core.Interfaces;
 using InstaVende.Infrastructure.Data;
-using InstaVende.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace InstaVende.Web.Services;
 
+/// <summary>
+/// Sends WhatsApp messages via the local whatsapp-web.js Node.js client.
+/// Expected endpoint: POST {BaseUrl}/send  { to: "phone", message: "text" }
+/// </summary>
 public class WhatsAppService : IChannelMessageSender
 {
     public ChannelType Channel => ChannelType.WhatsApp;
+
     private readonly IHttpClientFactory _http;
     private readonly AppDbContext _db;
-    private readonly DataProtectionService _dp;
+    private readonly IConfiguration _config;
     private readonly ILogger<WhatsAppService> _logger;
-    private const string ApiBase = "https://graph.facebook.com/v20.0";
 
-    public WhatsAppService(IHttpClientFactory http, AppDbContext db, DataProtectionService dp, ILogger<WhatsAppService> logger)
-    { _http = http; _db = db; _dp = dp; _logger = logger; }
+    public WhatsAppService(IHttpClientFactory http, AppDbContext db, IConfiguration config, ILogger<WhatsAppService> logger)
+    { _http = http; _db = db; _config = config; _logger = logger; }
 
     public async Task SendTextAsync(int businessId, string recipient, string text)
     {
-        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == businessId
-            && c.ChannelType == ChannelType.WhatsApp && c.IsActive);
-        if (cfg == null) { _logger.LogWarning("No WhatsApp config for {Id}", businessId); return; }
+        var active = await _db.ChannelConfigs
+            .AsNoTracking()
+            .AnyAsync(c => c.BusinessId == businessId
+                        && c.ChannelType == ChannelType.WhatsApp
+                        && c.IsActive);
 
-        var token = _dp.Decrypt(cfg.AccessTokenEncrypted);
-        var payload = new { messaging_product = "whatsapp", to = recipient, type = "text", text = new { body = text } };
-        var client = _http.CreateClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        var resp = await client.PostAsync($"{ApiBase}/{cfg.PhoneNumberId}/messages",
-            new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
-        if (!resp.IsSuccessStatusCode)
-            _logger.LogError("WhatsApp send failed: {S} {B}", resp.StatusCode, await resp.Content.ReadAsStringAsync());
+        if (!active)
+        {
+            _logger.LogWarning("No active WhatsApp config for business {Id}", businessId);
+            return;
+        }
+
+        var waUrl   = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
+        var payload = JsonSerializer.Serialize(new { to = recipient, message = text });
+
+        for (var attempt = 1; attempt <= 2; attempt++)
+        {
+            try
+            {
+                using var http = _http.CreateClient();
+                http.Timeout   = TimeSpan.FromSeconds(10);
+
+                using var resp = await http.PostAsync(
+                    $"{waUrl}/send",
+                    new StringContent(payload, Encoding.UTF8, "application/json"));
+
+                if (resp.IsSuccessStatusCode) return;
+
+                var body = await resp.Content.ReadAsStringAsync();
+                _logger.LogError(
+                    "WhatsApp send failed (attempt {Attempt}) for business {Id}: {Status} — {Body}",
+                    attempt, businessId, resp.StatusCode, body);
+
+                // 503 = WA client not connected — no point retrying
+                if ((int)resp.StatusCode == 503) return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex,
+                    "WhatsApp send exception (attempt {Attempt}) for business {Id} to {Recipient}",
+                    attempt, businessId, recipient);
+            }
+
+            if (attempt < 2) await Task.Delay(1500);
+        }
     }
 }

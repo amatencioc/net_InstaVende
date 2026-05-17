@@ -22,15 +22,20 @@ public class MetaMessengerService : IChannelMessageSender
 
     public async Task SendTextAsync(int businessId, string psid, string text)
     {
-        var cfg = await _db.ChannelConfigs.FirstOrDefaultAsync(c => c.BusinessId == businessId
-            && c.ChannelType == ChannelType.FacebookMessenger && c.IsActive);
+        var cfg = await _db.ChannelConfigs
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.BusinessId == businessId
+                && c.ChannelType == ChannelType.FacebookMessenger && c.IsActive);
         if (cfg == null) { _logger.LogWarning("No Messenger config for {Id}", businessId); return; }
 
         var token = _dp.Decrypt(cfg.AccessTokenEncrypted);
         var payload = new { recipient = new { id = psid }, message = new { text } };
         var client = _http.CreateClient();
-        var resp = await client.PostAsync($"{ApiBase}/me/messages?access_token={token}",
-            new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
+        client.Timeout = TimeSpan.FromSeconds(10);
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        using var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var resp = await client.PostAsync($"{ApiBase}/me/messages", content);
         if (!resp.IsSuccessStatusCode)
             _logger.LogError("Messenger send failed: {S} {B}", resp.StatusCode, await resp.Content.ReadAsStringAsync());
     }

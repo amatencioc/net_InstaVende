@@ -1,54 +1,165 @@
 @model InstaVende.Web.ViewModels.MetricasViewModel
-@{ ViewData["Title"] = "Métricas y resultados"; }
+@{ ViewData["Title"] = "Metricas"; }
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div>
-        <h1 class="topbar-page-title mb-0">Métricas y resultados</h1>
-        <p class="text-muted small mb-0">Analiza el rendimiento de tu tienda</p>
+<div class="mb-4">
+    <h1 class="topbar-page-title mb-0">Métricas y resultados</h1>
+    <p class="text-muted small mb-0 mt-1">Analiza el rendimiento de tu tienda</p>
+</div>
+
+<!-- KPIs -->
+<div class="stat-grid mb-4">
+    <div class="stat-tile">
+        <div class="st-icon st-g"><i class="bi bi-chat-dots-fill"></i></div>
+        <div class="st-val">@Model.TotalConversations</div>
+        <div class="st-lbl">Conversaciones</div>
+    </div>
+    <div class="stat-tile">
+        <div class="st-icon st-b"><i class="bi bi-bag-check-fill"></i></div>
+        <div class="st-val">@Model.TotalOrders</div>
+        <div class="st-lbl">Pedidos totales</div>
+    </div>
+    <div class="stat-tile">
+        <div class="st-icon st-a"><i class="bi bi-currency-dollar"></i></div>
+        <div class="st-val">S/ @Model.TotalRevenue.ToString("N2")</div>
+        <div class="st-lbl">Ingresos</div>
+    </div>
+    <div class="stat-tile">
+        <div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="st-val">@Model.ConversionRate.ToString("P1")</div>
+        <div class="st-lbl">Conversión</div>
     </div>
 </div>
 
-@if (!Model.HasAccess)
-{
-    <!-- Blurred background panel -->
-    <div style="position:relative;overflow:hidden;border-radius:12px;min-height:400px">
-        <div style="filter:blur(6px);pointer-events:none;opacity:.45">
-            <div class="stat-grid mb-4">
-                <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-chat-dots-fill"></i></div><div class="st-val">@Model.TotalConversations</div><div class="st-lbl">Conversaciones</div></div>
-                <div class="stat-tile"><div class="st-icon st-b"><i class="bi bi-bag-check-fill"></i></div><div class="st-val">@Model.TotalOrders</div><div class="st-lbl">Órdenes</div></div>
-                <div class="stat-tile"><div class="st-icon st-a"><i class="bi bi-currency-dollar"></i></div><div class="st-val">S/ @Model.TotalRevenue.ToString("N2")</div><div class="st-lbl">Ingresos</div></div>
-                <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div><div class="st-val">@Model.ConversionRate.ToString("P1")</div><div class="st-lbl">Conversión</div></div>
+<div class="row g-4">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+
+        <!-- Conversión en tiempo real -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-lightning-charge-fill"></i> Conversión en tiempo real</div>
+                <span class="badge bg-success">En vivo</span>
             </div>
-            <div class="a-card" style="height:250px"></div>
+            <div class="a-card-body">
+                <div class="row g-3 mb-4">
+                    <div class="col-4 text-center">
+                        <div style="font-size:1.6rem;font-weight:800;color:#0f172a">@Model.TotalConversations</div>
+                        <div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Conversaciones</div>
+                    </div>
+                    <div class="col-4 text-center" style="border-left:1px solid #f1f5f9;border-right:1px solid #f1f5f9">
+                        <div style="font-size:1.6rem;font-weight:800;color:#0f172a">@Model.CompletedOrders</div>
+                        <div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ventas cerradas</div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div style="font-size:1.6rem;font-weight:800;color:var(--brand)">@Model.ConversionRate.ToString("P1")</div>
+                        <div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600">% Conversión</div>
+                    </div>
+                </div>
+                <div style="background:#f1f5f9;border-radius:50px;height:8px;overflow:hidden">
+                    @{ var convPct = Math.Min((Model.ConversionRate * 100), 100).ToString("F0", System.Globalization.CultureInfo.InvariantCulture); }
+                                    <div style="height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-l));border-radius:50px;width:@(convPct)%;max-width:100%"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <span style="font-size:.7rem;color:#94a3b8">0%</span>
+                    <span style="font-size:.7rem;color:#94a3b8">100%</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Paywall overlay -->
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem">
-            @await Html.PartialAsync("_UpgradeModal", new InstaVende.Web.ViewModels.UpgradeModalViewModel
-            {
-                Icon = "lock-fill",
-                Title = "¿Sabes dónde pierdes ventas?",
-                Subtitle = "Descúbrelo con Métricas Pro",
-                Description = "Accede al panel completo de métricas de tu tienda en WhatsApp. Toma decisiones en tiempo real con datos, no con intuición.",
-                Features = new List<(string Icon, string Title, string Desc)>
-                {
-                    ("lightning-charge-fill", "Conversión en tiempo real", "Conversaciones, ventas y % de conversión al instante"),
-                    ("bar-chart-fill", "Análisis de órdenes", "Ranking de productos, ticket promedio y combos ganadores"),
-                    ("megaphone-fill", "Rendimiento de campañas", "Mide qué anuncios generan ventas reales, no solo clics"),
-                    ("download", "Base de datos descargable", "Exporta tu base de clientes y segmenta como quieras")
-                },
-                PlanRequired = "Pro",
-                CtaUrl = "/Plans"
-            })
+        <!-- Análisis de órdenes -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-bar-chart-fill"></i> Análisis de órdenes</div>
+            </div>
+            <div class="a-card-body">
+                <div class="row g-3">
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 text-center" style="background:#f8fafc;border:1px solid #e2e8f0">
+                            <div style="font-size:1.4rem;font-weight:800;color:#0f172a">@Model.TotalOrders</div>
+                            <div style="font-size:.7rem;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Total pedidos</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 text-center" style="background:#f0fdf4;border:1px solid #bbf7d0">
+                            <div style="font-size:1.4rem;font-weight:800;color:var(--brand)">@Model.CompletedOrders</div>
+                            <div style="font-size:.7rem;color:#16a34a;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Completados</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 text-center" style="background:#fffbeb;border:1px solid #fde68a">
+                            <div style="font-size:1.4rem;font-weight:800;color:#d97706">
+                                S/ @(Model.TotalOrders > 0 ? (Model.TotalRevenue / Model.TotalOrders).ToString("N2") : "0.00")
+                            </div>
+                            <div style="font-size:.7rem;color:#d97706;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Ticket promedio</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
-}
-else
-{
-    <div class="stat-grid mb-4">
-        <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-chat-dots-fill"></i></div><div class="st-val">@Model.TotalConversations</div><div class="st-lbl">Conversaciones</div></div>
-        <div class="stat-tile"><div class="st-icon st-b"><i class="bi bi-bag-check-fill"></i></div><div class="st-val">@Model.TotalOrders</div><div class="st-lbl">Órdenes</div></div>
-        <div class="stat-tile"><div class="st-icon st-a"><i class="bi bi-currency-dollar"></i></div><div class="st-val">S/ @Model.TotalRevenue.ToString("N2")</div><div class="st-lbl">Ingresos</div></div>
-        <div class="stat-tile"><div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div><div class="st-val">@Model.ConversionRate.ToString("P1")</div><div class="st-lbl">Conversión</div></div>
+
+    <!-- Columna lateral -->
+    <div class="col-lg-4">
+
+        <!-- Ingresos totales -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-currency-dollar"></i> Ingresos totales</div>
+            </div>
+            <div class="a-card-body text-center py-4">
+                <div style="font-size:2rem;font-weight:800;color:#0f172a;line-height:1">
+                    S/ @Model.TotalRevenue.ToString("N2")
+                </div>
+                <p class="text-muted small mt-2 mb-0">Pedidos no cancelados</p>
+            </div>
+        </div>
+
+        <!-- Rendimiento -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-megaphone-fill"></i> Rendimiento</div>
+            </div>
+            <div class="a-card-body">
+                <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-2" style="background:#f8fafc">
+                    <div class="st-icon st-g flex-shrink-0" style="width:32px;height:32px;font-size:.85rem"><i class="bi bi-chat-dots-fill"></i></div>
+                    <div class="flex-grow-1">
+                        <div style="font-size:.82rem;font-weight:600;color:#0f172a">Conversaciones</div>
+                        <div style="font-size:.73rem;color:#94a3b8">Total iniciadas</div>
+                    </div>
+                    <strong style="font-size:.9rem;color:#0f172a">@Model.TotalConversations</strong>
+                </div>
+                <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-2" style="background:#f8fafc">
+                    <div class="st-icon st-b flex-shrink-0" style="width:32px;height:32px;font-size:.85rem"><i class="bi bi-bag-check-fill"></i></div>
+                    <div class="flex-grow-1">
+                        <div style="font-size:.82rem;font-weight:600;color:#0f172a">Ventas</div>
+                        <div style="font-size:.73rem;color:#94a3b8">Pedidos completados</div>
+                    </div>
+                    <strong style="font-size:.9rem;color:#0f172a">@Model.CompletedOrders</strong>
+                </div>
+                <div class="d-flex align-items-center gap-3 p-2 rounded-2" style="background:#f0fdf4">
+                    <div class="st-icon st-g flex-shrink-0" style="width:32px;height:32px;font-size:.85rem"><i class="bi bi-graph-up-arrow"></i></div>
+                    <div class="flex-grow-1">
+                        <div style="font-size:.82rem;font-weight:600;color:#0f172a">Tasa de conversión</div>
+                        <div style="font-size:.73rem;color:#94a3b8">Conv / Ventas</div>
+                    </div>
+                    <strong style="font-size:.9rem;color:var(--brand)">@Model.ConversionRate.ToString("P1")</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exportar base de clientes -->
+        <div class="a-card">
+            <div class="a-card-header">
+                <div class="a-card-title"><i class="bi bi-download"></i> Base de datos descargable</div>
+            </div>
+            <div class="a-card-body">
+                <p class="text-muted mb-3" style="font-size:.83rem">Exporta tu base de clientes y segmenta como quieras.</p>
+                <a href="/Conversations/Export" class="btn btn-outline-primary w-100 btn-sm">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar clientes (CSV)
+                </a>
+            </div>
+        </div>
+
     </div>
-}
+</div>

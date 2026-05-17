@@ -11,6 +11,10 @@ public class CurrentUserService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppDbContext _db;
 
+    // Per-request cache — service is registered Scoped so this is safe
+    private Business? _cachedBusiness;
+    private bool _businessLoaded;
+
     public CurrentUserService(IHttpContextAccessor httpContextAccessor, AppDbContext db)
     {
         _httpContextAccessor = httpContextAccessor;
@@ -22,9 +26,15 @@ public class CurrentUserService
 
     public async Task<Business?> GetBusinessAsync()
     {
+        if (_businessLoaded) return _cachedBusiness;
+
         var userId = GetUserId();
-        if (userId == null) return null;
-        return await _db.Businesses.FirstOrDefaultAsync(b => b.UserId == userId);
+        _cachedBusiness = userId is null
+            ? null
+            : await _db.Businesses.AsNoTracking().FirstOrDefaultAsync(b => b.UserId == userId);
+
+        _businessLoaded = true;
+        return _cachedBusiness;
     }
 
     public async Task<int?> GetBusinessIdAsync()

@@ -33,11 +33,25 @@ public class DashboardController : Controller
         var resolved = await _db.Conversations.CountAsync(c => c.BusinessId == bid && c.Status == ConversationStatus.Resolved);
         var active = await _db.Conversations.CountAsync(c => c.BusinessId == bid && c.Status == ConversationStatus.BotActive);
         var products = await _db.Products.CountAsync(p => p.BusinessId == bid && p.IsActive);
-        var byChannel = await _db.Conversations.Where(c => c.BusinessId == bid).GroupBy(c => c.ChannelType)
-            .Select(g => new { Channel = g.Key.ToString(), Count = g.Count() }).ToListAsync();
-        var daily = await _db.Conversations.Where(c => c.BusinessId == bid && c.CreatedAt >= since)
-            .GroupBy(c => c.CreatedAt.Date).Select(g => new { Date = g.Key.ToString("yyyy-MM-dd"), Count = g.Count() })
-            .OrderBy(x => x.Date).ToListAsync();
-        return Json(new { totalConversations = total, resolvedConversations = resolved, activeConversations = active, totalProducts = products, resolutionRate = total > 0 ? Math.Round((double)resolved / total * 100, 1) : 0, conversationsByChannel = byChannel, dailyConversations = daily });
+        var byChannel = await _db.Conversations
+            .AsNoTracking()
+            .Where(c => c.BusinessId == bid)
+            .GroupBy(c => c.ChannelType)
+            .Select(g => new { Channel = g.Key, Count = g.Count() })
+            .ToListAsync();
+        var byChannelMapped = byChannel.Select(x => new { Channel = x.Channel.ToString(), x.Count }).ToList();
+
+        var daily = await _db.Conversations
+            .AsNoTracking()
+            .Where(c => c.BusinessId == bid && c.CreatedAt >= since)
+            .GroupBy(c => new { c.CreatedAt.Year, c.CreatedAt.Month, c.CreatedAt.Day })
+            .Select(g => new { Year = g.Key.Year, Month = g.Key.Month, Day = g.Key.Day, Count = g.Count() })
+            .OrderBy(x => x.Year).ThenBy(x => x.Month).ThenBy(x => x.Day)
+            .ToListAsync();
+        var dailyMapped = daily
+            .Select(x => new { Date = new DateTime(x.Year, x.Month, x.Day).ToString("yyyy-MM-dd"), x.Count })
+            .ToList();
+
+        return Json(new { totalConversations = total, resolvedConversations = resolved, activeConversations = active, totalProducts = products, resolutionRate = total > 0 ? Math.Round((double)resolved / total * 100, 1) : 0, conversationsByChannel = byChannelMapped, dailyConversations = dailyMapped });
     }
 }

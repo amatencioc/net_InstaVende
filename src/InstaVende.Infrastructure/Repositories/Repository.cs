@@ -17,9 +17,9 @@ public class Repository<T> : IRepository<T> where T : class
     }
 
     public async Task<T?> GetByIdAsync(int id) => await _dbSet.FindAsync(id);
-    public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
+    public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.AsNoTracking().ToListAsync();
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
-        => await _dbSet.Where(predicate).ToListAsync();
+        => await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
 
     public async Task<T> AddAsync(T entity) { await _dbSet.AddAsync(entity); return entity; }
     public Task UpdateAsync(T entity) { _dbSet.Update(entity); return Task.CompletedTask; }

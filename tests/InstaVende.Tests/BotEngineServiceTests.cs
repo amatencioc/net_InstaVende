@@ -29,7 +29,7 @@ public class BotEngineServiceTests
         var logger = Mock.Of<ILogger<BotEngineService>>();
 
         var env = new Mock<IWebHostEnvironment>();
-        env.Setup(e => e.ContentRootPath).Returns((string)Path.GetTempPath());
+        env.Setup(e => e.ContentRootPath).Returns(Path.GetTempPath());
         var promptBuilderLogger = Mock.Of<ILogger<MasterPromptBuilder>>();
         var promptBuilder = new MasterPromptBuilder(env.Object, promptBuilderLogger);
 
@@ -123,6 +123,8 @@ public class BotEngineServiceTests
     public async Task ProcessMessage_KnowledgeBaseMatch_ReturnsAnswer()
     {
         using var db = CreateDb();
+        // BotEngineService loads cfg.Business — seed a minimal Business to prevent null-ref
+        db.Businesses.Add(new Business { Id = 4, UserId = "user4", Name = "TestBiz4" });
         var config = new BotConfig
         {
             BusinessId = 4,

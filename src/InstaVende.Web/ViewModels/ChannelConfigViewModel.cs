@@ -17,12 +17,8 @@ public class ChannelConfigViewModel
     public bool IsActive { get; set; } = true;
 }
 
-public class EmbeddedSignupCallbackViewModel
+public class QrConnectionViewModel
 {
-    /// <summary>Authorization code returned by Meta's Embedded Signup JS SDK.</summary>
-    public string Code { get; set; } = string.Empty;
-    /// <summary>WhatsApp Business Account ID (from session_info extras).</summary>
-    public string? WabaId { get; set; }
-    /// <summary>Phone Number ID (from session_info extras, if available).</summary>
-    public string? PhoneNumberId { get; set; }
+    /// <summary>Phone number or WID reported by the local whatsapp-web.js client.</summary>
+    public string? Phone { get; set; }
 }

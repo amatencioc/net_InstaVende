@@ -27,12 +27,14 @@ public class RemindersController : Controller
         if (biz == null) return RedirectToAction("Index", "Dashboard");
 
         var reminders = await _db.Reminders
+            .AsNoTracking()
             .Include(r => r.Contact)
             .Where(r => r.BusinessId == biz.Id)
             .OrderBy(r => r.ScheduledAt)
             .ToListAsync();
 
         var contacts = await _db.Contacts
+            .AsNoTracking()
             .Where(c => c.BusinessId == biz.Id)
             .Select(c => new { c.Id, c.Name, c.Phone })
             .ToListAsync();
@@ -41,7 +43,7 @@ public class RemindersController : Controller
         return View(reminders.Select(r => MapToVm(r)).ToList());
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Save([FromBody] ReminderViewModel vm)
     {
         var biz = await _user.GetBusinessAsync();
@@ -77,22 +79,24 @@ public class RemindersController : Controller
         return Json(new { ok = true, id = entity.Id });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel(int id)
     {
         var biz = await _user.GetBusinessAsync();
-        var entity = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == id && r.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var entity = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == id && r.BusinessId == biz.Id);
         if (entity == null) return Json(new { ok = false });
         entity.Status = ReminderStatus.Cancelled;
         await _db.SaveChangesAsync();
         return Json(new { ok = true });
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         var biz = await _user.GetBusinessAsync();
-        var entity = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == id && r.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var entity = await _db.Reminders.FirstOrDefaultAsync(r => r.Id == id && r.BusinessId == biz.Id);
         if (entity == null) return Json(new { ok = false });
         _db.Reminders.Remove(entity);
         await _db.SaveChangesAsync();

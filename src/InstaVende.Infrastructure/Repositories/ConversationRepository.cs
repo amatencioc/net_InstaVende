@@ -13,8 +13,8 @@ public class ConversationRepository : Repository<Conversation>, IConversationRep
     public async Task<IEnumerable<Conversation>> GetByBusinessIdAsync(int businessId, ChannelType? channel = null, ConversationStatus? status = null)
     {
         var query = _context.Conversations
+            .AsNoTracking()
             .Include(c => c.Contact)
-            .Include(c => c.Messages.OrderByDescending(m => m.SentAt).Take(1))
             .Where(c => c.BusinessId == businessId);
         if (channel.HasValue) query = query.Where(c => c.ChannelType == channel.Value);
         if (status.HasValue) query = query.Where(c => c.Status == status.Value);
@@ -23,12 +23,14 @@ public class ConversationRepository : Repository<Conversation>, IConversationRep
 
     public async Task<Conversation?> GetWithMessagesAsync(int conversationId)
         => await _context.Conversations
+            .AsNoTracking()
             .Include(c => c.Contact)
             .Include(c => c.Messages.OrderBy(m => m.SentAt))
             .FirstOrDefaultAsync(c => c.Id == conversationId);
 
     public async Task<Conversation?> FindByContactAndChannelAsync(int contactId, ChannelType channel)
         => await _context.Conversations
+            .AsNoTracking()
             .Where(c => c.ContactId == contactId && c.ChannelType == channel && c.Status != ConversationStatus.Resolved)
             .OrderByDescending(c => c.UpdatedAt)
             .FirstOrDefaultAsync();

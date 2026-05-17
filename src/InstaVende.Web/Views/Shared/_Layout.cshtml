@@ -17,75 +17,78 @@
 <!-- Sidebar overlay (mobile) -->
 <div class="sb-overlay" id="sbOverlay"></div>
 
-<!-- Sidebar icon-only -->
+<!-- Sidebar -->
 <aside class="app-sidebar" id="appSidebar">
     <div class="sb-logo">
-        <span class="sb-logo-text">IV<span>.</span></span>
+        <a asp-controller="Dashboard" asp-action="Index" class="sb-logo-text">Insta<span>Vende</span></a>
+        <button class="sb-collapse-btn" id="sbCollapseBtn" title="Colapsar menú">
+            <i class="bi bi-layout-sidebar-reverse" id="sbCollapseIcon"></i>
+        </button>
     </div>
     <nav class="sb-nav">
+        <div class="sb-section">Principal</div>
         <a asp-controller="Dashboard" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
-           title="Dashboard">
-            <i class="bi bi-speedometer2"></i>
-            <span class="sb-label">Inicio</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i class="bi bi-speedometer2"></i><span class="sb-link-text">Dashboard</span>
         </a>
         <a asp-controller="Inbox" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inbox" ? "active" : "")"
-           title="Mensajes">
-            <i class="bi bi-chat-dots"></i>
-            <span class="sb-label">Mensajes</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inbox" ? "active" : "")">
+            <i class="bi bi-chat-dots"></i><span class="sb-link-text">Mensajes</span>
             <span class="sb-badge" id="sbInboxCount" style="display:none">0</span>
         </a>
         <a asp-controller="Orders" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")"
-           title="Pedidos">
-            <i class="bi bi-bag-check"></i>
-            <span class="sb-label">Pedidos</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")">
+            <i class="bi bi-bag-check"></i><span class="sb-link-text">Pedidos</span>
         </a>
         <a asp-controller="Products" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")"
-           title="Productos">
-            <i class="bi bi-box-seam"></i>
-            <span class="sb-label">Productos</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")">
+            <i class="bi bi-box-seam"></i><span class="sb-link-text">Productos</span>
         </a>
+        <div class="sb-section">Vendedor</div>
         <a asp-controller="Vendedor" asp-action="Personalidad"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vendedor" ? "active" : "")"
-           title="Mi Vendedor">
-            <i class="bi bi-cpu"></i>
-            <span class="sb-label">Vendedor</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vendedor" ? "active" : "")">
+            <i class="bi bi-cpu"></i><span class="sb-link-text">Mi Vendedor</span>
+        </a>
+        <a asp-controller="ReminderTemplates" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReminderTemplates" ? "active" : "")">
+            <i class="bi bi-alarm"></i><span class="sb-link-text">Recordatorios</span>
         </a>
         <a asp-controller="Metricas" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Metricas" ? "active" : "")"
-           title="Metricas">
-            <i class="bi bi-graph-up-arrow"></i>
-            <span class="sb-label">Metricas</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Metricas" ? "active" : "")">
+            <i class="bi bi-graph-up-arrow"></i><span class="sb-link-text">Métricas</span>
         </a>
+        <div class="sb-section">Cuenta</div>
         <a asp-controller="ChannelConfig" asp-action="WhatsApp"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChannelConfig" ? "active" : "")"
-           title="Canales">
-            <i class="bi bi-broadcast"></i>
-            <span class="sb-label">Canales</span>
-            <span class="sb-badge" id="sbChannelBadge" style="display:none">!</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChannelConfig" ? "active" : "")">
+            <i class="bi bi-broadcast"></i><span class="sb-link-text">Canales</span>
+            <span class="sb-badge" id="sbChannelBadge" style="display:none;background:#f59e0b">!</span>
         </a>
         <a asp-controller="AccountConfig" asp-action="Index"
-           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AccountConfig" ? "active" : "")"
-           title="Configuracion">
-            <i class="bi bi-gear"></i>
-            <span class="sb-label">Config</span>
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AccountConfig" ? "active" : "")">
+            <i class="bi bi-building-gear"></i><span class="sb-link-text">Configuración</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Business"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")">
+            <i class="bi bi-person-gear"></i><span class="sb-link-text">Mi perfil</span>
         </a>
     </nav>
     <div class="sb-bottom">
-        <div class="sb-avatar" title="@User.Identity?.Name">@(User.Identity?.Name?.Substring(0,1).ToUpper() ?? "U")</div>
-        <form asp-controller="Account" asp-action="Logout" method="post" class="d-contents">
+        <div class="sb-user">
+            <div class="sb-avatar">@(User.Identity?.Name?.Substring(0,1).ToUpper() ?? "U")</div>
+            <div class="sb-user-info">
+                <div class="sb-user-name">@User.Identity?.Name</div>
+                <div class="sb-user-role">InstaVende Pro</div>
+            </div>
+        </div>
+        <form asp-controller="Account" asp-action="Logout" method="post">
             @Html.AntiForgeryToken()
-            <button type="submit" class="sb-logout" title="Cerrar sesion">
+            <button type="submit" class="sb-logout">
                 <i class="bi bi-box-arrow-right"></i>
+                <span class="sb-link-text">Cerrar sesión</span>
             </button>
         </form>
     </div>
 </aside>
-
-<!-- Topbar -->
 <header class="app-topbar">
     <div class="topbar-left">
         <button class="sb-toggle" id="sbToggle"><i class="bi bi-list"></i></button>
@@ -120,12 +123,49 @@ else
   fetch('/ChannelConfig/IsConnected').then(r => r.json()).then(d => {
     if (!d.connected) { var b = document.getElementById('sbChannelBadge'); if(b) b.style.display=''; }
   }).catch(()=>{});
-  var sbToggle = document.getElementById('sbToggle');
-  var sidebar = document.getElementById('appSidebar');
-  var overlay = document.getElementById('sbOverlay');
+
+  var sidebar   = document.getElementById('appSidebar');
+  var overlay   = document.getElementById('sbOverlay');
+  var sbToggle  = document.getElementById('sbToggle');       // mobile hamburger (topbar)
+  var collapseBtn = document.getElementById('sbCollapseBtn'); // desktop toggle (sidebar header)
+  var collapseIcon = document.getElementById('sbCollapseIcon');
+
+  // Desktop collapse/expand — persists in localStorage
+  var COLLAPSED_KEY = 'sb_collapsed';
+  function applySidebarState(collapsed) {
+    if (collapsed) {
+      sidebar.classList.add('collapsed');
+      document.body.classList.add('sb-collapsed');
+      if (collapseIcon) { collapseIcon.className = 'bi bi-layout-sidebar'; }
+    } else {
+      sidebar.classList.remove('collapsed');
+      document.body.classList.remove('sb-collapsed');
+      if (collapseIcon) { collapseIcon.className = 'bi bi-layout-sidebar-reverse'; }
+    }
+  }
+  // Restore saved state
+  applySidebarState(localStorage.getItem(COLLAPSED_KEY) === '1');
+
+  if (collapseBtn) {
+    collapseBtn.addEventListener('click', function() {
+      var isNowCollapsed = !sidebar.classList.contains('collapsed');
+      applySidebarState(isNowCollapsed);
+      localStorage.setItem(COLLAPSED_KEY, isNowCollapsed ? '1' : '0');
+    });
+  }
+
+  // Mobile toggle
   if (sbToggle) {
-    sbToggle.addEventListener('click', function () { sidebar.classList.toggle('open'); overlay.classList.toggle('open'); });
-    overlay.addEventListener('click', function () { sidebar.classList.remove('open'); overlay.classList.remove('open'); });
+    sbToggle.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    });
+  }
+  if (overlay) {
+    overlay.addEventListener('click', function() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    });
   }
 </script>
 @await RenderSectionAsync("Scripts", required: false)

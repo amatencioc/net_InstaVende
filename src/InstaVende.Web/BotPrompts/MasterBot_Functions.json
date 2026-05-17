@@ -2,15 +2,15 @@
   "functions": [
     {
       "name": "buscar_productos",
-      "description": "Busca productos en el catálogo según criterios del usuario. Úsala siempre antes de presentar productos.",
+      "description": "Busca productos en el catï¿½logo segï¿½n criterios del usuario. ï¿½sala siempre antes de presentar productos.",
       "parameters": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "Término de búsqueda libre" },
-          "categoria": { "type": "string", "description": "Categoría o subcategoría del producto" },
+          "query": { "type": "string", "description": "Tï¿½rmino de bï¿½squeda libre" },
+          "categoria": { "type": "string", "description": "Categorï¿½a o subcategorï¿½a del producto" },
           "marca": { "type": "string", "description": "Marca preferida" },
-          "precio_min": { "type": "number", "description": "Precio mínimo" },
-          "precio_max": { "type": "number", "description": "Precio máximo" },
+          "precio_min": { "type": "number", "description": "Precio mï¿½nimo" },
+          "precio_max": { "type": "number", "description": "Precio mï¿½ximo" },
           "orden": {
             "type": "string",
             "enum": ["relevancia", "precio_asc", "precio_desc", "rating", "mas_vendido"],
@@ -23,34 +23,34 @@
     },
     {
       "name": "obtener_producto",
-      "description": "Obtiene información completa de un producto por su ID.",
+      "description": "Obtiene informaciï¿½n completa de un producto por su ID.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string", "description": "ID único del producto" }
+          "product_id": { "type": "string", "description": "ID ï¿½nico del producto" }
         },
         "required": ["product_id"]
       }
     },
     {
       "name": "obtener_imagen_producto",
-      "description": "Obtiene la URL de la imagen de un producto. SIEMPRE úsala al presentar un producto.",
+      "description": "Obtiene la URL de la imagen de un producto. SIEMPRE ï¿½sala al presentar un producto.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string", "description": "ID único del producto" }
+          "product_id": { "type": "string", "description": "ID ï¿½nico del producto" }
         },
         "required": ["product_id"]
       }
     },
     {
       "name": "buscar_alternativas",
-      "description": "Encuentra productos similares cuando el producto exacto no está disponible.",
+      "description": "Encuentra productos similares cuando el producto exacto no estï¿½ disponible.",
       "parameters": {
         "type": "object",
         "properties": {
           "product_id": { "type": "string", "description": "ID del producto original" },
-          "max_resultados": { "type": "integer", "default": 3, "description": "Número máximo de alternativas" }
+          "max_resultados": { "type": "integer", "default": 3, "description": "Nï¿½mero mï¿½ximo de alternativas" }
         },
         "required": ["product_id"]
       }
@@ -70,7 +70,7 @@
     },
     {
       "name": "calcular_descuento",
-      "description": "Calcula el descuento máximo permitido según el nivel de negociación. No superar el nivel 3.",
+      "description": "Calcula el descuento mï¿½ximo permitido segï¿½n el nivel de negociaciï¿½n. No superar el nivel 3.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -80,7 +80,7 @@
           "intento_negociacion": {
             "type": "integer",
             "enum": [1, 2, 3],
-            "description": "Nivel de negociación: 1=bajo, 2=medio, 3=máximo"
+            "description": "Nivel de negociaciï¿½n: 1=bajo, 2=medio, 3=mï¿½ximo"
           }
         },
         "required": ["product_id", "intento_negociacion"]
@@ -88,7 +88,7 @@
     },
     {
       "name": "calcular_envio",
-      "description": "Calcula costo y tiempo de envío estimado.",
+      "description": "Calcula costo y tiempo de envï¿½o estimado.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -109,7 +109,7 @@
     },
     {
       "name": "crear_pedido",
-      "description": "Inicia el proceso de creación de pedido. Usar solo cuando el cliente confirma la compra.",
+      "description": "Inicia el proceso de creaciï¿½n de pedido. Usar solo cuando el cliente confirma la compra.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -145,7 +145,7 @@
     },
     {
       "name": "transferir_a_humano",
-      "description": "Transfiere la conversación a un agente humano. Incluir siempre un resumen detallado.",
+      "description": "Transfiere la conversaciï¿½n a un agente humano. Incluir siempre un resumen detallado.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -175,7 +175,7 @@
     },
     {
       "name": "obtener_promociones",
-      "description": "Obtiene promociones y descuentos vigentes para una categoría o segmento.",
+      "description": "Obtiene promociones y descuentos vigentes para una categorï¿½a o segmento.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -186,7 +186,7 @@
     },
     {
       "name": "registrar_interes",
-      "description": "Registra el interés del cliente en un producto sin stock para notificarle cuando esté disponible.",
+      "description": "Registra el interï¿½s del cliente en un producto sin stock para notificarle cuando estï¿½ disponible.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -203,7 +203,7 @@
     },
     {
       "name": "obtener_historial_cliente",
-      "description": "Obtiene historial de compras y preferencias del cliente para personalizar la atención.",
+      "description": "Obtiene historial de compras y preferencias del cliente para personalizar la atenciï¿½n.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -214,7 +214,7 @@
     },
     {
       "name": "rastrear_pedido",
-      "description": "Rastrea el estado de un pedido existente por su número de orden.",
+      "description": "Rastrea el estado de un pedido existente por su nï¿½mero de orden.",
       "parameters": {
         "type": "object",
         "properties": {

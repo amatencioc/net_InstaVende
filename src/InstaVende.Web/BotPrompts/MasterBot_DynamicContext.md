@@ -58,3 +58,10 @@ Sitio web: {{COMPANY_WEBSITE}}
 Teléfono: {{COMPANY_PHONE}}
 Email: {{COMPANY_EMAIL}}
 Redes sociales: {{SOCIAL_MEDIA}}
+
+[BASE DE CONOCIMIENTO DEL NEGOCIO]
+La siguiente información ha sido configurada por el administrador del negocio.
+Úsala como fuente de verdad para responder preguntas sobre productos, políticas, horarios y más.
+Si la respuesta está aquí, úsala directamente sin inventar.
+
+{{KNOWLEDGE_BASE | "Sin base de conocimiento configurada aún."}}

@@ -56,6 +56,7 @@ builder.Services.AddSingleton<MasterPromptBuilder>();
 builder.Services.AddScoped<IBotEngineService, BotEngineService>();
 builder.Services.AddScoped<IChannelMessageSender, WhatsAppService>();
 builder.Services.AddScoped<IChannelMessageSender, MetaMessengerService>();
+builder.Services.AddScoped<IChannelMessageSender, InstagramService>();
 
 builder.Services.AddControllersWithViews(o =>
     o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
@@ -65,11 +66,22 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var rm = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    foreach (var role in new[] { "Admin", "Merchant" })
-        if (!await rm.RoleExistsAsync(role)) await rm.CreateAsync(new IdentityRole(role));
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    if (db.Database.GetPendingMigrations().Any()) await db.Database.MigrateAsync();
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        if (db.Database.GetPendingMigrations().Any())
+            await db.Database.MigrateAsync();
+
+        var rm = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        foreach (var role in new[] { "Admin", "Merchant", "Member" })
+            if (!await rm.RoleExistsAsync(role))
+                await rm.CreateAsync(new IdentityRole(role));
+    }
+    catch (Exception ex)
+    {
+        var startupLog = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        startupLog.LogError(ex, "Startup seeding failed — the application may not function correctly");
+    }
 }
 
 if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Shared/Error"); app.UseHsts(); }

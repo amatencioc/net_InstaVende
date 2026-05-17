@@ -22,8 +22,8 @@ public class ProductsController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return RedirectToAction("Register", "Account");
-        var cats = await _db.ProductCategories.Where(c => c.BusinessId == bid).ToListAsync();
-        var products = await _db.Products.Include(p => p.Category).Where(p => p.BusinessId == bid).OrderByDescending(p => p.CreatedAt).ToListAsync();
+        var cats = await _db.ProductCategories.AsNoTracking().Where(c => c.BusinessId == bid).ToListAsync();
+        var products = await _db.Products.AsNoTracking().Include(p => p.Category).Where(p => p.BusinessId == bid).OrderByDescending(p => p.CreatedAt).ToListAsync();
         return View(new ProductListViewModel
         {
             Products = products.Select(Map),
@@ -36,7 +36,7 @@ public class ProductsController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return Unauthorized();
-        var q = _db.Products.Include(p => p.Category).Where(p => p.BusinessId == bid && p.IsActive);
+        var q = _db.Products.AsNoTracking().Include(p => p.Category).Where(p => p.BusinessId == bid && p.IsActive);
         if (!string.IsNullOrWhiteSpace(search)) q = q.Where(p => p.Name.Contains(search) || (p.Description != null && p.Description.Contains(search)));
         if (categoryId.HasValue) q = q.Where(p => p.CategoryId == categoryId);
         return Json((await q.OrderBy(p => p.Name).ToListAsync()).Select(Map));

@@ -27,15 +27,18 @@ public class AccountConfigController : Controller
         if (biz == null) return RedirectToAction("Register", "Account");
 
         var users = await _db.BusinessUsers
+            .AsNoTracking()
             .Include(bu => bu.User)
             .Where(bu => bu.BusinessId == biz.Id)
             .ToListAsync();
 
         var invitations = await _db.UserInvitations
+            .AsNoTracking()
             .Where(i => i.BusinessId == biz.Id && i.Status == InvitationStatus.Pending)
             .ToListAsync();
 
         var notifEmails = await _db.NotificationEmails
+            .AsNoTracking()
             .Where(n => n.BusinessId == biz.Id)
             .OrderBy(n => n.Id)
             .ToListAsync();
