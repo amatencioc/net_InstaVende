@@ -92,28 +92,25 @@ function createClient() {
                 '--safebrowsing-disable-auto-update',
                 '--password-store=basic',
                 '--use-mock-keychain',
-                // Speed up subsequent startups by keeping the disk cache warm
+                // Keep disk cache warm for faster subsequent startups
                 '--disk-cache-size=67108864',          // 64 MB cache
                 '--media-cache-size=16777216',          // 16 MB media cache
-                '--aggressive-cache-discard',
-                // Reduce process startup overhead
-                '--single-process',                    // eliminates renderer fork latency on Linux/Windows
-                '--js-flags=--max-old-space-size=256', // cap V8 heap to avoid OOM on low-RAM servers
             ],
         },
     });
 
     client.on('loading_screen', (percent, message) => {
-        log(`Loading ${percent}% — ${message}`);
+        log(`[Chrome] Loading ${percent}% — ${message}`);
+        if (percent === 0)  log('[Chrome] Browser launched, WhatsApp Web loading...');
+        if (percent === 100) log('[Chrome] WhatsApp Web fully loaded');
     });
 
     client.on('qr', async (qr) => {
-        log('QR received — scan with WhatsApp');
+        const sessionExists = fs.existsSync(path.join(SESSION_DIR, 'session'));
+        log(`[QR] QR event received — uptime ${Math.floor(process.uptime())}s (prior session: ${sessionExists ? 'yes (may be stale)' : 'none'})`);
         clearQrTimer();
         state.phase      = 'qr';
         state.clientInfo = null;
-        // Set expiry immediately so the browser can start the countdown
-        // while we encode the QR (encoding is fast but we don't block state update)
         state.qrDataUrl   = null;
         state.qrExpiresAt = new Date(Date.now() + QR_TTL_MS).toISOString();
 
@@ -121,8 +118,10 @@ function createClient() {
         setImmediate(async () => {
             try {
                 state.qrDataUrl = await qrcode.toDataURL(qr, { width: 280, margin: 2 });
+                const sizeKb    = Math.round(state.qrDataUrl.length / 1024);
+                log(`[QR] Encoded OK — ${sizeKb} KB, expires at ${state.qrExpiresAt} — ready for browser poll`);
             } catch (e) {
-                log(`QR encode error: ${e.message}`, 'error');
+                log(`[QR] Encode error: ${e.message}`, 'error');
                 state.qrDataUrl   = null;
                 state.qrExpiresAt = null;
             }
@@ -168,7 +167,7 @@ function createClient() {
             phone:    '+' + me.wid.user,
             pushname: me.pushname,
         };
-        log(`Connected as ${state.clientInfo.pushname} (${state.clientInfo.phone}) ?`);
+        log(`Connected as ${state.clientInfo.pushname} (${state.clientInfo.phone}) — uptime ${Math.floor(process.uptime())}s`);
     });
 
     client.on('disconnected', (reason) => {
@@ -191,25 +190,41 @@ function createClient() {
         scheduleReinit(5000);
     });
 
-                client.on('message', async (msg) => {
-                    if (msg.isGroupMsg || msg.from === 'status@broadcast') return;
-                    const from = msg.from.replace('@c.us', '');
-                    const body = msg.body?.trim();
-                    if (!body) return;
-                    log(`Incoming from ${from}: ${body.substring(0, 100)}`);
-                    await forwardWithRetry({ from, body, businessId: Number(BUSINESS_ID) });
-                });
+    client.on('message', async (msg) => {
+        if (msg.isGroupMsg || msg.from === 'status@broadcast') return;
+        const from = msg.from.replace('@c.us', '');
+        const body = msg.body?.trim();
+        if (!body) return;
+        log(`Incoming from ${from}: ${body.substring(0, 100)}`);
+        await forwardWithRetry({ from, body, businessId: Number(BUSINESS_ID) });
+    });
 
-                return client;
-            }
+    return client;
+}
 
-    function scheduleReinit(delayMs) {
+function scheduleReinit(delayMs) {
     setTimeout(() => {
-        log(`Reinitialising client (new instance)...`);
+        log(`Reinitialising client in ${delayMs}ms (new instance)...`);
         state.phase = 'initializing';
         clearChromeLocks();
+        log(`[Reinit] Chrome locks cleared, creating new client instance`);
         waClient = createClient();
+        if (!waClient) {
+            log('[Reinit] FATAL: createClient() returned null/undefined — aborting reinit', 'error');
+            return;
+        }
+        log(`[Reinit] waClient OK — calling initialize()...`);
+        // Per-reinit watchdog
+        const _reinitWatchdog = setTimeout(() => {
+            if (state.phase === 'initializing') {
+                log('Watchdog: reinit still stuck after 90 s — retrying', 'warn');
+                try { waClient.destroy().catch(() => {}); } catch (_) {}
+                scheduleReinit(10000);
+            }
+        }, 90_000);
+        _reinitWatchdog.unref();
         waClient.initialize().catch(err => {
+            clearTimeout(_reinitWatchdog);
             log(`Reinitialize error: ${err.message}`, 'error');
             state.phase = 'disconnected';
             scheduleReinit(10000); // back-off and retry
@@ -232,13 +247,46 @@ async function forwardWithRetry(payload, attempt = 1) {
 }
 
 // ?? Initialize ????????????????????????????????????????????????????????????????
+log(`Node.js ${process.version} — PID ${process.pid}`);
+log(`Session dir : ${SESSION_DIR}`);
+try {
+    const chromePath = require('puppeteer').executablePath();
+    log(`Chrome path : ${chromePath}`);
+    const fs2 = require('fs');
+    log(`Chrome exists: ${fs2.existsSync(chromePath)}`);
+} catch (e) {
+    log(`Could not resolve Chrome path: ${e.message}`, 'warn');
+}
 clearChromeLocks();
 waClient = createClient();
-waClient.initialize().catch(err => {
-    log(`Initialize error: ${err.message}`, 'error');
-    state.phase = 'disconnected';
-    scheduleReinit(5000);
-});
+
+// Watchdog null-check: createClient() should never return null/undefined,
+// but if it does (e.g. future refactor error) we log clearly instead of
+// crashing with a cryptic "Cannot read properties of undefined" error.
+if (!waClient) {
+    log('FATAL: createClient() returned null/undefined — cannot initialize. Check createClient() for early returns.', 'error');
+    process.exit(1);
+}
+log(`[Init] waClient instance created OK, calling initialize()...`);
+
+// Watchdog: if still in 'initializing' after 90 s something went wrong
+const _initWatchdog = setTimeout(() => {
+    if (state.phase === 'initializing') {
+        log('Watchdog: still initializing after 90 s — forcing reinit', 'warn');
+        try { waClient.destroy().catch(() => {}); } catch (_) {}
+        scheduleReinit(3000);
+    }
+}, 90_000);
+_initWatchdog.unref(); // don't keep the process alive just for the watchdog
+
+waClient.initialize()
+    .then(() => log('[Init] initialize() resolved — waiting for QR or auth events...'))
+    .catch(err => {
+        clearTimeout(_initWatchdog);
+        log(`Initialize error: ${err.message}`, 'error');
+        state.phase = 'disconnected';
+        scheduleReinit(5000);
+    });
 
 // ?? Express API ???????????????????????????????????????????????????????????????
 const app = express();
@@ -342,17 +390,20 @@ function clearChromeLocks() {
     const lockFiles = ['lockfile', 'SingletonLock', 'SingletonCookie', 'SingletonSocket'];
     // LocalAuth nests the profile under SESSION_DIR/session/
     const profileDir = path.join(SESSION_DIR, 'session');
+    let cleared = 0;
     for (const name of lockFiles) {
         const p = path.join(profileDir, name);
         try {
             if (fs.existsSync(p)) {
                 fs.rmSync(p, { force: true });
-                log(`Removed stale lock: ${name}`);
+                log(`[Locks] Removed stale lock: ${name}`);
+                cleared++;
             }
         } catch (e) {
-            log(`Could not remove lock ${name}: ${e.message}`, 'warn');
+            log(`[Locks] Could not remove lock ${name}: ${e.message}`, 'warn');
         }
     }
+    if (cleared === 0) log('[Locks] No stale Chrome locks found');
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

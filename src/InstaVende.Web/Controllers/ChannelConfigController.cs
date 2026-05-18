@@ -23,6 +23,7 @@ public class ChannelConfigController : Controller
     private readonly IHttpClientFactory _http;
     private readonly ILogger<ChannelConfigController> _logger;
     private readonly IMemoryCache _cache;
+    private readonly WaClientHostedService _waService;
 
     public ChannelConfigController(
         AppDbContext db,
@@ -31,18 +32,21 @@ public class ChannelConfigController : Controller
         IOptions<WhatsAppClientOptions> waOptions,
         IHttpClientFactory http,
         ILogger<ChannelConfigController> logger,
-        IMemoryCache cache)
+        IMemoryCache cache,
+        WaClientHostedService waService)
     {
-        _db     = db;
-        _cu     = cu;
-        _dp     = dp;
-        _waOpts = waOptions.Value;
-        _http   = http;
-        _logger = logger;
-        _cache  = cache;
+        _db        = db;
+        _cu        = cu;
+        _dp        = dp;
+        _waOpts    = waOptions.Value;
+        _http      = http;
+        _logger    = logger;
+        _cache     = cache;
+        _waService = waService;
     }
 
-    private const string WaOfflineCacheKey = "wa_offline";
+    private const string WaOfflineCacheKey   = "wa_offline";
+    private const string WaFailCountCacheKey = "wa_fail_count";
     private string WaUrl        => _waOpts.BaseUrl;
     private string WaClientPath => Path.IsPathRooted(_waOpts.ClientPath)
         ? _waOpts.ClientPath
@@ -169,8 +173,15 @@ public class ChannelConfigController : Controller
     {
         const string offline = "{\"state\":\"disconnected\",\"connected\":false,\"qrDataUrl\":null,\"qrExpiresAt\":null,\"info\":null}";
 
-        if (_cache.TryGetValue(WaOfflineCacheKey, out _))
+        // Solo usamos la caché offline para evitar saturar Node cuando está confirmado muerto
+        // Y SOLO si el proceso ya no está intentando arrancar (no tenemos proceso vivo registrado).
+        // Esto permite que los polls lleguen a Node durante el startup de Puppeteer (~30-60 s).
+        bool processIsLaunching = !_waService.IsRestarting && _cache.TryGetValue(WaOfflineCacheKey, out _);
+        if (processIsLaunching)
+        {
+            IncrementFailCounterAndMaybeRestart();
             return Content(offline, "application/json");
+        }
 
         try
         {
@@ -179,24 +190,74 @@ public class ChannelConfigController : Controller
             if (!resp.IsSuccessStatusCode)
             {
                 SetOfflineCache(TimeSpan.FromSeconds(4));
+                IncrementFailCounterAndMaybeRestart();
                 return Content(offline, "application/json");
             }
             var body = await resp.Content.ReadAsStringAsync();
             JsonDocument.Parse(body).Dispose(); // validate JSON before forwarding
+            // Node respondió OK — limpiar toda la caché de fallos
+            _cache.Remove(WaOfflineCacheKey);
+            _cache.Remove(WaFailCountCacheKey);
             return Content(body, "application/json");
         }
         catch (Exception ex) when (ex is TaskCanceledException or HttpRequestException)
         {
             _logger.LogDebug("WA client offline at {Url} (expected when not running)", WaUrl);
             SetOfflineCache(TimeSpan.FromSeconds(4));
+            IncrementFailCounterAndMaybeRestart();
             return Content(offline, "application/json");
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "WA client unexpected error at {Url}", WaUrl);
             SetOfflineCache(TimeSpan.FromSeconds(4));
+            IncrementFailCounterAndMaybeRestart();
             return Content(offline, "application/json");
         }
+    }
+
+    /// <summary>
+    /// Incrementa el contador de fallos consecutivos y dispara el auto-restart
+    /// cuando se alcanza <see cref="WhatsAppClientOptions.OfflineFailThreshold"/>.
+    /// Se llama tanto en fallos HTTP reales como en polls con caché offline activa,
+    /// de modo que el umbral se evalúa en cada poll independientemente del TTL del caché.
+    /// </summary>
+    private void IncrementFailCounterAndMaybeRestart()
+    {
+        var threshold = Math.Max(1, _waOpts.OfflineFailThreshold);
+        var fails = _cache.GetOrCreate(WaFailCountCacheKey, e =>
+        {
+            e.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2);
+            return 0;
+        });
+        fails++;
+        _cache.Set(WaFailCountCacheKey, fails, TimeSpan.FromMinutes(2));
+
+        if (fails >= threshold)
+        {
+            _logger.LogWarning(
+                "WaStatus: Node offline for {Count} consecutive polls (threshold {Threshold}) — triggering auto-restart.",
+                fails, threshold);
+            _cache.Remove(WaFailCountCacheKey);
+            _ = _waService.RestartIfDeadAsync(CancellationToken.None);
+        }
+    }
+
+    /// <summary>
+    /// Devuelve si hay un reinicio del proceso Node en curso y el número de
+    /// fallos consecutivos actuales, para que la UI pueda mostrar un contador
+    /// de reintentos junto al mensaje "Reiniciando servicio…".
+    /// GET /ChannelConfig/WaRestartStatus
+    /// </summary>
+    [HttpGet]
+    public IActionResult WaRestartStatus()
+    {
+        var failCount = _cache.TryGetValue(WaFailCountCacheKey, out int f) ? f : 0;
+        return Json(new
+        {
+            restarting = _waService.IsRestarting,
+            failCount,
+        });
     }
 
     private void SetOfflineCache(TimeSpan ttl)
@@ -236,6 +297,7 @@ public class ChannelConfigController : Controller
         if (await WaIsReachableAsync())
         {
             _cache.Remove(WaOfflineCacheKey);
+            _cache.Remove(WaFailCountCacheKey);
             return Json(new { ok = true, message = "El servicio ya estaba corriendo." });
         }
 
@@ -249,31 +311,15 @@ public class ChannelConfigController : Controller
 
         try
         {
-            var psi = new System.Diagnostics.ProcessStartInfo
-            {
-                FileName               = "node",
-                Arguments              = "index.js",
-                WorkingDirectory       = waPath,
-                UseShellExecute        = false,
-                CreateNoWindow         = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError  = true,
-            };
+            // Delegate to the hosted service so the process is tracked under _process.
+            // waitSeconds=0 means "fire and return" — the browser poll loop will pick up the QR.
+            await _waService.EnsureRunningAsync(CancellationToken.None);
 
-            var proc = new System.Diagnostics.Process { StartInfo = psi };
-            proc.OutputDataReceived += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) _logger.LogInformation("[wa-client] {Line}", e.Data); };
-            proc.ErrorDataReceived  += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) _logger.LogWarning("[wa-client] {Line}", e.Data); };
-            proc.Start();
-            proc.BeginOutputReadLine();
-            proc.BeginErrorReadLine();
-
-            _logger.LogInformation("WaRestart: launched wa-client (PID {Pid}) from {Path}", proc.Id, waPath);
-
-            // Clear the offline cache so WaStatus proxy stops returning stale "offline" JSON.
+            // Clear stale caches so WaStatus starts hitting Node immediately.
             _cache.Remove(WaOfflineCacheKey);
+            _cache.Remove(WaFailCountCacheKey);
 
-            // Return immediately — the browser's poll loop (WaStatus) will pick up the QR
-            // as soon as Node generates it (~15-20 s).
+            _logger.LogInformation("WaRestart: EnsureRunningAsync completed — Node launching.");
             return Json(new { ok = true, message = "Servicio iniciado. Generando codigo QR..." });
         }
         catch (Exception ex)
@@ -334,5 +380,44 @@ public class ChannelConfigController : Controller
 
         await _db.SaveChangesAsync();
         return Json(new { success = true });
+    }
+
+    /// <summary>
+    /// Elimina la sesión de whatsapp-web.js guardada en disco para forzar
+    /// un QR fresco la próxima vez que el cliente Node arranque.
+    /// Útil cuando la sesión está corrupta o expirada y el QR nunca aparece.
+    /// POST /ChannelConfig/ClearWaSession
+    /// </summary>
+    [HttpPost, ValidateAntiForgeryToken]
+    public IActionResult ClearWaSession()
+    {
+        var sessionPath = Path.Combine(WaClientPath, "session");
+        try
+        {
+            // Detener Node antes de borrar la sesión para evitar conflictos con Chrome
+            _waService.StopNode();
+            _logger.LogInformation("ClearWaSession: Node process stopped before session deletion.");
+
+            if (Directory.Exists(sessionPath))
+            {
+                Directory.Delete(sessionPath, recursive: true);
+                _logger.LogInformation("ClearWaSession: session directory deleted ({Path})", sessionPath);
+            }
+            else
+            {
+                _logger.LogInformation("ClearWaSession: no session directory found at {Path}", sessionPath);
+            }
+
+            // Clear caches so the next WaStatus poll hits Node fresh
+            _cache.Remove(WaOfflineCacheKey);
+            _cache.Remove(WaFailCountCacheKey);
+
+            return Json(new { ok = true, message = "Sesión eliminada. El próximo inicio generará un QR fresco." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ClearWaSession: failed to delete session directory {Path}", sessionPath);
+            return Json(new { ok = false, message = $"No se pudo eliminar la sesión: {ex.Message}" });
+        }
     }
 }

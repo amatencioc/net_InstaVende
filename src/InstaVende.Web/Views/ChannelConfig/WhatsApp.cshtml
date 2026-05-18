@@ -14,6 +14,9 @@
     </nav>
     <h1 class="topbar-page-title mb-0"><i class="bi bi-whatsapp me-2" style="color:#25D366"></i>WhatsApp</h1>
     <p class="text-muted small mb-0 mt-1">Conecta tu numero escaneando el codigo QR desde tu celular</p>
+    <div class="mt-2">
+        <span id="svcBadge" class="badge rounded-pill px-3 py-2" style="font-size:.78rem;display:none"></span>
+    </div>
 </div>
 
 <div class="wa-layout">
@@ -133,10 +136,18 @@ else
                     <i class="bi bi-exclamation-triangle-fill text-warning d-block mb-2" style="font-size:2rem"></i>
                     <p class="fw-semibold mb-1" style="font-size:.9rem;color:#1e293b">No se pudo mostrar el codigo QR.</p>
                     <p id="errorDetail" class="text-muted mb-4" style="font-size:.82rem">El servicio no esta disponible.</p>
-                    <button class="btn btn-success px-5" id="btnGetQr" onclick="WaQr.getQr()">
-                        <i class="bi bi-qr-code me-2"></i>Obtener codigo QR
-                    </button>
-                    <p id="restartMsg" class="mt-3 mb-0 small"></p>
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <button class="btn btn-success px-4" id="btnGetQr" onclick="WaQr.getQr()">
+                            <i class="bi bi-qr-code me-2"></i>Obtener codigo QR
+                        </button>
+                        <button class="btn btn-outline-secondary px-4" id="btnClearSession" onclick="WaQr.clearSession()" title="Elimina la sesion guardada para forzar un QR fresco">
+                            <i class="bi bi-trash me-1"></i>Limpiar sesion
+                        </button>
+                    </div>
+                    <p class="text-muted mt-2 mb-0" style="font-size:.75rem">
+                        ¿El QR nunca aparece? Usa <strong>Limpiar sesion</strong> para borrar una sesion corrupta.
+                    </p>
+                    <p id="restartMsg" class="mt-2 mb-0 small"></p>
                 </div>
 
                 <!-- Barra de estado (visible cuando QR o auth) -->
@@ -199,22 +210,26 @@ else
 (function () {
   'use strict';
 
-  var STATUS_URL  = '/ChannelConfig/WaStatus';
-  var SAVE_URL    = '/ChannelConfig/SaveQrConnection';
-  var RESTART_URL = '/ChannelConfig/WaRestart';
+  var STATUS_URL          = '/ChannelConfig/WaStatus';
+  var SAVE_URL            = '/ChannelConfig/SaveQrConnection';
+  var RESTART_URL         = '/ChannelConfig/WaRestart';
+  var RESTART_STATUS_URL  = '/ChannelConfig/WaRestartStatus';
+  var CLEAR_SESSION_URL   = '/ChannelConfig/ClearWaSession';
   var QR_TTL_MS   = 18000;
   var MAX_ERRORS  = 8;
   var POLL_FAST   = 1000;
   var POLL_NORMAL = 2000;
   var POLL_SLOW   = 5000;   // used after 'disconnected' — Node reinits in ~5s
 
-  var _timer      = null;
-  var _cTimer     = null;
-  var _errors     = 0;
-  var _lastQrUrl  = null;
-  var _lastQrHash = null;   // ETag surrogate: skip re-rendering if QR unchanged
-  var _saving     = false;
-  var _restarting = false;
+  var _timer           = null;
+  var _cTimer          = null;
+  var _rsTimer         = null;  // restart-status poll timer
+  var _errors          = 0;
+  var _lastQrUrl       = null;
+  var _lastQrHash      = null;   // ETag surrogate: skip re-rendering if QR unchanged
+  var _saving          = false;
+  var _restarting      = false;
+  var _restartAttempts = 0;      // número de reintentos auto-restart visibles en la UI
 
   var el = {
     viewSpinner:   document.getElementById('viewSpinner'),
@@ -230,22 +245,48 @@ else
     statusText:    document.getElementById('statusText'),
     errorDetail:   document.getElementById('errorDetail'),
     btnGetQr:      document.getElementById('btnGetQr'),
+    btnClearSession: document.getElementById('btnClearSession'),
     restartMsg:    document.getElementById('restartMsg'),
   };
 
   // Guard: only active on the QR / not-connected page
-  if (!el.viewSpinner) return;
+  if (!el.viewSpinner) {
+    // En la vista conectada aún queremos el indicador de servicio
+    (function svcIndicatorConnected() {
+      var badge = document.getElementById('svcBadge');
+      if (!badge) return;
+      function updateBadge() {
+        fetch(STATUS_URL, { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d) { badge.style.display = 'none'; return; }
+            var online = d.connected === true || (d.state && d.state !== 'disconnected');
+            badge.style.display    = '';
+            badge.style.background = online ? '#dcfce7' : '#fee2e2';
+            badge.style.color      = online ? '#166534' : '#991b1b';
+            badge.innerHTML = online
+              ? '<i class="bi bi-circle-fill me-1" style="font-size:.55rem;vertical-align:middle"></i>Servicio online'
+              : '<i class="bi bi-circle-fill me-1" style="font-size:.55rem;vertical-align:middle"></i>Servicio offline';
+          })
+          .catch(function () { badge.style.display = 'none'; });
+      }
+      updateBadge();
+      setInterval(updateBadge, 5000);
+    }());
+    return;
+  }
 
   // Public API
-  window.WaQr = { getQr: getQr, start: start };
+  window.WaQr = { getQr: getQr, start: start, clearSession: clearSession };
 
   // ?? helpers ???????????????????????????????????????????????????????????????
   function tok() {
     var inp = document.querySelector('input[name="__RequestVerificationToken"]');
     return inp ? inp.value : '';
   }
-  function clearTimer()     { if (_timer)  { clearTimeout(_timer);  _timer  = null; } }
-  function clearCountdown() { if (_cTimer) { clearTimeout(_cTimer); _cTimer = null; } }
+  function clearTimer()             { if (_timer)   { clearTimeout(_timer);   _timer   = null; } }
+  function clearCountdown()         { if (_cTimer)  { clearTimeout(_cTimer);  _cTimer  = null; } }
+  function clearRestartStatusTimer(){ if (_rsTimer) { clearTimeout(_rsTimer); _rsTimer = null; } }
 
   function showView(name) {
     el.viewSpinner.style.display = name === 'spinner' ? '' : 'none';
@@ -265,6 +306,46 @@ else
       el.btnGetQr.disabled  = false;
       el.btnGetQr.innerHTML = '<i class="bi bi-qr-code me-2"></i>Obtener codigo QR';
     }
+    if (el.btnClearSession) {
+      el.btnClearSession.disabled  = false;
+      el.btnClearSession.innerHTML = '<i class="bi bi-trash me-1"></i>Limpiar sesion';
+    }
+  }
+
+  // ?? limpiar sesion Node (fuerza QR fresco) ???????????????????????????????????????????
+  function clearSession() {
+    if (el.btnClearSession) {
+      el.btnClearSession.disabled  = true;
+      el.btnClearSession.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Limpiando...';
+    }
+    if (el.restartMsg) el.restartMsg.textContent = '';
+
+    fetch(CLEAR_SESSION_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': tok() },
+      body:    '{}',
+    })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) {
+      if (el.restartMsg) {
+        el.restartMsg.textContent = d.message || (d.ok ? 'Sesion eliminada.' : 'No se pudo eliminar.');
+        el.restartMsg.className   = 'mt-2 mb-0 small ' + (d.ok ? 'text-success' : 'text-danger');
+      }
+      if (d.ok) {
+        // Esperar 1 s para que el usuario lea el mensaje y luego reiniciar servicio
+        setTimeout(function () { getQr(); }, 1200);
+      } else {
+        resetBtn();
+      }
+    })
+    .catch(function (err) {
+      console.error('[WaQr] clearSession:', err.message);
+      if (el.restartMsg) {
+        el.restartMsg.textContent = 'Error de red al limpiar la sesion.';
+        el.restartMsg.className   = 'mt-2 mb-0 small text-danger';
+      }
+      resetBtn();
+    });
   }
 
   // ?? countdown bar ?????????????????????????????????????????????????????????
@@ -292,12 +373,14 @@ else
 
   // ?? main poll loop ????????????????????????????????????????????????????????
   function start() {
-    _errors     = 0;
-    _saving     = false;
-    _restarting = false;
-    _lastQrUrl  = null;
-    _lastQrHash = null;
+    _errors          = 0;
+    _saving          = false;
+    _restarting      = false;
+    _lastQrUrl       = null;
+    _lastQrHash      = null;
+    _restartAttempts = 0;
     clearTimer();
+    clearRestartStatusTimer();
     stopCountdown();
     showView('spinner');
     if (el.spinnerText) el.spinnerText.textContent = 'Iniciando servicio...';
@@ -381,11 +464,28 @@ else
     }
 
     if (state === 'disconnected') {
-      // Node auto-reinitialises in ~5s — keep polling
+      // Consultar WaRestartStatus para distinguir entre "offline" y "reiniciando Puppeteer"
       stopCountdown();
-      if (el.spinnerText) el.spinnerText.textContent = 'Reconectando, espera un momento...';
       showView('spinner');
       setStatus('Esperando al servicio...', true);
+      clearRestartStatusTimer();
+      fetch(RESTART_STATUS_URL, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rs) {
+          if (!rs) return;
+          if (rs.restarting) {
+            var attempt = rs.failCount > 0 ? rs.failCount : (_restartAttempts + 1);
+            _restartAttempts = attempt;
+            if (el.spinnerText)
+              el.spinnerText.textContent = 'Reiniciando servicio... (intento ' + attempt + ')';
+          } else {
+            if (el.spinnerText)
+              el.spinnerText.textContent = 'Reconectando, espera un momento...';
+          }
+        })
+        .catch(function () {
+          if (el.spinnerText) el.spinnerText.textContent = 'Reconectando, espera un momento...';
+        });
       _timer = setTimeout(poll, POLL_SLOW);
       return;
     }
@@ -462,6 +562,29 @@ else
 
   // Boot
   start();
+
+  // ?? indicador online/offline del servicio Node (vista QR) ???????????????????
+  (function svcIndicator() {
+    var badge = document.getElementById('svcBadge');
+    if (!badge) return;
+    function updateBadge() {
+      fetch(STATUS_URL, { cache: 'no-store' })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          if (!d) { badge.style.display = 'none'; return; }
+          var online = d.connected === true || (d.state && d.state !== 'disconnected');
+          badge.style.display    = '';
+          badge.style.background = online ? '#dcfce7' : '#fee2e2';
+          badge.style.color      = online ? '#166534' : '#991b1b';
+          badge.innerHTML = online
+            ? '<i class="bi bi-circle-fill me-1" style="font-size:.55rem;vertical-align:middle"></i>Servicio online'
+            : '<i class="bi bi-circle-fill me-1" style="font-size:.55rem;vertical-align:middle"></i>Servicio offline';
+        })
+        .catch(function () { badge.style.display = 'none'; });
+    }
+    updateBadge();
+    setInterval(updateBadge, 5000);
+  }());
 
 }());
 

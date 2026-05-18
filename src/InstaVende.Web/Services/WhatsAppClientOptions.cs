@@ -17,6 +17,13 @@ public sealed class WhatsAppClientOptions
 
     /// <summary>Si es <c>true</c>, el hosted service arrancará el proceso Node al iniciar la app.</summary>
     public bool AutoStart { get; set; } = true;
+
+    /// <summary>
+    /// Número de polls consecutivos fallidos de <c>WaStatus</c> antes de disparar
+    /// un auto-restart del proceso Node. Mínimo 1. Por defecto 3.
+    /// Configurable en <c>appsettings.json</c> bajo <c>WhatsAppClient:OfflineFailThreshold</c>.
+    /// </summary>
+    public int OfflineFailThreshold { get; set; } = 3;
 }
 
 /// <summary>

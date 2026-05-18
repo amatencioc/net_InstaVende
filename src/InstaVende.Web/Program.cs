@@ -63,7 +63,8 @@ builder.Services.AddScoped<IChannelMessageSender, InstagramService>();
 builder.Services.AddControllersWithViews(o =>
     o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddHostedService<InstaVende.Web.Services.WaClientHostedService>();
+builder.Services.AddSingleton<InstaVende.Web.Services.WaClientHostedService>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<InstaVende.Web.Services.WaClientHostedService>());
 
 var app = builder.Build();
 
@@ -72,14 +73,16 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var pending = await db.Database.GetPendingMigrationsAsync();
-        if (pending.Any())
-            await db.Database.MigrateAsync();
+        // MigrateAsync ya consulta __EFMigrationsHistory internamente;
+        // GetPendingMigrationsAsync() es redundante y añade un roundtrip extra.
+        await db.Database.MigrateAsync();
 
         var rm = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        foreach (var role in new[] { "Admin", "Merchant", "Member" })
-            if (!await rm.RoleExistsAsync(role))
-                await rm.CreateAsync(new IdentityRole(role));
+        // Carga todos los roles en 1 query en lugar de N × RoleExistsAsync
+        var requiredRoles  = new[] { "Admin", "Merchant", "Member" };
+        var existingRoles  = rm.Roles.Select(r => r.Name).ToHashSet();
+        foreach (var role in requiredRoles.Where(r => !existingRoles.Contains(r)))
+            await rm.CreateAsync(new IdentityRole(role));
     }
     catch (Exception ex)
     {

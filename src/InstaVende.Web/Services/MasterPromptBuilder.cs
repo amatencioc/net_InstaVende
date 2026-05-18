@@ -19,6 +19,15 @@ public class MasterPromptBuilder
     private LlmConfig? _cachedLlmConfig;
     private readonly object _lock = new();
 
+    // Compilados una sola vez a nivel de tipo — evitan el parse del patrón en cada llamada
+    private static readonly Regex _defaultValueRegex = new(
+        @"\{\{[^|}]+\|\s*""([^""]*)""\s*\}\}",
+        RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
+    private static readonly Regex _unresolvedRegex = new(
+        @"\{\{[^}]+\}\}",
+        RegexOptions.Compiled, TimeSpan.FromMilliseconds(100));
+
     public MasterPromptBuilder(IWebHostEnvironment env, ILogger<MasterPromptBuilder> logger)
     {
         _basePath = Path.Combine(env.ContentRootPath, "BotPrompts");
@@ -110,13 +119,10 @@ public class MasterPromptBuilder
             template = template.Replace($"{{{{{kv.Key}}}}}", kv.Value);
 
         // 2. Replace {{KEY | "default"}} patterns — extract the default value
-        template = Regex.Replace(
-            template,
-            @"\{\{[^|}]+\|\s*""([^""]*)""\s*\}\}",
-            "$1");
+        template = _defaultValueRegex.Replace(template, "$1");
 
         // 3. Remove any remaining unresolved placeholders
-        template = Regex.Replace(template, @"\{\{[^}]+\}\}", string.Empty);
+        template = _unresolvedRegex.Replace(template, string.Empty);
 
         return template;
     }
