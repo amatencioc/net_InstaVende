@@ -150,7 +150,7 @@ var varModal = new bootstrap.Modal(document.getElementById('variantModal'));
 function openVariantModal() { varModal.show(); }
 function saveVariant() {
     var val = document.getElementById('vAttrValue').value.trim();
-    if (!val) { alert('El valor es obligatorio.'); return; }
+    if (!val) { ivAlert('El valor es obligatorio.', 'warning'); return; }
     $.post('/Products/AddVariant', {
         productId: @Model.Id,
         attributeName: document.getElementById('vAttrName').value,
@@ -159,12 +159,16 @@ function saveVariant() {
         stock: document.getElementById('vStock').value,
         sku: document.getElementById('vSku').value,
         __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val()
-    }).done(function(d) { if(d.ok) { varModal.hide(); location.reload(); } });
+    }).done(function(d) { if(d.ok) { varModal.hide(); location.reload(); } else { ivAlert('No se pudo agregar la variante.', 'danger'); } })
+      .fail(function() { ivAlert('Error de conexión al agregar variante.', 'danger'); });
 }
 function deleteVariant(id) {
-    if (!confirm('¿Eliminar esta variante?')) return;
-    $.post('/Products/DeleteVariant', { id, __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val() })
-        .done(function(d) { if(d.ok) location.reload(); });
+    ivConfirm({ title: '¿Eliminar variante?', message: 'Esta acción no se puede deshacer.', okLabel: 'Eliminar', type: 'danger' }).then(function(ok) {
+        if (!ok) return;
+        $.post('/Products/DeleteVariant', { id, __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val() })
+            .done(function(d) { if(d.ok) location.reload(); else { ivAlert('No se pudo eliminar la variante.', 'danger'); } })
+            .fail(function() { ivAlert('Error de conexión al eliminar.', 'danger'); });
+    });
 }
 </script>
 }

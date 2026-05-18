@@ -7,7 +7,7 @@ public class PaymentMethodViewModel
     public int Id { get; set; }
     public PaymentMethodType Type { get; set; }
     [Required(ErrorMessage = "El nombre es obligatorio.")]
-    [StringLength(150, ErrorMessage = "Máximo 150 caracteres.")]
+    [StringLength(150, ErrorMessage = "MÃ¡ximo 150 caracteres.")]
     public string Name { get; set; } = string.Empty;
     public string? Instructions { get; set; }
     public string? AccountAlias { get; set; }

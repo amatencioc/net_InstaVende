@@ -20,16 +20,16 @@ public class ReminderSegmentViewModel
     public CustomerSegment Segment { get; set; }
     public string SegmentLabel => Segment switch
     {
-        CustomerSegment.Frio => "Frío",
+        CustomerSegment.Frio => "FrÃ­o",
         CustomerSegment.Tibio => "Tibio",
         CustomerSegment.Caliente => "Caliente",
         _ => Segment.ToString()
     };
     public string SegmentNote => Segment switch
     {
-        CustomerSegment.Frio => "Para contactos fríos es mejor no insistir demasiado.",
-        CustomerSegment.Tibio => "Un único recordatorio estratégico para contactos tibios.",
-        CustomerSegment.Caliente => "Dos recordatorios para convertir el interés en compra.",
+        CustomerSegment.Frio => "Para contactos frÃ­os es mejor no insistir demasiado.",
+        CustomerSegment.Tibio => "Un Ãºnico recordatorio estratÃ©gico para contactos tibios.",
+        CustomerSegment.Caliente => "Dos recordatorios para convertir el interÃ©s en compra.",
         _ => ""
     };
     public int MaxReminders => Segment switch { CustomerSegment.Frio => 1, _ => 2 };

@@ -4,6 +4,8 @@ using InstaVende.Core.Enums;
 using InstaVende.Core.Interfaces;
 using InstaVende.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 using OpenAI.Chat;
 
 namespace InstaVende.Web.Services;
@@ -11,36 +13,34 @@ namespace InstaVende.Web.Services;
 public class BotEngineService : IBotEngineService
 {
     private readonly AppDbContext _db;
-    private readonly IConfiguration _config;
     private readonly MasterPromptBuilder _promptBuilder;
     private readonly ILogger<BotEngineService> _logger;
-
-    private const int MaxHistoryMessages = 10;
-    private const int MaxToolIterations   = 5;
+    private readonly IMemoryCache _cache;
+    private readonly BotCacheOptions _cacheOpts;
+    private readonly OpenAiOptions _openAiOpts;
 
     public BotEngineService(
         AppDbContext db,
         IConfiguration config,
         MasterPromptBuilder promptBuilder,
-        ILogger<BotEngineService> logger)
+        ILogger<BotEngineService> logger,
+        IMemoryCache cache,
+        IOptions<BotCacheOptions> cacheOptions,
+        IOptions<OpenAiOptions> openAiOptions)
     {
-        _db = db;
-        _config = config;
+        _db            = db;
         _promptBuilder = promptBuilder;
-        _logger = logger;
+        _logger        = logger;
+        _cache         = cache;
+        _cacheOpts     = cacheOptions.Value;
+        _openAiOpts    = openAiOptions.Value;
     }
 
     // ── Public entry point ────────────────────────────────────────────────────
 
     public async Task<string> ProcessMessageAsync(int businessId, int conversationId, string incomingMessage)
     {
-        var botConfig = await _db.BotConfigs
-            .AsNoTracking()
-            .Include(b => b.Intents.Where(i => i.IsActive))
-            .Include(b => b.KnowledgeBase.Where(k => k.IsActive))
-            .Include(b => b.Business)
-                .ThenInclude(biz => biz.VendorConfig)
-            .FirstOrDefaultAsync(b => b.BusinessId == businessId && b.IsActive);
+        var botConfig = await GetOrCreateBotConfigAsync(businessId);
 
         if (botConfig == null) return "Hola, ¿en qué puedo ayudarte?";
 
@@ -90,18 +90,13 @@ public class BotEngineService : IBotEngineService
         if (kbMatch != null) return kbMatch.Answer;
 
         // AI path: GPT-4o with master prompt + function calling
-        var apiKey = _config["OpenAI:ApiKey"];
+        var apiKey = _openAiOpts.ApiKey;
         if (!string.IsNullOrWhiteSpace(apiKey))
         {
             try
             {
-                // Load KnowledgeEntries (configured in Mi Vendedor → Base de Conocimiento)
-                var knowledgeEntries = await _db.KnowledgeEntries
-                    .AsNoTracking()
-                    .Where(k => k.BusinessId == businessId)
-                    .OrderByDescending(k => k.IsFavorite)
-                    .Take(30)
-                    .ToListAsync();
+                // Load KnowledgeEntries — cached per business
+                var knowledgeEntries = await GetOrCreateKnowledgeEntriesAsync(businessId);
 
                 return await CallOpenAiWithToolsAsync(
                     botConfig, businessId, conversationId, msg, apiKey, knowledgeEntries);
@@ -114,6 +109,67 @@ public class BotEngineService : IBotEngineService
 
         return botConfig.FallbackMessage;
     }
+
+    // ── Cache helpers ─────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Returns the active BotConfig for <paramref name="businessId"/> from cache,
+    /// falling back to the database on a cache miss. Intents and KnowledgeBase
+    /// are filtered (active-only) before caching so callers never see stale records.
+    /// Call <see cref="InvalidateBotConfigCache"/> whenever the config is saved.
+    /// </summary>
+    private async Task<BotConfig?> GetOrCreateBotConfigAsync(int businessId)
+    {
+        var key = $"BotConfig_{businessId}";
+        if (_cache.TryGetValue(key, out BotConfig? cached))
+            return cached;
+
+        var cfg = await _db.BotConfigs
+            .AsNoTracking()
+            .Include(b => b.Intents)
+            .Include(b => b.KnowledgeBase)
+            .Include(b => b.Business)
+                .ThenInclude(biz => biz.VendorConfig)
+            .FirstOrDefaultAsync(b => b.BusinessId == businessId && b.IsActive);
+
+        if (cfg != null)
+        {
+            cfg.Intents       = cfg.Intents.Where(i => i.IsActive).ToList();
+            cfg.KnowledgeBase = cfg.KnowledgeBase.Where(k => k.IsActive).ToList();
+        }
+
+        _cache.Set(key, cfg, TimeSpan.FromMinutes(_cacheOpts.BotConfigTtlMinutes));
+        return cfg;
+    }
+
+    /// <summary>
+    /// Returns the KnowledgeEntries for <paramref name="businessId"/> from cache.
+    /// Call <see cref="InvalidateKnowledgeCache"/> whenever entries are saved.
+    /// </summary>
+    private async Task<List<KnowledgeEntry>> GetOrCreateKnowledgeEntriesAsync(int businessId)
+    {
+        var key = $"KnowledgeEntries_{businessId}";
+        if (_cache.TryGetValue(key, out List<KnowledgeEntry>? cached) && cached is not null)
+            return cached;
+
+        var entries = await _db.KnowledgeEntries
+            .AsNoTracking()
+            .Where(k => k.BusinessId == businessId)
+            .OrderByDescending(k => k.IsFavorite)
+            .Take(30)
+            .ToListAsync();
+
+        _cache.Set(key, entries, TimeSpan.FromMinutes(_cacheOpts.KnowledgeEntriesTtlMinutes));
+        return entries;
+    }
+
+    /// <summary>Evicts the BotConfig cache for <paramref name="businessId"/>.</summary>
+    public void InvalidateBotConfigCache(int businessId)
+        => _cache.Remove($"BotConfig_{businessId}");
+
+    /// <summary>Evicts the KnowledgeEntries cache for <paramref name="businessId"/>.</summary>
+    public void InvalidateKnowledgeCache(int businessId)
+        => _cache.Remove($"KnowledgeEntries_{businessId}");
 
     // ── Command detection (mirrors the Python MVP bot) ───────────────────────
 
@@ -160,7 +216,7 @@ public class BotEngineService : IBotEngineService
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"📦 *CATÁLOGO DE {cfg.Business.Name.ToUpperInvariant()}*");
-        sb.AppendLine(new string('─', 26));
+        sb.AppendLine(new string('-', 26));
 
         foreach (var (p, i) in products.Select((p, i) => (p, i + 1)))
         {
@@ -171,7 +227,7 @@ public class BotEngineService : IBotEngineService
             sb.AppendLine(p.Stock > 5 ? "✅ Disponible" : $"⚠️ Solo {p.Stock} en stock");
         }
 
-        sb.AppendLine("\n" + new string('─', 26));
+        sb.AppendLine("\n" + new string('-', 26));
         sb.AppendLine("💬 Escribe el número del producto para agregarlo al carrito");
         sb.AppendLine("Ej: *agregar 1*");
         sb.AppendLine("\n🛒 *#carrito* → Ver carrito  |  📦 *#pedido* → Confirmar");
@@ -196,23 +252,23 @@ public class BotEngineService : IBotEngineService
             .FirstOrDefaultAsync(o => o.ConversationId == conversationId
                                    && o.Status == InstaVende.Core.Enums.OrderStatus.Pending);
 
-        if (order == null || !order.Items.Any())
+        if (conversationId <= 0 || order == null || !order.Items.Any())
             return "🛒 Tu carrito está vacío.\n\nEscribe *#catalogo* para ver nuestros productos. 😊";
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("🛒 *TU CARRITO*");
-        sb.AppendLine(new string('─', 26));
+        sb.AppendLine(new string('-', 26));
 
         decimal total = 0;
         foreach (var item in order.Items)
         {
             var subtotal = item.UnitPrice * item.Quantity;
             total += subtotal;
-            sb.AppendLine($"\n• {item.Product.Name}");
+            sb.AppendLine($"\n• {item.ProductName}");
             sb.AppendLine($"  {item.Quantity} × S/ {item.UnitPrice:N2} = S/ {subtotal:N2}");
         }
 
-        sb.AppendLine("\n" + new string('─', 26));
+        sb.AppendLine("\n" + new string('-', 26));
         sb.AppendLine($"💰 *TOTAL: S/ {total:N2}*");
         sb.AppendLine("\n📦 Escribe *#pedido* para confirmar tu compra");
         sb.AppendLine("🗑️ Escribe *#limpiar* para vaciar el carrito");
@@ -221,7 +277,9 @@ public class BotEngineService : IBotEngineService
 
     private async Task<string> ConfirmOrderAsync(int businessId, int conversationId, BotConfig cfg)
     {
-        var conv = await _db.Conversations.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == conversationId);
+        if (conversationId <= 0)
+            return "📦 Esta función no está disponible en modo de vista previa.";
+
         var pendingOrder = await _db.Orders
             .Include(o => o.Items).ThenInclude(i => i.Product)
             .FirstOrDefaultAsync(o => o.ConversationId == conversationId
@@ -232,16 +290,18 @@ public class BotEngineService : IBotEngineService
             return "📦 No tienes productos en el carrito.\n\nEscribe *#catalogo* para ver nuestros productos. 😊";
 
         pendingOrder.Status = InstaVende.Core.Enums.OrderStatus.Confirmed;
-        pendingOrder.Total  = pendingOrder.Items.Sum(i => i.UnitPrice * i.Quantity);
+        var itemsTotal = pendingOrder.Items.Sum(i => i.UnitPrice * i.Quantity);
+        pendingOrder.Subtotal = itemsTotal;
+        pendingOrder.Total    = itemsTotal - pendingOrder.Discount + pendingOrder.ShippingCost;
         await _db.SaveChangesAsync();
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("✅ *¡PEDIDO CONFIRMADO!*");
-        sb.AppendLine(new string('─', 26));
+        sb.AppendLine(new string('-', 26));
         sb.AppendLine($"📋 Pedido #{pendingOrder.OrderNumber}");
         foreach (var item in pendingOrder.Items)
-            sb.AppendLine($"• {item.Product.Name} × {item.Quantity} = S/ {item.UnitPrice * item.Quantity:N2}");
-        sb.AppendLine(new string('─', 26));
+            sb.AppendLine($"• {item.ProductName} × {item.Quantity} = S/ {item.UnitPrice * item.Quantity:N2}");
+        sb.AppendLine(new string('-', 26));
         sb.AppendLine($"💰 *Total: S/ {pendingOrder.Total:N2}*");
         sb.AppendLine("\n🚀 En breve te contactaremos para coordinar el pago y entrega.");
         sb.AppendLine("¡Gracias por tu compra! 🙌");
@@ -250,6 +310,9 @@ public class BotEngineService : IBotEngineService
 
     private async Task<string> ClearCartAsync(int conversationId, BotConfig cfg)
     {
+        if (conversationId <= 0)
+            return "🗑️ El carrito no está disponible en modo de vista previa.";
+
         var pendingOrder = await _db.Orders
             .Include(o => o.Items)
             .FirstOrDefaultAsync(o => o.ConversationId == conversationId
@@ -265,6 +328,9 @@ public class BotEngineService : IBotEngineService
 
     private async Task<string> GetOrderStatusAsync(int conversationId, BotConfig cfg)
     {
+        if (conversationId <= 0)
+            return "📊 Esta función no está disponible en modo de vista previa.";
+
         var lastOrder = await _db.Orders
             .Include(o => o.Items).ThenInclude(i => i.Product)
             .Where(o => o.ConversationId == conversationId
@@ -287,18 +353,21 @@ public class BotEngineService : IBotEngineService
 
         var sb = new System.Text.StringBuilder();
         sb.AppendLine($"📊 *ESTADO DE TU PEDIDO #{lastOrder.OrderNumber}*");
-        sb.AppendLine(new string('─', 26));
+        sb.AppendLine(new string('-', 26));
         sb.AppendLine($"Estado: {statusLabel}");
         sb.AppendLine($"Fecha: {lastOrder.CreatedAt:dd/MM/yyyy}");
         foreach (var item in lastOrder.Items)
-            sb.AppendLine($"• {item.Product.Name} × {item.Quantity}");
+            sb.AppendLine($"• {item.ProductName} × {item.Quantity}");
         sb.AppendLine($"\n💰 Total: S/ {lastOrder.Total:N2}");
         return sb.ToString();
     }
 
     private async Task<string> AddToCartFromMessageAsync(int businessId, int conversationId, string msg, BotConfig cfg)
     {
-        // Extract product number from message: "agregar 1", "quiero el 2", etc.
+        if (conversationId <= 0)
+            return "🛒 El carrito no está disponible en modo de vista previa.";
+
+        // Extract product number
         var match = System.Text.RegularExpressions.Regex.Match(msg, @"\d+");
         if (!match.Success || !int.TryParse(match.Value, out var num) || num < 1)
             return "🤔 No entendí el número del producto. Escribe *#catalogo* para ver la lista numerada.";
@@ -345,7 +414,10 @@ public class BotEngineService : IBotEngineService
 
         var existing = order.Items.FirstOrDefault(i => i.ProductId == product.Id);
         if (existing != null)
+        {
             existing.Quantity++;
+            existing.Subtotal = existing.UnitPrice * existing.Quantity;
+        }
         else
             _db.OrderItems.Add(new OrderItem
             {
@@ -353,7 +425,8 @@ public class BotEngineService : IBotEngineService
                 ProductId   = product.Id,
                 ProductName = product.Name,
                 UnitPrice   = product.Price,
-                Quantity    = 1
+                Quantity    = 1,
+                Subtotal    = product.Price
             });
 
         await _db.SaveChangesAsync();
@@ -390,7 +463,7 @@ public class BotEngineService : IBotEngineService
             .AsNoTracking()
             .Where(m => m.ConversationId == conversationId)
             .OrderByDescending(m => m.SentAt)
-            .Take(MaxHistoryMessages)
+            .Take(_cacheOpts.MaxHistoryMessages)
             .OrderBy(m => m.SentAt)
             .ToListAsync();
 
@@ -428,7 +501,7 @@ public class BotEngineService : IBotEngineService
         };
         foreach (var tool in tools) options.Tools.Add(tool);
 
-        var client = new ChatClient("gpt-4o", apiKey);
+        var client = new ChatClient(_openAiOpts.Model, apiKey);
 
         // Tool-calling loop: let the model invoke functions until it gives a final answer
         ChatCompletion completion;
@@ -461,7 +534,7 @@ public class BotEngineService : IBotEngineService
 
             iteration++;
         }
-        while (completion.FinishReason == ChatFinishReason.ToolCalls && iteration < MaxToolIterations);
+        while (completion.FinishReason == ChatFinishReason.ToolCalls && iteration < _cacheOpts.MaxToolIterations);
 
         return completion.Content.FirstOrDefault()?.Text ?? cfg.FallbackMessage;
     }
@@ -818,28 +891,33 @@ public class BotEngineService : IBotEngineService
         if (string.IsNullOrWhiteSpace(userId))
             return Serialize(new { error = "user_id requerido." });
 
-        var contact = await _db.Contacts
+        // 3 queries secuenciales consolidadas en 1 sola query con proyección
+        var historial = await _db.Contacts
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.ExternalId == userId && c.BusinessId == businessId);
-
-        if (contact == null)
-            return Serialize(new { historial = Array.Empty<object>(), total_conversaciones = 0 });
-
-        var totalConvs = await _db.Conversations.CountAsync(c => c.ContactId == contact.Id);
-        var ultimaConv = await _db.Conversations
-            .AsNoTracking()
-            .Where(c => c.ContactId == contact.Id)
-            .OrderByDescending(c => c.UpdatedAt)
-            .Select(c => c.UpdatedAt)
+            .Where(c => c.ExternalId == userId && c.BusinessId == businessId)
+            .Select(c => new
+            {
+                c.Name,
+                c.FirstSeenAt,
+                c.LastSeenAt,
+                TotalConversaciones = c.Conversations.Count(),
+                UltimaConversacion  = c.Conversations
+                    .OrderByDescending(cv => cv.UpdatedAt)
+                    .Select(cv => cv.UpdatedAt)
+                    .FirstOrDefault(),
+            })
             .FirstOrDefaultAsync();
+
+        if (historial == null)
+            return Serialize(new { historial = Array.Empty<object>(), total_conversaciones = 0 });
 
         return Serialize(new
         {
-            nombre               = contact.Name,
-            primera_interaccion  = contact.FirstSeenAt,
-            ultima_interaccion   = contact.LastSeenAt,
-            total_conversaciones = totalConvs,
-            ultima_conversacion  = ultimaConv,
+            nombre               = historial.Name,
+            primera_interaccion  = historial.FirstSeenAt,
+            ultima_interaccion   = historial.LastSeenAt,
+            total_conversaciones = historial.TotalConversaciones,
+            ultima_conversacion  = historial.UltimaConversacion,
         });
     }
 

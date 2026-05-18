@@ -5,30 +5,42 @@ var currentStatus = '';
 var searchTerm = '';
 
 var connection = new signalR.HubConnectionBuilder().withUrl('/inboxHub').withAutomaticReconnect().build();
-connection.on('NewMessage', function(convId, message) {
-    if (convId === currentConvId) appendMessage(message);
+connection.on('NewMessage', function(payload) {
+    if (payload.conversationId === currentConvId) appendMessage(payload);
     loadConversations();
 });
 connection.on('ConversationUpdated', loadConversations);
 connection.start().catch(console.error);
 
 function loadConversations() {
-    $.getJSON('/Inbox/GetConversations', { channel: currentChannel, status: currentStatus, search: searchTerm }, function(data) {
+    $.getJSON('/Inbox/GetConversations', { channel: currentChannel, status: currentStatus }, function(data) {
+
+        if (searchTerm) {
+            var lower = searchTerm.toLowerCase();
+            data = data.filter(function(c) {
+                return (c.contactName || '').toLowerCase().includes(lower) ||
+                       (c.contactPhone || '').toLowerCase().includes(lower) ||
+                       (c.lastMessage || '').toLowerCase().includes(lower);
+            });
+        }
         var list = $('#conversationList').empty();
         data.forEach(function(c) {
-            var badge = getChannelBadge(c.channelType);
+            var badge = getChannelBadge(c.channel);
             var statusCls = getStatusClass(c.status);
+            var displayName = c.contactName || c.contactPhone || '(sin nombre)';
             var item = $('<div class="p-3 border-bottom conversation-item" style="cursor:pointer">' +
                 '<div class="d-flex justify-content-between">' +
-                '<strong>' + $('<span>').text(c.contactName || c.externalContactId).html() + '</strong>' +
+                '<strong>' + $('<span>').text(displayName).html() + '</strong>' +
                 badge + '</div>' +
                 '<div class="small text-truncate text-muted">' + $('<span>').text(c.lastMessage || '').html() + '</div>' +
                 '<span class="badge ' + statusCls + ' mt-1">' + getStatusLabel(c.status) + '</span>' +
                 '</div>');
-            item.on('click', function() { openConversation(c.id, c.contactName || c.externalContactId, c.channelType, c.status); });
+            item.on('click', function() { openConversation(c.id, displayName, c.channel, c.status); });
             if (c.id === currentConvId) item.addClass('bg-primary bg-opacity-10');
             list.append(item);
         });
+    }).fail(function() {
+        $('#conversationList').html('<div class="p-3 text-muted small">Error al cargar conversaciones.</div>');
     });
 }
 
@@ -40,8 +52,8 @@ function openConversation(id, name, channelType, status) {
     $('#chatStatusBadge').html('<span class="badge ' + getStatusClass(status) + '">' + getStatusLabel(status) + '</span>');
     $('#messageThread').empty();
     loadConversations();
-    $.getJSON('/Inbox/GetMessages/' + id, function(msgs) { msgs.forEach(appendMessage); scrollBottom(); });
-    connection.invoke('JoinConversation', id.toString()).catch(console.error);
+    $.getJSON('/Inbox/GetMessages?conversationId=' + id, function(msgs) { msgs.forEach(appendMessage); scrollBottom(); });
+    connection.invoke('JoinBusinessGroup', businessId.toString()).catch(console.error);
 }
 
 function appendMessage(m) {
@@ -64,20 +76,22 @@ function sendMessage() {
     if (!currentConvId) return;
     var msg = $('#msgInput').val().trim();
     if (!msg) return;
-    $.ajax({ url: '/Inbox/Send', method: 'POST', contentType: 'application/json',
+    var $btn = $('#sendBtn').prop('disabled', true);
+    $.ajax({ url: '/Inbox/SendMessage', method: 'POST', contentType: 'application/json',
         headers: { 'RequestVerificationToken': token },
-        data: JSON.stringify({ conversationId: currentConvId, content: msg }),
-        success: function() { $('#msgInput').val(''); },
-        error: function() { alert('Error al enviar mensaje.'); }
+        data: JSON.stringify({ conversationId: currentConvId, message: msg }),
+        success: function() { $('#msgInput').val(''); $btn.prop('disabled', false); },
+        error: function() { $btn.prop('disabled', false); alert('Error al enviar mensaje.'); }
     });
 }
 
 function setConvStatus(status) {
     if (!currentConvId) return;
-    $.ajax({ url: '/Inbox/SetStatus', method: 'POST', contentType: 'application/json',
+    $.ajax({ url: '/Inbox/UpdateStatus', method: 'POST', contentType: 'application/json',
         headers: { 'RequestVerificationToken': token },
         data: JSON.stringify({ conversationId: currentConvId, status: status }),
-        success: loadConversations, error: function() { alert('Error.'); }
+        success: loadConversations,
+        error: function() { alert('Error al actualizar el estado de la conversación.'); }
     });
 }
 
@@ -114,4 +128,18 @@ $('[data-channel]').on('click', function() {
 $('#statusFilter').on('change', function() { currentStatus = $(this).val(); loadConversations(); });
 $('#inboxSearch').on('input', function() { searchTerm = $(this).val(); loadConversations(); });
 
-$(loadConversations);
+$(function() {
+    loadConversations();
+    // Auto-open a conversation when arriving from an external link (e.g. order detail)
+    var params = new URLSearchParams(window.location.search);
+    var autoId = parseInt(params.get('conversationId'));
+    if (autoId) {
+        $.getJSON('/Inbox/GetConversations', {}, function(data) {
+            var conv = data.find(function(c) { return c.id === autoId; });
+            if (conv) {
+                var displayName = conv.contactName || conv.contactPhone || '(sin nombre)';
+                openConversation(conv.id, displayName, conv.channel, conv.status);
+            }
+        });
+    }
+});

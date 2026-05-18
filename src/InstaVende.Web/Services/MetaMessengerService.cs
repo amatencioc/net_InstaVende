@@ -30,12 +30,12 @@ public class MetaMessengerService : IChannelMessageSender
 
         var token = _dp.Decrypt(cfg.AccessTokenEncrypted);
         var payload = new { recipient = new { id = psid }, message = new { text } };
-        var client = _http.CreateClient();
+        using var client = _http.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(10);
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
         using var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var resp = await client.PostAsync($"{ApiBase}/me/messages", content);
+        using var resp = await client.PostAsync($"{ApiBase}/me/messages", content);
         if (!resp.IsSuccessStatusCode)
             _logger.LogError("Messenger send failed: {S} {B}", resp.StatusCode, await resp.Content.ReadAsStringAsync());
     }

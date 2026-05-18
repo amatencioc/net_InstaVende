@@ -1,6 +1,6 @@
 @model InstaVende.Web.ViewModels.BaseConocimientoViewModel
 @using InstaVende.Core.Enums
-@{ ViewData["Title"] = "Mi Vendedor – Base de conocimiento"; }
+@{ ViewData["Title"] = "Mi Vendedor â€“ Base de conocimiento"; }
 
 @await Html.PartialAsync("_VendedorTabs", "base")
 
@@ -10,7 +10,7 @@
         (null, "Todas", "bi-grid"),
         (KnowledgeCategory.Productos, "Productos", "bi-box"),
         (KnowledgeCategory.Horarios, "Horarios", "bi-clock"),
-        (KnowledgeCategory.Envios, "Envíos", "bi-truck"),
+        (KnowledgeCategory.Envios, "EnvÃ­os", "bi-truck"),
         (KnowledgeCategory.Pagos, "Pagos", "bi-credit-card"),
         (KnowledgeCategory.Devoluciones, "Devoluciones", "bi-arrow-return-left"),
         (KnowledgeCategory.Otros, "Otros", "bi-question-circle"),
@@ -39,7 +39,7 @@
 {
     <div class="a-card text-center py-5">
         <i class="bi bi-book" style="font-size:2.5rem;color:#c4b5fd"></i>
-        <p class="text-muted mt-3 mb-2">No hay entradas en esta categoría.</p>
+        <p class="text-muted mt-3 mb-2">No hay entradas en esta categorÃ­a.</p>
         <button class="btn btn-outline-primary btn-sm" onclick="openKnowledgeModal(null)">
             <i class="bi bi-plus me-1"></i> Agregar primer tema
         </button>
@@ -94,11 +94,11 @@ else
             <div class="modal-body">
                 <input type="hidden" id="keId" />
                 <div class="mb-3">
-                    <label class="f-label">Título / Pregunta *</label>
-                    <input id="keTitle" class="f-input" placeholder="Ej. ¿Realizan envíos a provincia?" required />
+                    <label class="f-label">TÃ­tulo / Pregunta *</label>
+                    <input id="keTitle" class="f-input" placeholder="Ej. Â¿Realizan envÃ­os a provincia?" required />
                 </div>
                 <div class="mb-3">
-                    <label class="f-label">Categoría</label>
+                    <label class="f-label">CategorÃ­a</label>
                     <select id="keCategory" class="f-input">
                         @foreach (KnowledgeCategory c in Enum.GetValues<KnowledgeCategory>())
                         { <option value="@((int)c)">@c</option> }
@@ -107,7 +107,7 @@ else
                 <div class="mb-0">
                     <label class="f-label">Contenido / Respuesta *</label>
                     <textarea id="keContent" class="f-input" rows="5"
-                              placeholder="Respuesta completa que usará el vendedor IA..."></textarea>
+                              placeholder="Respuesta completa que usarÃ¡ el vendedor IA..."></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -127,12 +127,12 @@ function openKnowledgeModal(id) {
     const modal = new bootstrap.Modal(document.getElementById('modalKnowledge'));
     document.getElementById('keId').value = id || 0;
     if (id) {
-        const e = keData.find(x => x.id === id);
+        const e = keData.find(x => x.Id === id);
         if (!e) return;
         document.getElementById('modalKnowledgeTitle').textContent = 'Editar tema';
-        document.getElementById('keTitle').value = e.title;
-        document.getElementById('keCategory').value = e.category;
-        document.getElementById('keContent').value = e.content;
+        document.getElementById('keTitle').value = e.Title;
+        document.getElementById('keCategory').value = e.Category;
+        document.getElementById('keContent').value = e.Content;
     } else {
         document.getElementById('modalKnowledgeTitle').textContent = 'Agregar tema';
         document.getElementById('keTitle').value = '';
@@ -151,29 +151,40 @@ function saveKnowledge() {
     };
     fetch('/Vendedor/SaveKnowledge', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else ivAlert('No se pudo guardar el tema.', 'danger');
+    }).catch(() => ivAlert('Error de conexiÃ³n al guardar.', 'danger'));
 }
 
 function toggleFavorite(id, btn) {
+    const icon = btn.querySelector('i');
+    const wasFav = icon.classList.contains('bi-star-fill');
     fetch('/Vendedor/ToggleFavoriteKnowledge', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ id })
     }).then(r => r.json()).then(d => {
-        const icon = btn.querySelector('i');
         icon.className = d.isFavorite ? 'bi bi-star-fill' : 'bi bi-star';
-        btn.className = btn.className.replace('text-muted','').replace('text-warning','') + (d.isFavorite ? ' text-warning' : ' text-muted');
+        btn.className = btn.className.replace('text-muted','').replace('text-warning','').trim() + (d.isFavorite ? ' text-warning' : ' text-muted');
+    }).catch(() => {
+        icon.className = wasFav ? 'bi bi-star-fill' : 'bi bi-star';
+        ivAlert('Error al actualizar favorito.', 'danger');
     });
 }
 
 function deleteKnowledge(id) {
-    if (!confirm('¿Eliminar esta entrada? Esta acción no se puede deshacer.')) return;
+    ivConfirm({ title: 'Â¿Eliminar entrada?', message: 'Esta acciÃ³n no se puede deshacer.', okLabel: 'Eliminar', type: 'danger' }).then(function(ok) { if (!ok) return;
     fetch('/Vendedor/DeleteKnowledge', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ id })
-    }).then(() => document.getElementById('ke-'+id)?.remove());
+    }).then(r => r.json()).then(d => {
+        if (d.success) document.getElementById('ke-'+id)?.remove();
+        else ivAlert('No se pudo eliminar la entrada.', 'danger');
+    }).catch(() => ivAlert('Error de conexiÃ³n al eliminar.', 'danger'));
+    });
 }
 </script>

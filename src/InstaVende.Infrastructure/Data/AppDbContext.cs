@@ -52,6 +52,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(p => p.Price).HasColumnType("decimal(18,2)");
             e.Property(p => p.PriceOriginal).HasColumnType("decimal(18,2)");
             e.Property(p => p.Name).HasMaxLength(300).IsRequired();
+            // Bot: catálogo, add_to_cart, buscar_productos
+            e.HasIndex(p => new { p.BusinessId, p.IsActive, p.SortOrder });
+            // Bot: buscar_alternativas
+            e.HasIndex(p => new { p.BusinessId, p.IsActive, p.CategoryId });
+            // ProductsController.Index: listado admin ordenado por fecha de creación
+            e.HasIndex(p => new { p.BusinessId, p.CreatedAt });
+            // ProductsController.GetList: selector ordenado por nombre
+            e.HasIndex(p => new { p.BusinessId, p.IsActive, p.Name });
         });
 
         builder.Entity<ProductVariant>(e =>
@@ -75,6 +83,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(o => o.OrderNumber).HasMaxLength(50).IsRequired();
             e.HasIndex(o => new { o.ConversationId, o.Status });
             e.HasIndex(o => new { o.BusinessId, o.Status });
+            e.HasIndex(o => new { o.BusinessId, o.CreatedAt, o.Status });
             e.HasOne(o => o.Business).WithMany(b => b.Orders)
                 .HasForeignKey(o => o.BusinessId).OnDelete(DeleteBehavior.NoAction);
             e.HasOne(o => o.Contact).WithMany(c => c.Orders)
@@ -113,6 +122,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.Property(c => c.TotalSpent).HasColumnType("decimal(18,2)");
             e.HasIndex(c => new { c.BusinessId, c.ChannelType, c.ExternalId }).IsUnique();
+            e.HasIndex(c => new { c.BusinessId, c.LastSeenAt });
             // Evita multiples rutas de cascada hacia Conversations
             e.HasMany(c => c.Conversations).WithOne(cv => cv.Contact)
                 .HasForeignKey(cv => cv.ContactId).OnDelete(DeleteBehavior.Restrict);
@@ -154,6 +164,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.HasIndex(c => new { c.ContactId, c.Status });
             e.HasIndex(c => new { c.BusinessId, c.Status });
+            e.HasIndex(c => new { c.BusinessId, c.CreatedAt });
+            e.HasIndex(c => new { c.BusinessId, c.UpdatedAt });
+            e.HasIndex(c => new { c.BusinessId, c.Status, c.UpdatedAt });
             e.HasOne(c => c.AssignedAgent).WithMany()
                 .HasForeignKey(c => c.AssignedAgentId).OnDelete(DeleteBehavior.SetNull);
             // Business ? Conversation: NoAction para no crear ciclo con Business ? Contact ? Conversation
@@ -170,12 +183,14 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         {
             e.HasOne(v => v.Business).WithOne(b => b.VendorConfig)
                 .HasForeignKey<VendorConfig>(v => v.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(v => v.BusinessId).IsUnique();
         });
 
         builder.Entity<KnowledgeEntry>(e =>
         {
             e.HasOne(k => k.Business).WithMany(b => b.KnowledgeEntries)
                 .HasForeignKey(k => k.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(k => new { k.BusinessId, k.IsFavorite, k.CreatedAt });
         });
 
         builder.Entity<DeliveryZone>(e =>
@@ -183,6 +198,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(d => d.Cost).HasColumnType("decimal(18,2)");
             e.HasOne(d => d.Business).WithMany(b => b.DeliveryZones)
                 .HasForeignKey(d => d.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            e.HasIndex(d => new { d.BusinessId, d.SortOrder });
         });
 
         builder.Entity<PaymentImage>(e =>
@@ -191,12 +207,22 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(p => p.BusinessId).OnDelete(DeleteBehavior.Cascade);
         });
 
+        builder.Entity<PaymentMethod>(e =>
+        {
+            e.HasOne(p => p.Business).WithMany(b => b.PaymentMethods)
+                .HasForeignKey(p => p.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            // PaymentMethodsController.Index: WHERE BusinessId ORDER BY SortOrder, Id
+            e.HasIndex(p => new { p.BusinessId, p.SortOrder });
+        });
+
         builder.Entity<BusinessUser>(e =>
         {
             e.HasOne(bu => bu.Business).WithMany(b => b.BusinessUsers)
                 .HasForeignKey(bu => bu.BusinessId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(bu => bu.User).WithMany()
                 .HasForeignKey(bu => bu.UserId).OnDelete(DeleteBehavior.Restrict);
+            // AccountConfigController.Index: WHERE BusinessId
+            e.HasIndex(bu => bu.BusinessId);
         });
 
         builder.Entity<UserInvitation>(e =>
@@ -204,12 +230,16 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasIndex(i => i.Token).IsUnique();
             e.HasOne(i => i.Business).WithMany(b => b.UserInvitations)
                 .HasForeignKey(i => i.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            // AccountConfigController.Index: WHERE BusinessId AND Status = Pending
+            e.HasIndex(i => new { i.BusinessId, i.Status });
         });
 
         builder.Entity<NotificationEmail>(e =>
         {
             e.HasOne(n => n.Business).WithMany(b => b.NotificationEmails)
                 .HasForeignKey(n => n.BusinessId).OnDelete(DeleteBehavior.Cascade);
+            // AccountConfigController.Index: WHERE BusinessId ORDER BY Id
+            e.HasIndex(n => n.BusinessId);
         });
 
         builder.Entity<ReminderTemplate>(e =>

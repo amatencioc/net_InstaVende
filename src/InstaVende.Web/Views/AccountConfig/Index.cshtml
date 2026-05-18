@@ -1,6 +1,6 @@
 @model InstaVende.Web.ViewModels.AccountConfigViewModel
 @{
-    ViewData["Title"] = "Configuración de la cuenta";
+    ViewData["Title"] = "ConfiguraciÃ³n de la cuenta";
     var tab = Model.ActiveTab ?? "organizacion";
 }
 
@@ -8,13 +8,13 @@
     <div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-1" style="font-size:.78rem">
-                <li class="breadcrumb-item"><a href="/Settings/Account" class="text-muted">Configuración</a></li>
+                <li class="breadcrumb-item"><a href="/Settings/Account" class="text-muted">ConfiguraciÃ³n</a></li>
                 <li class="breadcrumb-item active">Cuenta</li>
             </ol>
         </nav>
-        <h1 class="topbar-page-title mb-0">Configuración de la cuenta</h1>
+        <h1 class="topbar-page-title mb-0">ConfiguraciÃ³n de la cuenta</h1>
     </div>
-    <button class="btn btn-primary" id="btnSave" onclick="saveChanges()" disabled>
+    <button class="btn btn-primary" id="btnSave" onclick="saveChanges()" @(tab != "organizacion" ? "style=\"display:none\"" : "") disabled>
         <i class="bi bi-floppy me-1"></i> Guardar cambios
     </button>
 </div>
@@ -22,7 +22,7 @@
 <!-- Tabs -->
 <ul class="nav nav-tabs mb-4" id="accountTabs">
     <li class="nav-item">
-        <a class="nav-link @(tab == "organizacion" ? "active" : "")" href="?tab=organizacion">Organización</a>
+        <a class="nav-link @(tab == "organizacion" ? "active" : "")" href="?tab=organizacion">OrganizaciÃ³n</a>
     </li>
     <li class="nav-item">
         <a class="nav-link @(tab == "usuarios" ? "active" : "")" href="?tab=usuarios">Usuarios</a>
@@ -31,29 +31,29 @@
         <a class="nav-link @(tab == "notificaciones" ? "active" : "")" href="?tab=notificaciones">Notificaciones por email</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link @(tab == "pago" ? "active" : "")" href="?tab=pago">Métodos de pago</a>
+        <a class="nav-link @(tab == "pago" ? "active" : "")" href="?tab=pago">MÃ©todos de pago</a>
     </li>
 </ul>
 
-<!-- TAB 1: Organización -->
+<!-- TAB 1: OrganizaciÃ³n -->
 @if (tab == "organizacion")
 {
     <div class="a-card">
         <div class="a-card-body" style="max-width:560px">
             <p class="text-muted small mb-4">
                 <i class="bi bi-info-circle me-1"></i>
-                Incluye el país y la moneda para personalizar el vendedor inteligente.
+                Incluye el paÃ­s y la moneda para personalizar el vendedor inteligente.
             </p>
             <div class="mb-3">
-                <label class="f-label">Nombre de la organización</label>
+                <label class="f-label">Nombre de la organizaciÃ³n</label>
                 <input type="text" id="orgName" class="f-input" value="@Model.Organizacion.Name"
                        placeholder="Nombre de tu negocio" oninput="enableSave()" />
             </div>
             <div class="mb-3">
-                <label class="f-label">País</label>
+                <label class="f-label">PaÃ­s</label>
                 <select id="orgCountry" class="f-input" onchange="enableSave()">
-                    <option value="">Seleccionar país</option>
-                    @foreach (var c in new[] { "Perú", "México", "Colombia", "Argentina", "Chile", "Ecuador", "Bolivia", "Uruguay", "Paraguay", "Venezuela" })
+                    <option value="">Seleccionar paÃ­s</option>
+                    @foreach (var c in new[] { "PerÃº", "MÃ©xico", "Colombia", "Argentina", "Chile", "Ecuador", "Bolivia", "Uruguay", "Paraguay", "Venezuela" })
                     {
                         <option value="@c" selected="@(Model.Organizacion.Country == c)">@c</option>
                     }
@@ -63,7 +63,7 @@
                 <label class="f-label">Moneda</label>
                 <select id="orgCurrency" class="f-input" onchange="enableSave()">
                     <option value="">Seleccionar moneda</option>
-                    @foreach (var m in new[] { "PEN - Sol Peruano", "MXN - Peso Mexicano", "COP - Peso Colombiano", "ARS - Peso Argentino", "CLP - Peso Chileno", "USD - Dólar Americano" })
+                    @foreach (var m in new[] { "PEN - Sol Peruano", "MXN - Peso Mexicano", "COP - Peso Colombiano", "ARS - Peso Argentino", "CLP - Peso Chileno", "USD - DÃ³lar Americano" })
                     {
                         <option value="@m" selected="@(Model.Organizacion.Currency == m)">@m</option>
                     }
@@ -132,7 +132,7 @@
         <div class="a-card-body p-0">
             <table class="table table-hover mb-0">
                 <thead class="table-light">
-                    <tr><th>Usuario</th><th>Teléfono</th><th>Rol</th></tr>
+                    <tr><th>Usuario</th><th>TelÃ©fono</th><th>Rol</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var u in Model.Usuarios.Users)
@@ -145,7 +145,7 @@
                                 </div>
                                 <span>@u.Email</span>
                             </td>
-                            <td class="text-muted small">@(u.Phone ?? "—")</td>
+                            <td class="text-muted small">@(u.Phone ?? "â€”")</td>
                             <td>
                                 <span class="badge @(u.Role == InstaVende.Core.Enums.UserRole.Admin ? "bg-primary" : "bg-secondary")">
                                     @(u.Role == InstaVende.Core.Enums.UserRole.Admin ? "Admin" : "Member")
@@ -168,7 +168,7 @@
         </div>
         <div class="a-card-body">
             <p class="text-muted small mb-4">
-                Recibe avisos cuando tu vendedor IA cierre una venta o cuando sea necesario que un humano tome la conversación.
+                Recibe avisos cuando tu vendedor IA cierre una venta o cuando sea necesario que un humano tome la conversaciÃ³n.
             </p>
 
             <div id="emailList">
@@ -186,14 +186,14 @@
             <div class="d-flex gap-2 mt-3" style="max-width:480px">
                 <input type="email" id="newNotifEmail" class="f-input flex-grow-1" placeholder="nuevo@email.com" />
                 <button class="btn btn-outline-primary" onclick="addNotifEmail()">
-                    <i class="bi bi-plus me-1"></i> Añadir email
+                    <i class="bi bi-plus me-1"></i> AÃ±adir email
                 </button>
             </div>
         </div>
     </div>
 }
 
-<!-- TAB 4: Métodos de pago -->
+<!-- TAB 4: MÃ©todos de pago -->
 @if (tab == "pago")
 {
     <div class="a-card">
@@ -202,12 +202,12 @@
                  style="width:64px;height:64px;background:#ede9fe">
                 <i class="bi bi-credit-card-2-front" style="font-size:1.8rem;color:#7c3aed"></i>
             </div>
-            <h5 class="fw-bold mb-2">Gestiona tus métodos de pago</h5>
+            <h5 class="fw-bold mb-2">Gestiona tus mÃ©todos de pago</h5>
             <p class="text-muted small mb-4">
-                Gestiona tus métodos de pago a través de nuestro portal de pagos seguro.
+                Gestiona tus mÃ©todos de pago a travÃ©s de nuestro portal de pagos seguro.
             </p>
             <a href="#" class="btn btn-primary">
-                <i class="bi bi-shield-lock me-2"></i> Gestionar métodos de pago
+                <i class="bi bi-shield-lock me-2"></i> Gestionar mÃ©todos de pago
             </a>
         </div>
     </div>
@@ -225,7 +225,7 @@ function saveChanges() {
     if (tab === 'organizacion') {
         fetch('/AccountConfig/SaveOrganizacion', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
             body: JSON.stringify({
                 name: document.getElementById('orgName').value,
                 country: document.getElementById('orgCountry').value,
@@ -235,8 +235,10 @@ function saveChanges() {
             if (d.success) {
                 document.getElementById('btnSave').disabled = true;
                 showToast('Cambios guardados correctamente.', 'success');
+            } else {
+                showToast('Error al guardar los cambios.', 'error');
             }
-        });
+        }).catch(() => showToast('Error de conexiÃ³n al guardar.', 'error'));
     }
 }
 
@@ -245,21 +247,25 @@ function inviteUser() {
     if (!email) return;
     fetch('/AccountConfig/InviteUser', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ email })
     }).then(r => r.json()).then(d => {
         if (d.success) location.reload();
         else showToast(d.error, 'error');
-    });
+    }).catch(() => showToast('Error de conexiÃ³n al invitar.', 'error'));
 }
 
 function cancelInvitation(id) {
-    if (!confirm('¿Cancelar esta invitación?')) return;
+    ivConfirm({ title: 'Â¿Cancelar invitaciÃ³n?', message: 'Â¿Seguro que deseas cancelar esta invitaciÃ³n pendiente?', okLabel: 'SÃ­, cancelar', type: 'warning' }).then(function(ok) { if (!ok) return;
     fetch('/AccountConfig/CancelInvitation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ id })
-    }).then(() => location.reload());
+    }).then(r => r.json()).then(d => {
+        if (d.success) location.reload();
+        else showToast('No se pudo cancelar la invitaciÃ³n.', 'error');
+    }).catch(() => showToast('Error de conexiÃ³n.', 'error'));
+    });
 }
 
 function addNotifEmail() {
@@ -267,20 +273,23 @@ function addNotifEmail() {
     if (!email) return;
     fetch('/AccountConfig/AddNotificationEmail', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ email })
     }).then(r => r.json()).then(d => {
         if (d.success) location.reload();
         else showToast(d.error, 'error');
-    });
+    }).catch(() => showToast('Error de conexiÃ³n.', 'error'));
 }
 
 function removeNotifEmail(id) {
     fetch('/AccountConfig/RemoveNotificationEmail', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]').value },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ id })
-    }).then(() => document.getElementById('notif-' + id)?.remove());
+    }).then(r => r.json()).then(d => {
+        if (d.success) document.getElementById('notif-' + id)?.remove();
+        else showToast('No se pudo eliminar el email.', 'error');
+    }).catch(() => showToast('Error de conexiÃ³n.', 'error'));
 }
 
 function showToast(msg, type) {

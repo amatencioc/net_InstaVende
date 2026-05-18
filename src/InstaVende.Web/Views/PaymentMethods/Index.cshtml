@@ -1,14 +1,14 @@
 @model List<InstaVende.Web.ViewModels.PaymentMethodViewModel>
 @using InstaVende.Core.Enums
-@{ ViewData["Title"] = "MÈtodos de Pago"; }
+@{ ViewData["Title"] = "M√©todos de Pago"; }
 
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
-        <h1 class="topbar-page-title mb-0">MÈtodos de Pago</h1>
-        <p class="text-muted small mb-0">Define cÛmo tus clientes pueden pagarte. El bot usar· esta informaciÛn autom·ticamente.</p>
+        <h1 class="topbar-page-title mb-0">M√©todos de Pago</h1>
+        <p class="text-muted small mb-0">Define c√≥mo tus clientes pueden pagarte. El bot usar√° esta informaci√≥n autom√°ticamente.</p>
     </div>
     <button class="btn btn-primary" onclick="openModal(0)">
-        <i class="bi bi-plus-circle me-1"></i> Agregar mÈtodo
+        <i class="bi bi-plus-circle me-1"></i> Agregar m√©todo
     </button>
 </div>
 
@@ -16,8 +16,8 @@
 {
 <div class="a-card text-center py-5">
     <i class="bi bi-credit-card" style="font-size:3rem;color:#cbd5e1"></i>
-    <h5 class="mt-3 text-muted">Sin mÈtodos de pago configurados</h5>
-    <p class="text-muted small">Agrega al menos un mÈtodo para que el bot pueda informar a tus clientes cÛmo pagar.</p>
+    <h5 class="mt-3 text-muted">Sin m√©todos de pago configurados</h5>
+    <p class="text-muted small">Agrega al menos un m√©todo para que el bot pueda informar a tus clientes c√≥mo pagar.</p>
     <button class="btn btn-primary" onclick="openModal(0)"><i class="bi bi-plus-circle me-1"></i> Agregar ahora</button>
 </div>
 }
@@ -69,21 +69,21 @@ else
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title fw-bold" id="pmModalTitle">MÈtodo de Pago</h5>
+                <h5 class="modal-title fw-bold" id="pmModalTitle">M√©todo de Pago</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="pmId" value="0" />
                 <div class="f-group">
-                    <label class="f-label">Tipo de mÈtodo</label>
+                    <label class="f-label">Tipo de m√©todo</label>
                     <select class="f-input" id="pmType">
-                        <option value="1">?? Transferencia bancaria</option>
-                        <option value="2">?? Tarjeta de crÈdito/dÈbito</option>
-                        <option value="3">?? Efectivo / Contra entrega</option>
-                        <option value="4">?? Mercado Pago</option>
-                        <option value="5">??? PayPal</option>
-                        <option value="6">?? Stripe</option>
-                        <option value="99">?? Otro</option>
+                        <option value="1">üè¶ Transferencia bancaria</option>
+                        <option value="2">üí≥ Tarjeta de cr√©dito/d√©bito</option>
+                        <option value="3">üíµ Efectivo / Contra entrega</option>
+                        <option value="4">üí∞ Mercado Pago</option>
+                        <option value="5">üÖø PayPal</option>
+                        <option value="6">‚ö° Stripe</option>
+                        <option value="99">üí≥ Otro</option>
                     </select>
                 </div>
                 <div class="f-group">
@@ -95,8 +95,8 @@ else
                     <input type="text" class="f-input" id="pmAlias" placeholder="Ej: minegocio.mp o 123456789012" />
                 </div>
                 <div class="f-group">
-                    <label class="f-label">N˙mero de cuenta / CBU</label>
-                    <input type="text" class="f-input" id="pmAccount" placeholder="N˙mero completo" />
+                    <label class="f-label">N√∫mero de cuenta / CBU</label>
+                    <input type="text" class="f-input" id="pmAccount" placeholder="N√∫mero completo" />
                 </div>
                 <div class="f-group">
                     <label class="f-label">Link de pago</label>
@@ -108,7 +108,7 @@ else
                 </div>
                 <div class="f-group">
                     <label class="f-check">
-                        <input type="checkbox" id="pmActive" checked /> MÈtodo activo
+                        <input type="checkbox" id="pmActive" checked /> M√©todo activo
                     </label>
                 </div>
             </div>
@@ -120,6 +120,7 @@ else
     </div>
 </div>
 
+@Html.AntiForgeryToken()
 @section Scripts {
 <style>
 .pm-icon{font-size:1.3rem;margin-right:.25rem}
@@ -130,7 +131,7 @@ var modal = new bootstrap.Modal(document.getElementById('pmModal'));
 
 function openModal(id) {
     if (id === 0) {
-        document.getElementById('pmModalTitle').textContent = 'Nuevo mÈtodo de pago';
+        document.getElementById('pmModalTitle').textContent = 'Nuevo m√©todo de pago';
         document.getElementById('pmId').value = 0;
         document.getElementById('pmType').value = 1;
         document.getElementById('pmName').value = '';
@@ -142,7 +143,7 @@ function openModal(id) {
     } else {
         var m = methods.find(x => x.Id === id);
         if (!m) return;
-        document.getElementById('pmModalTitle').textContent = 'Editar mÈtodo de pago';
+        document.getElementById('pmModalTitle').textContent = 'Editar m√©todo de pago';
         document.getElementById('pmId').value = m.Id;
         document.getElementById('pmType').value = m.Type;
         document.getElementById('pmName').value = m.Name;
@@ -157,7 +158,7 @@ function openModal(id) {
 
 function saveMethod() {
     var name = document.getElementById('pmName').value.trim();
-    if (!name) { alert('El nombre es obligatorio.'); return; }
+    if (!name) { ivAlert('El nombre es obligatorio.', 'warning'); return; }
     var payload = {
         Id: parseInt(document.getElementById('pmId').value),
         Type: parseInt(document.getElementById('pmType').value),
@@ -170,42 +171,48 @@ function saveMethod() {
         SortOrder: 0
     };
     fetch('/PaymentMethods/Save', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify(payload)
-    }).then(r => r.json()).then(d => { if (d.ok) { modal.hide(); location.reload(); } });
+    }).then(r => r.json()).then(d => {
+        if (d.ok) { modal.hide(); location.reload(); }
+        else { ivAlert('No se pudo guardar el m√©todo de pago.', 'danger'); }
+    }).catch(() => ivAlert('Error de conexi√≥n al guardar.', 'danger'));
 }
 
 function toggleActive(id) {
     fetch('/PaymentMethods/ToggleActive', {
-        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value || '' },
         body: 'id=' + id
     }).then(r => r.json()).then(d => {
         if (d.ok) {
             var badge = document.querySelector('.pm-status-' + id);
             if (badge) { badge.textContent = d.isActive ? 'Activo' : 'Inactivo'; badge.className = 'badge pm-status-' + id + (d.isActive ? ' bg-success' : ' bg-secondary'); }
-        }
-    });
+        } else { ivAlert('No se pudo cambiar el estado.', 'danger'); }
+    }).catch(() => ivAlert('Error de conexi√≥n al cambiar estado.', 'danger'));
 }
 
 function deleteMethod(id) {
-    if (!confirm('øEliminar este mÈtodo de pago?')) return;
+    ivConfirm({ title: '¬øEliminar m√©todo de pago?', message: 'Esta acci√≥n no se puede deshacer.', okLabel: 'Eliminar', type: 'danger' }).then(function(ok) { if (!ok) return;
     fetch('/PaymentMethods/Delete', {
-        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value || '' },
         body: 'id=' + id
-    }).then(r => r.json()).then(d => { if (d.ok) { var el = document.getElementById('pm-' + id); if (el) el.remove(); } });
+    }).then(r => r.json()).then(d => {
+        if (d.ok) { var el = document.getElementById('pm-' + id); if (el) el.remove(); }
+        else { ivAlert('No se pudo eliminar el m√©todo de pago.', 'danger'); }
+    }).catch(() => ivAlert('Error de conexi√≥n al eliminar.', 'danger'));
+    });
 }
 </script>
-@Html.AntiForgeryToken()
 }
 
 @functions {
     static string GetIcon(PaymentMethodType t) => t switch {
-        PaymentMethodType.BankTransfer => "??",
-        PaymentMethodType.CreditCard   => "??",
-        PaymentMethodType.Cash         => "??",
-        PaymentMethodType.MercadoPago  => "??",
-        PaymentMethodType.PayPal       => "???",
-        PaymentMethodType.Stripe       => "??",
-        _ => "??"
+        PaymentMethodType.BankTransfer => "üè¶",
+        PaymentMethodType.CreditCard   => "üí≥",
+        PaymentMethodType.Cash         => "üíµ",
+        PaymentMethodType.MercadoPago  => "üí∞",
+        PaymentMethodType.PayPal       => "üÖø",
+        PaymentMethodType.Stripe       => "‚ö°",
+        _ => "üí≥"
     };
 }

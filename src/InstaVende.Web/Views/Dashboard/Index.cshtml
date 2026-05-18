@@ -104,12 +104,16 @@ $(function() {
             data: { labels: d.conversationsByChannel.map(x => x.channel), datasets: [{ data: d.conversationsByChannel.map(x => x.count), backgroundColor: ['#25D366','#1877F2','#E1306C'] }] },
             options: { plugins: { legend: { position: 'bottom' } } }
         });
+    }).fail(function() {
+        ['statTotal','statResolved','statActive','statRate'].forEach(function(id) { $('#'+id).text('Error'); });
     });
     $.getJSON('/Orders/GetStats', function(d) {
         $('#oKpiMonth').text(d.totalMonth);
         $('#oKpiRevenue').text('$' + (d.revenueMonth || 0).toLocaleString('es', {minimumFractionDigits:2}));
         $('#oKpiPending').text(d.pending);
         $('#oKpiDelivered').text(d.delivered);
+    }).fail(function() {
+        ['oKpiMonth','oKpiRevenue','oKpiPending','oKpiDelivered'].forEach(function(id) { $('#'+id).text('Error'); });
     });
 });
 </script>

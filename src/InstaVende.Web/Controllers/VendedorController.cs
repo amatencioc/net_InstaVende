@@ -1,5 +1,6 @@
 using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
+using InstaVende.Core.Interfaces;
 using InstaVende.Infrastructure.Data;
 using InstaVende.Web.Services;
 using InstaVende.Web.ViewModels;
@@ -15,12 +16,14 @@ public class VendedorController : Controller
     private readonly AppDbContext _db;
     private readonly CurrentUserService _cu;
     private readonly ImageService _img;
+    private readonly IBotEngineService _engine;
 
-    public VendedorController(AppDbContext db, CurrentUserService cu, ImageService img)
+    public VendedorController(AppDbContext db, CurrentUserService cu, ImageService img, IBotEngineService engine)
     {
-        _db = db;
-        _cu = cu;
-        _img = img;
+        _db     = db;
+        _cu     = cu;
+        _img    = img;
+        _engine = engine;
     }
 
     // ?? Personalidad ?????????????????????????????????????????????????????????
@@ -87,6 +90,8 @@ public class VendedorController : Controller
         config.WordsToAvoid = model.WordsToAvoid;
         config.EmojiPalette = model.EmojiPalette;
         config.WelcomeMessage = model.WelcomeMessage;
+        if (model.WelcomeMediaUrl != null)
+            config.WelcomeMediaUrl = model.WelcomeMediaUrl;
         config.PurchaseConfirmationMessage = model.PurchaseConfirmationMessage;
         config.HumanHandoffSituations = model.HumanHandoffSituations;
         config.AutoPauseOnHandoff = model.AutoPauseOnHandoff;
@@ -94,6 +99,7 @@ public class VendedorController : Controller
         config.UpdatedAt = DateTime.UtcNow;
 
         await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(biz.Id);
         return Json(new { success = true });
     }
 
@@ -148,6 +154,7 @@ public class VendedorController : Controller
         entry.Category = model.Category;
         entry.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
+        _engine.InvalidateKnowledgeCache(biz.Id);
         return Json(new { success = true, id = entry.Id });
     }
 
@@ -160,6 +167,7 @@ public class VendedorController : Controller
         if (entry == null) return NotFound();
         entry.IsFavorite = !entry.IsFavorite;
         await _db.SaveChangesAsync();
+        _engine.InvalidateKnowledgeCache(biz.Id);
         return Json(new { success = true, isFavorite = entry.IsFavorite });
     }
 
@@ -172,6 +180,7 @@ public class VendedorController : Controller
         if (entry == null) return NotFound();
         _db.KnowledgeEntries.Remove(entry);
         await _db.SaveChangesAsync();
+        _engine.InvalidateKnowledgeCache(biz.Id);
         return Json(new { success = true });
     }
 
@@ -266,7 +275,14 @@ public class VendedorController : Controller
             {
                 Id = m.Id,
                 Name = m.Name,
-                Type = m.Type.ToString(),
+                Type = m.Type switch
+                {
+                    InstaVende.Core.Enums.PaymentMethodType.BankTransfer => "Transferencia bancaria",
+                    InstaVende.Core.Enums.PaymentMethodType.CreditCard   => "Tarjeta de crédito",
+                    InstaVende.Core.Enums.PaymentMethodType.Cash         => "Efectivo",
+                    InstaVende.Core.Enums.PaymentMethodType.MercadoPago  => "Billeteras virtuales",
+                    _                                                     => "Efectivo"
+                },
                 Instructions = m.Instructions,
                 IsActive = m.IsActive,
                 SortOrder = m.SortOrder
@@ -302,6 +318,17 @@ public class VendedorController : Controller
         pm.Instructions = model.Instructions;
         pm.IsActive = model.IsActive;
         pm.SortOrder = model.SortOrder;
+        pm.Type = model.Type switch
+        {
+            "Billeteras virtuales" => InstaVende.Core.Enums.PaymentMethodType.MercadoPago,
+            "Transferencia bancaria" => InstaVende.Core.Enums.PaymentMethodType.BankTransfer,
+            "Contraentrega" => InstaVende.Core.Enums.PaymentMethodType.Cash,
+            "Tarjeta de crédito" => InstaVende.Core.Enums.PaymentMethodType.CreditCard,
+            "Efectivo" => InstaVende.Core.Enums.PaymentMethodType.Cash,
+            _ => Enum.TryParse<InstaVende.Core.Enums.PaymentMethodType>(model.Type, ignoreCase: true, out var pt)
+                    ? pt
+                    : InstaVende.Core.Enums.PaymentMethodType.Other
+        };
         await _db.SaveChangesAsync();
         return Json(new { success = true, id = pm.Id });
     }
@@ -337,10 +364,11 @@ public class VendedorController : Controller
         if (biz == null) return Unauthorized();
 
         var count = await _db.PaymentImages.CountAsync(p => p.BusinessId == biz.Id);
-        if (count >= 5) return BadRequest(new { error = "M�ximo 5 im�genes de pago." });
+        if (count >= 5) return BadRequest(new { error = "Máximo 5 imágenes de pago." });
         if (file.Length > 5 * 1024 * 1024) return BadRequest(new { error = "El archivo supera los 5MB." });
 
         var url = await _img.SaveImageAsync(file, "payment-images");
+        if (url == null) return BadRequest(new { error = "Formato de imagen no v\u00e1lido o archivo demasiado grande." });
         var img = new PaymentImage { BusinessId = biz.Id, ImageUrl = url, SortOrder = count };
         _db.PaymentImages.Add(img);
         await _db.SaveChangesAsync();

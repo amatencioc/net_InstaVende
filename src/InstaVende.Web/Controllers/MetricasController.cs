@@ -1,3 +1,4 @@
+using InstaVende.Core.Enums;
 using InstaVende.Infrastructure.Data;
 using InstaVende.Web.Services;
 using InstaVende.Web.ViewModels;
@@ -24,12 +25,25 @@ public class MetricasController : Controller
         var biz = await _cu.GetBusinessAsync();
         if (biz == null) return RedirectToAction("Register", "Account");
 
-        var totalConv   = await _db.Conversations.CountAsync(c => c.BusinessId == biz.Id);
-        var totalOrders = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id);
-        var totalRevenue = await _db.Orders
-            .Where(o => o.BusinessId == biz.Id && o.Status != InstaVende.Core.Enums.OrderStatus.Cancelled)
-            .SumAsync(o => (decimal?)o.Total) ?? 0;
-        var completedOrders = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == InstaVende.Core.Enums.OrderStatus.Delivered);
+        var totalConv = await _db.Conversations.CountAsync(c => c.BusinessId == biz.Id);
+
+        // 3 queries de Orders consolidadas en 1 sola query agregada
+        var orderStats = await _db.Orders
+            .Where(o => o.BusinessId == biz.Id)
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Total     = g.Count(),
+                Revenue   = g.Where(o => o.Status != OrderStatus.Cancelled
+                                      && o.Status != OrderStatus.Refunded)
+                             .Sum(o => (decimal?)o.Total) ?? 0m,
+                Delivered = g.Count(o => o.Status == OrderStatus.Delivered),
+            })
+            .FirstOrDefaultAsync();
+
+        var totalOrders     = orderStats?.Total     ?? 0;
+        var totalRevenue    = orderStats?.Revenue   ?? 0m;
+        var completedOrders = orderStats?.Delivered ?? 0;
         var convRate = totalConv > 0 ? (double)completedOrders / totalConv : 0;
 
         var vm = new MetricasViewModel

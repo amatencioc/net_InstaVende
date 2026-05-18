@@ -7,4 +7,5 @@
   <Folder Name="/tests/">
     <Project Path="tests/InstaVende.Tests/InstaVende.Tests.csproj" />
   </Folder>
+  <Project Path="BenchmarkSuite1/BenchmarkSuite1.csproj" />
 </Solution>

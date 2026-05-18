@@ -51,6 +51,7 @@ public class BotController : Controller
         cfg.EnableHandoff = model.EnableHandoff; cfg.HandoffTriggerPhrase = model.HandoffTriggerPhrase; cfg.IsActive = model.IsActive;
         cfg.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(bid.Value);
         return Json(new { success = true, message = "Configuración guardada." });
     }
 
@@ -58,11 +59,13 @@ public class BotController : Controller
     public async Task<IActionResult> SaveIntent([FromBody] BotIntentViewModel model)
     {
         var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
         if (cfg == null) return NotFound();
         if (model.Id == 0) _db.BotIntents.Add(new BotIntent { BotConfigId = cfg.Id, IntentName = model.IntentName, TriggerPhrases = model.TriggerPhrases, Response = model.Response, IsActive = model.IsActive, Priority = model.Priority });
         else { var i = await _db.BotIntents.FirstOrDefaultAsync(x => x.Id == model.Id && x.BotConfigId == cfg.Id); if (i == null) return NotFound(); i.IntentName = model.IntentName; i.TriggerPhrases = model.TriggerPhrases; i.Response = model.Response; i.IsActive = model.IsActive; i.Priority = model.Priority; }
         await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(bid.Value);
         return Json(new { success = true });
     }
 
@@ -70,11 +73,14 @@ public class BotController : Controller
     public async Task<IActionResult> DeleteIntent([FromBody] IdRequest req)
     {
         var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
         if (cfg == null) return NotFound();
         var intent = await _db.BotIntents.FirstOrDefaultAsync(i => i.Id == req.Id && i.BotConfigId == cfg.Id);
         if (intent == null) return NotFound();
-        _db.BotIntents.Remove(intent); await _db.SaveChangesAsync();
+        _db.BotIntents.Remove(intent);
+        await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(bid.Value);
         return Json(new { success = true });
     }
 
@@ -82,23 +88,52 @@ public class BotController : Controller
     public async Task<IActionResult> SaveKnowledge([FromBody] BotKnowledgeViewModel model)
     {
         var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
         if (cfg == null) return NotFound();
         if (model.Id == 0) _db.BotKnowledges.Add(new BotKnowledge { BotConfigId = cfg.Id, Question = model.Question, Answer = model.Answer, Category = model.Category, IsActive = model.IsActive });
         else { var k = await _db.BotKnowledges.FirstOrDefaultAsync(x => x.Id == model.Id && x.BotConfigId == cfg.Id); if (k == null) return NotFound(); k.Question = model.Question; k.Answer = model.Answer; k.Category = model.Category; k.IsActive = model.IsActive; }
         await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(bid.Value);
         return Json(new { success = true });
+    }
+
+    [HttpPost][ValidateAntiForgeryToken]
+    public async Task<IActionResult> GetIntent([FromBody] IdRequest req)
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
+        var cfg = await _db.BotConfigs.AsNoTracking().FirstOrDefaultAsync(b => b.BusinessId == bid);
+        if (cfg == null) return NotFound();
+        var intent = await _db.BotIntents.AsNoTracking().FirstOrDefaultAsync(i => i.Id == req.Id && i.BotConfigId == cfg.Id);
+        if (intent == null) return NotFound();
+        return Json(MapIntent(intent));
+    }
+
+    [HttpPost][ValidateAntiForgeryToken]
+    public async Task<IActionResult> GetKnowledge([FromBody] IdRequest req)
+    {
+        var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
+        var cfg = await _db.BotConfigs.AsNoTracking().FirstOrDefaultAsync(b => b.BusinessId == bid);
+        if (cfg == null) return NotFound();
+        var kb = await _db.BotKnowledges.AsNoTracking().FirstOrDefaultAsync(k => k.Id == req.Id && k.BotConfigId == cfg.Id);
+        if (kb == null) return NotFound();
+        return Json(MapKb(kb));
     }
 
     [HttpPost][ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteKnowledge([FromBody] IdRequest req)
     {
         var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
         var cfg = await _db.BotConfigs.FirstOrDefaultAsync(b => b.BusinessId == bid);
         if (cfg == null) return NotFound();
         var kb = await _db.BotKnowledges.FirstOrDefaultAsync(k => k.Id == req.Id && k.BotConfigId == cfg.Id);
         if (kb == null) return NotFound();
-        _db.BotKnowledges.Remove(kb); await _db.SaveChangesAsync();
+        _db.BotKnowledges.Remove(kb);
+        await _db.SaveChangesAsync();
+        _engine.InvalidateBotConfigCache(bid.Value);
         return Json(new { success = true });
     }
 
@@ -107,7 +142,11 @@ public class BotController : Controller
     {
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return Unauthorized();
-        var reply = await _engine.ProcessMessageAsync(bid.Value, 0, model.Message);
+        if (string.IsNullOrWhiteSpace(model.Message))
+            return Json(new { reply = string.Empty });
+        // conversationId = -1 signals a preview context; cart/order commands
+        // will return graceful "no items" messages and never create real orders.
+        var reply = await _engine.ProcessMessageAsync(bid.Value, -1, model.Message);
         return Json(new { reply });
     }
 

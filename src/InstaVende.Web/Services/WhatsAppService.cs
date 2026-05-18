@@ -40,13 +40,13 @@ public class WhatsAppService : IChannelMessageSender
         var waUrl   = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
         var payload = JsonSerializer.Serialize(new { to = recipient, message = text });
 
+        // Reuse named client (timeout configured at registration in Program.cs)
+        using var http = _http.CreateClient("wa-send");
+
         for (var attempt = 1; attempt <= 2; attempt++)
         {
             try
             {
-                using var http = _http.CreateClient();
-                http.Timeout   = TimeSpan.FromSeconds(10);
-
                 using var resp = await http.PostAsync(
                     $"{waUrl}/send",
                     new StringContent(payload, Encoding.UTF8, "application/json"));
@@ -55,10 +55,10 @@ public class WhatsAppService : IChannelMessageSender
 
                 var body = await resp.Content.ReadAsStringAsync();
                 _logger.LogError(
-                    "WhatsApp send failed (attempt {Attempt}) for business {Id}: {Status} — {Body}",
+                    "WhatsApp send failed (attempt {Attempt}) for business {Id}: {Status} â€” {Body}",
                     attempt, businessId, resp.StatusCode, body);
 
-                // 503 = WA client not connected — no point retrying
+                // 503 = WA client not connected â€” no point retrying
                 if ((int)resp.StatusCode == 503) return;
             }
             catch (Exception ex)

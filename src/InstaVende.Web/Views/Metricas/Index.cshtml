@@ -2,7 +2,7 @@
 @{ ViewData["Title"] = "Metricas"; }
 
 <div class="mb-4">
-    <h1 class="topbar-page-title mb-0">M閠ricas y resultados</h1>
+    <h1 class="topbar-page-title mb-0">M茅tricas y resultados</h1>
     <p class="text-muted small mb-0 mt-1">Analiza el rendimiento de tu tienda</p>
 </div>
 
@@ -26,7 +26,7 @@
     <div class="stat-tile">
         <div class="st-icon st-g"><i class="bi bi-graph-up-arrow"></i></div>
         <div class="st-val">@Model.ConversionRate.ToString("P1")</div>
-        <div class="st-lbl">Conversi髇</div>
+        <div class="st-lbl">Conversi贸n</div>
     </div>
 </div>
 
@@ -34,10 +34,10 @@
     <!-- Columna principal -->
     <div class="col-lg-8">
 
-        <!-- Conversi髇 en tiempo real -->
+        <!-- Conversi贸n en tiempo real -->
         <div class="a-card">
             <div class="a-card-header">
-                <div class="a-card-title"><i class="bi bi-lightning-charge-fill"></i> Conversi髇 en tiempo real</div>
+                <div class="a-card-title"><i class="bi bi-lightning-charge-fill"></i> Conversi贸n en tiempo real</div>
                 <span class="badge bg-success">En vivo</span>
             </div>
             <div class="a-card-body">
@@ -52,7 +52,7 @@
                     </div>
                     <div class="col-4 text-center">
                         <div style="font-size:1.6rem;font-weight:800;color:var(--brand)">@Model.ConversionRate.ToString("P1")</div>
-                        <div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600">% Conversi髇</div>
+                        <div style="font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;font-weight:600">% Conversi贸n</div>
                     </div>
                 </div>
                 <div style="background:#f1f5f9;border-radius:50px;height:8px;overflow:hidden">
@@ -66,10 +66,10 @@
             </div>
         </div>
 
-        <!-- An醠isis de 髍denes -->
+        <!-- An谩lisis de 贸rdenes -->
         <div class="a-card">
             <div class="a-card-header">
-                <div class="a-card-title"><i class="bi bi-bar-chart-fill"></i> An醠isis de 髍denes</div>
+                <div class="a-card-title"><i class="bi bi-bar-chart-fill"></i> An谩lisis de 贸rdenes</div>
             </div>
             <div class="a-card-body">
                 <div class="row g-3">
@@ -140,7 +140,7 @@
                 <div class="d-flex align-items-center gap-3 p-2 rounded-2" style="background:#f0fdf4">
                     <div class="st-icon st-g flex-shrink-0" style="width:32px;height:32px;font-size:.85rem"><i class="bi bi-graph-up-arrow"></i></div>
                     <div class="flex-grow-1">
-                        <div style="font-size:.82rem;font-weight:600;color:#0f172a">Tasa de conversi髇</div>
+                        <div style="font-size:.82rem;font-weight:600;color:#0f172a">Tasa de conversi贸n</div>
                         <div style="font-size:.73rem;color:#94a3b8">Conv / Ventas</div>
                     </div>
                     <strong style="font-size:.9rem;color:var(--brand)">@Model.ConversionRate.ToString("P1")</strong>
@@ -155,8 +155,8 @@
             </div>
             <div class="a-card-body">
                 <p class="text-muted mb-3" style="font-size:.83rem">Exporta tu base de clientes y segmenta como quieras.</p>
-                <a href="/Conversations/Export" class="btn btn-outline-primary w-100 btn-sm">
-                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar clientes (CSV)
+                <a href="/Orders/ExportCsv" class="btn btn-outline-primary w-100 btn-sm">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar pedidos (CSV)
                 </a>
             </div>
         </div>

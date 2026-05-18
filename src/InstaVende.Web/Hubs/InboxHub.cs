@@ -13,7 +13,7 @@ public class InboxHub : Hub
 
     /// <summary>
     /// Joins the SignalR group for the caller's own business only.
-    /// The businessId parameter is ignored — always uses the authenticated user's business.
+    /// The businessId parameter is ignored â€” always uses the authenticated user's business.
     /// </summary>
     public async Task JoinBusinessGroup(string businessId)
     {

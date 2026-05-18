@@ -8,6 +8,8 @@ using InstaVende.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
 
 namespace InstaVende.Web.Controllers;
 
@@ -17,12 +19,34 @@ public class ChannelConfigController : Controller
     private readonly AppDbContext _db;
     private readonly CurrentUserService _cu;
     private readonly DataProtectionService _dp;
-    private readonly IConfiguration _config;
+    private readonly WhatsAppClientOptions _waOpts;
     private readonly IHttpClientFactory _http;
     private readonly ILogger<ChannelConfigController> _logger;
+    private readonly IMemoryCache _cache;
 
-    public ChannelConfigController(AppDbContext db, CurrentUserService cu, DataProtectionService dp, IConfiguration config, IHttpClientFactory http, ILogger<ChannelConfigController> logger)
-    { _db = db; _cu = cu; _dp = dp; _config = config; _http = http; _logger = logger; }
+    public ChannelConfigController(
+        AppDbContext db,
+        CurrentUserService cu,
+        DataProtectionService dp,
+        IOptions<WhatsAppClientOptions> waOptions,
+        IHttpClientFactory http,
+        ILogger<ChannelConfigController> logger,
+        IMemoryCache cache)
+    {
+        _db     = db;
+        _cu     = cu;
+        _dp     = dp;
+        _waOpts = waOptions.Value;
+        _http   = http;
+        _logger = logger;
+        _cache  = cache;
+    }
+
+    private const string WaOfflineCacheKey = "wa_offline";
+    private string WaUrl        => _waOpts.BaseUrl;
+    private string WaClientPath => Path.IsPathRooted(_waOpts.ClientPath)
+        ? _waOpts.ClientPath
+        : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, _waOpts.ClientPath));
 
     public async Task<IActionResult> Index()
     {
@@ -92,22 +116,26 @@ public class ChannelConfigController : Controller
         var bid = await _cu.GetBusinessIdAsync();
         if (bid == null) return Json(new { connected = false });
 
-        // Check live status first (most accurate)
-        var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
-        try
+        // Skip live check if wa-client was recently confirmed offline
+        if (!_cache.TryGetValue(WaOfflineCacheKey, out _))
         {
-            using var http = _http.CreateClient();
-            http.Timeout = TimeSpan.FromSeconds(3);
-            using var resp = await http.GetAsync($"{waUrl}/status");
-            if (resp.IsSuccessStatusCode)
+            try
             {
-                var json = await resp.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                if (doc.RootElement.TryGetProperty("connected", out var c) && c.GetBoolean())
-                    return Json(new { connected = true, source = "live" });
+                using var http = _http.CreateClient("wa-health");
+                using var resp = await http.GetAsync($"{WaUrl}/status");
+                if (resp.IsSuccessStatusCode)
+                {
+                    var json = await resp.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("connected", out var c) && c.GetBoolean())
+                        return Json(new { connected = true, source = "live" });
+                }
+            }
+            catch
+            {
+                _cache.Set(WaOfflineCacheKey, true, TimeSpan.FromSeconds(12));
             }
         }
-        catch { /* WA client offline — fall back to DB */ }
 
         // Fallback: DB flag
         var cfg = await _db.ChannelConfigs
@@ -133,32 +161,47 @@ public class ChannelConfigController : Controller
 
     /// <summary>
     /// Server-side proxy to the local whatsapp-web.js Node client.
-    /// Avoids CORS — the browser calls this endpoint, .NET calls Node.
+    /// Avoids CORS â€” the browser calls this endpoint, .NET calls Node.
     /// GET /ChannelConfig/WaStatus
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> WaStatus()
     {
-        var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
+        const string offline = "{\"state\":\"disconnected\",\"connected\":false,\"qrDataUrl\":null,\"qrExpiresAt\":null,\"info\":null}";
+
+        if (_cache.TryGetValue(WaOfflineCacheKey, out _))
+            return Content(offline, "application/json");
+
         try
         {
-            using var http = _http.CreateClient();
-            http.Timeout = TimeSpan.FromSeconds(12);
-            using var cts  = new CancellationTokenSource(TimeSpan.FromSeconds(12));
-            using var resp = await http.GetAsync($"{waUrl}/status", cts.Token);
-            var body = await resp.Content.ReadAsStringAsync(cts.Token);
+            using var http = _http.CreateClient("wa-health");
+            using var resp = await http.GetAsync($"{WaUrl}/status");
+            if (!resp.IsSuccessStatusCode)
+            {
+                SetOfflineCache(TimeSpan.FromSeconds(4));
+                return Content(offline, "application/json");
+            }
+            var body = await resp.Content.ReadAsStringAsync();
+            JsonDocument.Parse(body).Dispose(); // validate JSON before forwarding
             return Content(body, "application/json");
+        }
+        catch (Exception ex) when (ex is TaskCanceledException or HttpRequestException)
+        {
+            _logger.LogDebug("WA client offline at {Url} (expected when not running)", WaUrl);
+            SetOfflineCache(TimeSpan.FromSeconds(4));
+            return Content(offline, "application/json");
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "WA client unreachable at {Url}", waUrl);
-            return Content(
-                """{"state":"disconnected","connected":false,"qrDataUrl":null,"qrExpiresAt":null,"info":null,"error":"WA client offline"}""",
-                "application/json");
+            _logger.LogWarning(ex, "WA client unexpected error at {Url}", WaUrl);
+            SetOfflineCache(TimeSpan.FromSeconds(4));
+            return Content(offline, "application/json");
         }
     }
 
-    // Disconnect the local WA session and mark ChannelConfig inactive
+    private void SetOfflineCache(TimeSpan ttl)
+        => _cache.Set(WaOfflineCacheKey, true, ttl);
+
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Disconnect()
     {
@@ -168,21 +211,87 @@ public class ChannelConfigController : Controller
         // Tell the local WA client to log out (best-effort)
         try
         {
-            var waUrl = _config["WhatsAppClient:BaseUrl"] ?? "http://localhost:3001";
-            using var http = _http.CreateClient();
-            http.Timeout = TimeSpan.FromSeconds(6);
+            using var http = _http.CreateClient("wa-send");
             using var content = new StringContent("{}", System.Text.Encoding.UTF8, "application/json");
-            await http.PostAsync($"{waUrl}/disconnect", content);
+            await http.PostAsync($"{WaUrl}/disconnect", content);
         }
-        catch { /* ignore — Node may be offline */ }
+        catch { /* ignore â€” Node may be offline */ }
+
+        // Clear any cached offline/online state so next page visit reflects reality
+        _cache.Remove(WaOfflineCacheKey);
 
         // Mark inactive in DB
         var existing = await _db.ChannelConfigs
             .FirstOrDefaultAsync(c => c.BusinessId == bid && c.ChannelType == ChannelType.WhatsApp);
-        if (existing != null) { existing.IsActive = false; await _db.SaveChangesAsync(); }
+        if (existing != null) { existing.IsActive = false; existing.ConnectedAt = null; await _db.SaveChangesAsync(); }
 
         TempData["Success"] = "WhatsApp desconectado correctamente.";
         return RedirectToAction("WhatsApp");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> WaRestart()
+    {
+        // Check if already running â€” if so just clear cache and return
+        if (await WaIsReachableAsync())
+        {
+            _cache.Remove(WaOfflineCacheKey);
+            return Json(new { ok = true, message = "El servicio ya estaba corriendo." });
+        }
+
+        var waPath  = WaClientPath;
+        var indexJs = Path.Combine(waPath, "index.js");
+
+        if (!Directory.Exists(waPath))
+            return Json(new { ok = false, message = $"Directorio wa-client no encontrado: {waPath}" });
+        if (!System.IO.File.Exists(indexJs))
+            return Json(new { ok = false, message = "index.js no encontrado en wa-client." });
+
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName               = "node",
+                Arguments              = "index.js",
+                WorkingDirectory       = waPath,
+                UseShellExecute        = false,
+                CreateNoWindow         = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+            };
+
+            var proc = new System.Diagnostics.Process { StartInfo = psi };
+            proc.OutputDataReceived += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) _logger.LogInformation("[wa-client] {Line}", e.Data); };
+            proc.ErrorDataReceived  += (_, e) => { if (!string.IsNullOrEmpty(e.Data)) _logger.LogWarning("[wa-client] {Line}", e.Data); };
+            proc.Start();
+            proc.BeginOutputReadLine();
+            proc.BeginErrorReadLine();
+
+            _logger.LogInformation("WaRestart: launched wa-client (PID {Pid}) from {Path}", proc.Id, waPath);
+
+            // Clear the offline cache so WaStatus proxy stops returning stale "offline" JSON.
+            _cache.Remove(WaOfflineCacheKey);
+
+            // Return immediately â€” the browser's poll loop (WaStatus) will pick up the QR
+            // as soon as Node generates it (~15-20 s).
+            return Json(new { ok = true, message = "Servicio iniciado. Generando codigo QR..." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "WaRestart: failed to start wa-client");
+            return Json(new { ok = false, message = "No se pudo iniciar el servicio. Verifica que Node.js este instalado." });
+        }
+    }
+
+    private async Task<bool> WaIsReachableAsync()
+    {
+        try
+        {
+            using var http = _http.CreateClient("wa-health");
+            using var resp = await http.GetAsync($"{WaUrl}/health");
+            return resp.IsSuccessStatusCode;
+        }
+        catch { return false; }
     }
 
     // Called by the QR page JS when the local WA client reports connected
@@ -210,7 +319,7 @@ public class ChannelConfigController : Controller
                 BusinessId           = bid.Value,
                 ChannelType          = ChannelType.WhatsApp,
                 PhoneNumber          = phone,
-                AccessTokenEncrypted = string.Empty,   // QR-based — no Meta token needed
+                AccessTokenEncrypted = string.Empty,   // QR-based â€” no Meta token needed
                 WebhookVerifyToken   = Guid.NewGuid().ToString("N")[..16],
                 ConnectedAt          = DateTime.UtcNow,
                 IsActive             = true,

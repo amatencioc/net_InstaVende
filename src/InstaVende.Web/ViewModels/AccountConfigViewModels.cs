@@ -3,7 +3,7 @@ using InstaVende.Core.Enums;
 
 namespace InstaVende.Web.ViewModels;
 
-// Tab 1 – Organización
+// Tab 1 â€“ OrganizaciÃ³n
 public class OrganizacionViewModel
 {
     [Required, MaxLength(200)]
@@ -12,7 +12,7 @@ public class OrganizacionViewModel
     public string? Currency { get; set; }
 }
 
-// Tab 2 – Usuarios
+// Tab 2 â€“ Usuarios
 public class UsuariosViewModel
 {
     public List<BusinessUserItemViewModel> Users { get; set; } = new();
@@ -38,7 +38,7 @@ public class PendingInvitationViewModel
     public DateTime ExpiresAt { get; set; }
 }
 
-// Tab 3 – Notificaciones
+// Tab 3 â€“ Notificaciones
 public class NotificacionesEmailViewModel
 {
     public List<NotificationEmailItemViewModel> Emails { get; set; } = new();
@@ -52,7 +52,7 @@ public class NotificationEmailItemViewModel
     public bool IsActive { get; set; }
 }
 
-// Wrapper para toda la página con los 4 tabs
+// Wrapper para toda la pÃ¡gina con los 4 tabs
 public class AccountConfigViewModel
 {
     public OrganizacionViewModel Organizacion { get; set; } = new();

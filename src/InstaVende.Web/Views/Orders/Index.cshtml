@@ -63,7 +63,7 @@
                         <span class="kanban-col-title">@title</span>
                         <span class="badge substatus-@css.Replace("substatus-","")">@cards.Count</span>
                     </div>
-                    <button class="kanban-col-opts" title="Opciones">···</button>
+                    <button class="kanban-col-opts" title="Opciones">Â·Â·Â·</button>
                 </div>
                 <div>
                     @if (!cards.Any())
@@ -127,12 +127,22 @@
 function switchTab(name, btn) {
     document.querySelectorAll('.kanban-tab').forEach(t => t.style.display = 'none');
     document.querySelectorAll('#kanbanTabs .nav-link').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).style.display = '';
+    var tab = document.getElementById('tab-' + name);
+    tab.style.display = '';
+    // Restore all cards in this tab before re-applying the current search filter
+    tab.querySelectorAll('.kanban-card').forEach(c => c.style.display = '');
+    var q = document.getElementById('orderSearch').value;
+    if (q) filterCards(q);
     btn.classList.add('active');
 }
 function filterCards(q) {
     q = q.toLowerCase();
-    document.querySelectorAll('.kanban-card').forEach(card => {
+    // Only filter cards in the currently visible tab
+    var activeTab = document.querySelector('.kanban-tab:not([style*="display: none"])') ||
+                    document.querySelector('.kanban-tab[style=""]') ||
+                    document.querySelector('.kanban-tab');
+    if (!activeTab) return;
+    activeTab.querySelectorAll('.kanban-card').forEach(card => {
         card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
 }

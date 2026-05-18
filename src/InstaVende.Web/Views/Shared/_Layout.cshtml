@@ -92,6 +92,7 @@
 <header class="app-topbar">
     <div class="topbar-left">
         <button class="sb-toggle" id="sbToggle"><i class="bi bi-list"></i></button>
+        <span class="topbar-mobile-title">@ViewData["Title"]</span>
     </div>
     <div class="topbar-right">
         <span class="topbar-badge"><span class="dot"></span> Bot activo</span>
@@ -106,6 +107,19 @@
     {<div class="app-alert app-alert-error"><i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]</div>}
     @RenderBody()
 </main>
+
+<!-- ── Global confirm/alert modal ───────────────────────────────────────── -->
+<div class="iv-confirm-backdrop" id="ivConfirmBackdrop" role="dialog" aria-modal="true" aria-labelledby="ivConfirmTitle">
+    <div class="iv-confirm-box">
+        <div class="iv-confirm-icon danger" id="ivConfirmIcon"><i class="bi bi-exclamation-triangle-fill" id="ivConfirmIconI"></i></div>
+        <div class="iv-confirm-title" id="ivConfirmTitle">¿Estás seguro?</div>
+        <div class="iv-confirm-message" id="ivConfirmMessage"></div>
+        <div class="iv-confirm-actions" id="ivConfirmActions">
+            <button class="btn btn-outline-secondary" id="ivConfirmCancel">Cancelar</button>
+            <button class="btn btn-danger" id="ivConfirmOk">Confirmar</button>
+        </div>
+    </div>
+</div>
 }
 else
 {
@@ -143,30 +157,104 @@ else
       if (collapseIcon) { collapseIcon.className = 'bi bi-layout-sidebar-reverse'; }
     }
   }
-  // Restore saved state
-  applySidebarState(localStorage.getItem(COLLAPSED_KEY) === '1');
+  // Restore saved state — only when sidebar exists (authenticated pages)
+  if (sidebar) {
+    applySidebarState(localStorage.getItem(COLLAPSED_KEY) === '1');
 
-  if (collapseBtn) {
-    collapseBtn.addEventListener('click', function() {
-      var isNowCollapsed = !sidebar.classList.contains('collapsed');
-      applySidebarState(isNowCollapsed);
-      localStorage.setItem(COLLAPSED_KEY, isNowCollapsed ? '1' : '0');
-    });
+    if (collapseBtn) {
+      collapseBtn.addEventListener('click', function() {
+        var isNowCollapsed = !sidebar.classList.contains('collapsed');
+        applySidebarState(isNowCollapsed);
+        localStorage.setItem(COLLAPSED_KEY, isNowCollapsed ? '1' : '0');
+      });
+    }
+
+    // Mobile toggle
+    if (sbToggle) {
+      sbToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+      });
+    }
+    if (overlay) {
+      overlay.addEventListener('click', function() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('open');
+      });
+    }
+  }
+</script>
+
+<script>
+// ── ivConfirm — reemplaza window.confirm con modal elegante ───────────────
+// Uso: ivConfirm({ title, message, okLabel, type }).then(ok => { if(ok) ... })
+// type: 'danger' | 'warning' | 'info'  (default: 'danger')
+(function() {
+  var backdrop = document.getElementById('ivConfirmBackdrop');
+  var iconWrap = document.getElementById('ivConfirmIcon');
+  var iconEl   = document.getElementById('ivConfirmIconI');
+  var titleEl  = document.getElementById('ivConfirmTitle');
+  var msgEl    = document.getElementById('ivConfirmMessage');
+  var okBtn    = document.getElementById('ivConfirmOk');
+  var cancelBtn= document.getElementById('ivConfirmCancel');
+  var _resolve = null;
+
+  // Modal elements only exist on authenticated pages — skip wiring on login/register
+  if (!backdrop) {
+    window.ivConfirm = function() { return Promise.resolve(true); };
+    window.ivAlert   = function() { return Promise.resolve(true); };
+    return;
   }
 
-  // Mobile toggle
-  if (sbToggle) {
-    sbToggle.addEventListener('click', function() {
-      sidebar.classList.toggle('open');
-      overlay.classList.toggle('open');
-    });
+  var icons = {
+    danger:  'bi-exclamation-triangle-fill',
+    warning: 'bi-exclamation-circle-fill',
+    info:    'bi-info-circle-fill'
+  };
+  var okColors = { danger: 'btn-danger', warning: 'btn-warning', info: 'btn-primary' };
+
+  function open(opts) {
+    var type  = opts.type || 'danger';
+    titleEl.textContent = opts.title   || '¿Estás seguro?';
+    msgEl.textContent   = opts.message || '';
+    iconWrap.className  = 'iv-confirm-icon ' + type;
+    iconEl.className    = 'bi ' + (icons[type] || icons.danger);
+    okBtn.textContent   = opts.okLabel || 'Confirmar';
+    okBtn.className     = 'btn ' + (okColors[type] || 'btn-danger');
+    // show cancel only for confirm (not for alert)
+    cancelBtn.style.display = opts.alertOnly ? 'none' : '';
+    backdrop.classList.add('show');
+    setTimeout(function() { okBtn.focus(); }, 50);
   }
-  if (overlay) {
-    overlay.addEventListener('click', function() {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('open');
+
+  function close() { backdrop.classList.remove('show'); }
+
+  okBtn.addEventListener('click', function() { close(); if (_resolve) { _resolve(true); _resolve = null; } });
+  cancelBtn.addEventListener('click', function() { close(); if (_resolve) { _resolve(false); _resolve = null; } });
+  backdrop.addEventListener('click', function(e) {
+    if (e.target === backdrop) { close(); if (_resolve) { _resolve(false); _resolve = null; } }
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && backdrop.classList.contains('show')) {
+      close(); if (_resolve) { _resolve(false); _resolve = null; }
+    }
+  });
+
+  // Public API
+  window.ivConfirm = function(opts) {
+    return new Promise(function(resolve) {
+      _resolve = resolve;
+      open(typeof opts === 'string' ? { message: opts } : opts);
     });
-  }
+  };
+
+  window.ivAlert = function(message, type) {
+    return new Promise(function(resolve) {
+      _resolve = resolve;
+      open({ message: message, type: type || 'info', okLabel: 'Aceptar', alertOnly: true });
+    });
+  };
+})();
 </script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>

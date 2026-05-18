@@ -5,8 +5,10 @@ using InstaVende.Infrastructure.Data;
 using InstaVende.Web.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace InstaVende.Tests;
@@ -23,17 +25,18 @@ public class BotEngineServiceTests
 
     private BotEngineService CreateService(AppDbContext db, string? openAiKey = null)
     {
-        var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["OpenAI:ApiKey"] = openAiKey })
-            .Build();
         var logger = Mock.Of<ILogger<BotEngineService>>();
 
         var env = new Mock<IWebHostEnvironment>();
         env.Setup(e => e.ContentRootPath).Returns(Path.GetTempPath());
         var promptBuilderLogger = Mock.Of<ILogger<MasterPromptBuilder>>();
-        var promptBuilder = new MasterPromptBuilder(env.Object, promptBuilderLogger);
+        var promptBuilder  = new MasterPromptBuilder(env.Object, promptBuilderLogger);
+        var cache          = new MemoryCache(new MemoryCacheOptions());
+        var cacheOptions   = Options.Create(new BotCacheOptions());
+        var openAiOptions  = Options.Create(new OpenAiOptions { ApiKey = openAiKey ?? string.Empty });
+        var config         = new ConfigurationBuilder().Build();
 
-        return new BotEngineService(db, config, promptBuilder, logger);
+        return new BotEngineService(db, config, promptBuilder, logger, cache, cacheOptions, openAiOptions);
     }
 
     [Fact]
@@ -69,6 +72,7 @@ public class BotEngineServiceTests
     public async Task ProcessMessage_MatchesIntent_ReturnsIntentResponse()
     {
         using var db = CreateDb();
+        db.Businesses.Add(new Business { Id = 2, UserId = "user2", Name = "TestBiz2" });
         var config = new BotConfig
         {
             BusinessId = 2,
@@ -101,6 +105,7 @@ public class BotEngineServiceTests
     public async Task ProcessMessage_HandoffTrigger_ReturnsHandoffMessage()
     {
         using var db = CreateDb();
+        db.Businesses.Add(new Business { Id = 3, UserId = "user3", Name = "TestBiz3" });
         db.BotConfigs.Add(new BotConfig
         {
             BusinessId = 3,
@@ -155,6 +160,7 @@ public class BotEngineServiceTests
     public async Task ProcessMessage_NoMatch_ReturnsFallback()
     {
         using var db = CreateDb();
+        db.Businesses.Add(new Business { Id = 5, UserId = "user5", Name = "TestBiz5" });
         db.BotConfigs.Add(new BotConfig
         {
             BusinessId = 5,

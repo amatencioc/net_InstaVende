@@ -12,16 +12,16 @@ public class RegisterViewModel
     public string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El email es obligatorio.")]
-    [EmailAddress(ErrorMessage = "Ingresa un email válido.")]
+    [EmailAddress(ErrorMessage = "Ingresa un email vÃ¡lido.")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La contraseña es obligatoria.")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres.")]
+    [Required(ErrorMessage = "La contraseÃ±a es obligatoria.")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseÃ±a debe tener entre 6 y 100 caracteres.")]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessage = "Las contraseñas no coinciden.")]
+    [Compare("Password", ErrorMessage = "Las contraseÃ±as no coinciden.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El nombre del negocio es obligatorio.")]
@@ -32,10 +32,10 @@ public class RegisterViewModel
 public class LoginViewModel
 {
     [Required(ErrorMessage = "El email es obligatorio.")]
-    [EmailAddress(ErrorMessage = "Ingresa un email válido.")]
+    [EmailAddress(ErrorMessage = "Ingresa un email vÃ¡lido.")]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La contraseña es obligatoria.")]
+    [Required(ErrorMessage = "La contraseÃ±a es obligatoria.")]
     [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 

@@ -11,7 +11,7 @@ public class CurrentUserService
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppDbContext _db;
 
-    // Per-request cache — service is registered Scoped so this is safe
+    // Per-request cache â€” service is registered Scoped so this is safe
     private Business? _cachedBusiness;
     private bool _businessLoaded;
 

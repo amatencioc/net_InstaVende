@@ -12,7 +12,7 @@ public class ChannelConfigViewModel
     [Required(ErrorMessage = "El token de acceso es obligatorio.")]
     public string AccessToken { get; set; } = string.Empty;
     public string? AppSecret { get; set; }
-    [Required(ErrorMessage = "El token de verificación del webhook es obligatorio.")]
+    [Required(ErrorMessage = "El token de verificaciÃ³n del webhook es obligatorio.")]
     public string WebhookVerifyToken { get; set; } = string.Empty;
     public bool IsActive { get; set; } = true;
 }

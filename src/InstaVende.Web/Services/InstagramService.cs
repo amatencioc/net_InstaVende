@@ -64,15 +64,15 @@ public class InstagramService : IChannelMessageSender
             message   = new { text },
         };
 
-        var client = _http.CreateClient();
+        using var client = _http.CreateClient();
         client.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-        var content = new StringContent(
+        using var content = new StringContent(
             JsonSerializer.Serialize(payload),
             Encoding.UTF8,
             "application/json");
 
-        var resp = await client.PostAsync($"{ApiBase}/{igUserId}/messages", content);
+        using var resp = await client.PostAsync($"{ApiBase}/{igUserId}/messages", content);
         if (!resp.IsSuccessStatusCode)
         {
             var body = await resp.Content.ReadAsStringAsync();

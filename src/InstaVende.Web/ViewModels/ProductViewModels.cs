@@ -38,7 +38,7 @@ public class ProductListViewModel
 public class CategoryViewModel
 {
     public int Id { get; set; }
-    [Required(ErrorMessage = "El nombre de la categoría es obligatorio.")]
+    [Required(ErrorMessage = "El nombre de la categorÃ­a es obligatorio.")]
     [StringLength(100, ErrorMessage = "El nombre no puede superar los 100 caracteres.")]
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }

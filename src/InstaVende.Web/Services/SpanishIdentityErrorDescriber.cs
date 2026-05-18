@@ -11,37 +11,37 @@ public class SpanishIdentityErrorDescriber : IdentityErrorDescriber
         new() { Code = nameof(ConcurrencyFailure), Description = "Error de concurrencia optimista. El objeto ha sido modificado." };
 
     public override IdentityError PasswordMismatch() =>
-        new() { Code = nameof(PasswordMismatch), Description = "ContraseÒa incorrecta." };
+        new() { Code = nameof(PasswordMismatch), Description = "Contrase√±a incorrecta." };
 
     public override IdentityError InvalidToken() =>
-        new() { Code = nameof(InvalidToken), Description = "Token inv·lido." };
+        new() { Code = nameof(InvalidToken), Description = "Token inv√°lido." };
 
     public override IdentityError LoginAlreadyAssociated() =>
-        new() { Code = nameof(LoginAlreadyAssociated), Description = "Ya existe un usuario con este proveedor de inicio de sesiÛn." };
+        new() { Code = nameof(LoginAlreadyAssociated), Description = "Ya existe un usuario con este proveedor de inicio de sesi√≥n." };
 
     public override IdentityError InvalidUserName(string? userName) =>
-        new() { Code = nameof(InvalidUserName), Description = $"El nombre de usuario '{userName}' no es v·lido. Solo puede contener letras o dÌgitos." };
+        new() { Code = nameof(InvalidUserName), Description = $"El nombre de usuario '{userName}' no es v√°lido. Solo puede contener letras o d√≠gitos." };
 
     public override IdentityError InvalidEmail(string? email) =>
-        new() { Code = nameof(InvalidEmail), Description = $"El email '{email}' no es v·lido." };
+        new() { Code = nameof(InvalidEmail), Description = $"El email '{email}' no es v√°lido." };
 
     public override IdentityError DuplicateUserName(string userName) =>
-        new() { Code = nameof(DuplicateUserName), Description = $"El nombre de usuario '{userName}' ya est· en uso." };
+        new() { Code = nameof(DuplicateUserName), Description = $"El nombre de usuario '{userName}' ya est√° en uso." };
 
     public override IdentityError DuplicateEmail(string email) =>
-        new() { Code = nameof(DuplicateEmail), Description = $"El email '{email}' ya est· registrado." };
+        new() { Code = nameof(DuplicateEmail), Description = $"El email '{email}' ya est√° registrado." };
 
     public override IdentityError InvalidRoleName(string? role) =>
-        new() { Code = nameof(InvalidRoleName), Description = $"El nombre de rol '{role}' no es v·lido." };
+        new() { Code = nameof(InvalidRoleName), Description = $"El nombre de rol '{role}' no es v√°lido." };
 
     public override IdentityError DuplicateRoleName(string role) =>
         new() { Code = nameof(DuplicateRoleName), Description = $"El rol '{role}' ya existe." };
 
     public override IdentityError UserAlreadyHasPassword() =>
-        new() { Code = nameof(UserAlreadyHasPassword), Description = "El usuario ya tiene contraseÒa asignada." };
+        new() { Code = nameof(UserAlreadyHasPassword), Description = "El usuario ya tiene contrase√±a asignada." };
 
     public override IdentityError UserLockoutNotEnabled() =>
-        new() { Code = nameof(UserLockoutNotEnabled), Description = "El bloqueo de usuario no est· habilitado." };
+        new() { Code = nameof(UserLockoutNotEnabled), Description = "El bloqueo de usuario no est√° habilitado." };
 
     public override IdentityError UserAlreadyInRole(string role) =>
         new() { Code = nameof(UserAlreadyInRole), Description = $"El usuario ya pertenece al rol '{role}'." };
@@ -50,23 +50,23 @@ public class SpanishIdentityErrorDescriber : IdentityErrorDescriber
         new() { Code = nameof(UserNotInRole), Description = $"El usuario no pertenece al rol '{role}'." };
 
     public override IdentityError PasswordTooShort(int length) =>
-        new() { Code = nameof(PasswordTooShort), Description = $"La contraseÒa debe tener al menos {length} caracteres." };
+        new() { Code = nameof(PasswordTooShort), Description = $"La contrase√±a debe tener al menos {length} caracteres." };
 
     public override IdentityError PasswordRequiresNonAlphanumeric() =>
-        new() { Code = nameof(PasswordRequiresNonAlphanumeric), Description = "La contraseÒa debe contener al menos un car·cter especial (p. ej. !@#$%)." };
+        new() { Code = nameof(PasswordRequiresNonAlphanumeric), Description = "La contrase√±a debe contener al menos un car√°cter especial (p. ej. !@#$%)." };
 
     public override IdentityError PasswordRequiresDigit() =>
-        new() { Code = nameof(PasswordRequiresDigit), Description = "La contraseÒa debe contener al menos un n˙mero (0-9)." };
+        new() { Code = nameof(PasswordRequiresDigit), Description = "La contrase√±a debe contener al menos un n√∫mero (0-9)." };
 
     public override IdentityError PasswordRequiresLower() =>
-        new() { Code = nameof(PasswordRequiresLower), Description = "La contraseÒa debe contener al menos una letra min˙scula (a-z)." };
+        new() { Code = nameof(PasswordRequiresLower), Description = "La contrase√±a debe contener al menos una letra min√∫scula (a-z)." };
 
     public override IdentityError PasswordRequiresUpper() =>
-        new() { Code = nameof(PasswordRequiresUpper), Description = "La contraseÒa debe contener al menos una letra may˙scula (A-Z)." };
+        new() { Code = nameof(PasswordRequiresUpper), Description = "La contrase√±a debe contener al menos una letra may√∫scula (A-Z)." };
 
     public override IdentityError PasswordRequiresUniqueChars(int uniqueChars) =>
-        new() { Code = nameof(PasswordRequiresUniqueChars), Description = $"La contraseÒa debe contener al menos {uniqueChars} caracteres ˙nicos." };
+        new() { Code = nameof(PasswordRequiresUniqueChars), Description = $"La contrase√±a debe contener al menos {uniqueChars} caracteres √∫nicos." };
 
     public override IdentityError RecoveryCodeRedemptionFailed() =>
-        new() { Code = nameof(RecoveryCodeRedemptionFailed), Description = "El cÛdigo de recuperaciÛn no es v·lido." };
+        new() { Code = nameof(RecoveryCodeRedemptionFailed), Description = "El c√≥digo de recuperaci√≥n no es v√°lido." };
 }

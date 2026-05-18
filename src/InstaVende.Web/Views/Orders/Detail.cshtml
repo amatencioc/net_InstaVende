@@ -42,7 +42,7 @@
                 @if (Model.Discount > 0)
                 { <div class="d-flex justify-content-between mb-1 text-success"><span>Descuento</span><span>-$@Model.Discount.ToString("N2")</span></div> }
                 @if (Model.ShippingCost > 0)
-                { <div class="d-flex justify-content-between mb-1"><span>Envío</span><span>$@Model.ShippingCost.ToString("N2")</span></div> }
+                { <div class="d-flex justify-content-between mb-1"><span>EnvÃ­o</span><span>$@Model.ShippingCost.ToString("N2")</span></div> }
                 <hr/>
                 <div class="d-flex justify-content-between fw-bold fs-5"><span>Total</span><span>$@Model.Total.ToString("N2")</span></div>
             </div>
@@ -58,17 +58,17 @@
                 @if (!string.IsNullOrEmpty(Model.ContactPhone))
                 { <p class="text-muted small mb-1"><i class="bi bi-telephone me-1"></i>@Model.ContactPhone</p> }
                 @if (Model.ConversationId.HasValue)
-                { <a asp-controller="Inbox" asp-action="Index" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-dots me-1"></i>Ver conversación</a> }
+                { <a href="/Inbox/Index?conversationId=@Model.ConversationId.Value" class="btn btn-sm btn-outline-primary mt-2"><i class="bi bi-chat-dots me-1"></i>Ver conversaciÃ³n</a> }
             </div>
         </div>
-        <!-- Pago y envío -->
+        <!-- Pago y envÃ­o -->
         <div class="a-card mb-3">
             <div class="a-card-header"><div class="a-card-title"><i class="bi bi-credit-card"></i> Pago y entrega</div></div>
             <div class="a-card-body">
                 @if (!string.IsNullOrEmpty(Model.PaymentMethodName))
-                { <p class="mb-1 small"><strong>Método:</strong> @Model.PaymentMethodName</p> }
+                { <p class="mb-1 small"><strong>MÃ©todo:</strong> @Model.PaymentMethodName</p> }
                 @if (!string.IsNullOrEmpty(Model.ShippingAddress))
-                { <p class="mb-1 small"><strong>Dirección:</strong> @Model.ShippingAddress</p> }
+                { <p class="mb-1 small"><strong>DirecciÃ³n:</strong> @Model.ShippingAddress</p> }
                 @if (!string.IsNullOrEmpty(Model.Notes))
                 { <p class="mb-0 small text-muted"><strong>Notas:</strong> @Model.Notes</p> }
             </div>
@@ -100,7 +100,7 @@ function changeStatus() {
     $.post('/Orders/UpdateStatus', { id: @Model.Id, status: status, __RequestVerificationToken: $('input[name=__RequestVerificationToken]').val() })
         .done(function (d) {
             if (d.ok) { location.reload(); }
-            else alert('Error al actualizar el estado.');
+            else ivAlert('Error al actualizar el estado.', 'danger');
         });
 }
 </script>
@@ -110,7 +110,7 @@ function changeStatus() {
     static string GetStatusLabel(OrderStatus s) => s switch {
         OrderStatus.Pending   => "Pendiente",
         OrderStatus.Confirmed => "Confirmado",
-        OrderStatus.Preparing => "En preparación",
+        OrderStatus.Preparing => "En preparaciÃ³n",
         OrderStatus.Shipped   => "Enviado",
         OrderStatus.Delivered => "Entregado",
         OrderStatus.Cancelled => "Cancelado",

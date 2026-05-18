@@ -12,7 +12,7 @@ public class AccountProfileViewModel
     public string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El email es obligatorio.")]
-    [EmailAddress(ErrorMessage = "Ingresa un email válido.")]
+    [EmailAddress(ErrorMessage = "Ingresa un email vÃ¡lido.")]
     public string Email { get; set; } = string.Empty;
 
     public string? AvatarUrl { get; set; }
@@ -20,17 +20,17 @@ public class AccountProfileViewModel
 
 public class ChangePasswordViewModel
 {
-    [Required(ErrorMessage = "La contraseña actual es obligatoria.")]
+    [Required(ErrorMessage = "La contraseÃ±a actual es obligatoria.")]
     [DataType(DataType.Password)]
     public string CurrentPassword { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "La nueva contraseña es obligatoria.")]
-    [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres.")]
+    [Required(ErrorMessage = "La nueva contraseÃ±a es obligatoria.")]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseÃ±a debe tener entre 6 y 100 caracteres.")]
     [DataType(DataType.Password)]
     public string NewPassword { get; set; } = string.Empty;
 
     [DataType(DataType.Password)]
-    [Compare("NewPassword", ErrorMessage = "Las contraseñas no coinciden.")]
+    [Compare("NewPassword", ErrorMessage = "Las contraseÃ±as no coinciden.")]
     public string ConfirmNewPassword { get; set; } = string.Empty;
 }
 
@@ -44,7 +44,7 @@ public class BusinessProfileViewModel
     public string? Sector { get; set; }
     public string? Phone { get; set; }
 
-    [EmailAddress(ErrorMessage = "Ingresa un email válido.")]
+    [EmailAddress(ErrorMessage = "Ingresa un email vÃ¡lido.")]
     public string? Email { get; set; }
     public string? WebsiteUrl { get; set; }
     public string? WhatsAppNumber { get; set; }

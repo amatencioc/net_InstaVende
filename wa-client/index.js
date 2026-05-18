@@ -48,110 +48,176 @@ const state = {
     qrExpiresAt:  null,           // ISO string — browser shows countdown
     clientInfo:   null,           // { wid, phone, pushname }
     qrTimer:      null,           // handle to clear QR after TTL
+    intentionalDisconnect: false, // set true before logout() to suppress auto-reinit
 };
 
 function clearQrTimer() {
     if (state.qrTimer) { clearTimeout(state.qrTimer); state.qrTimer = null; }
 }
 
-// ?? WhatsApp client ??????????????????????????????????????????????????????????
-const waClient = new Client({
-    authStrategy: new LocalAuth({ dataPath: SESSION_DIR }),
-    puppeteer: {
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--disable-extensions',
-        ],
-    },
-});
+// ?? WhatsApp client factory ???????????????????????????????????????????????????
+// We recreate the Client on each reinitialise because calling initialize()
+// twice on the same instance throws in whatsapp-web.js.
+let waClient = null;
 
-waClient.on('loading_screen', (percent, message) => {
-    log(`Loading ${percent}% — ${message}`);
-});
+function createClient() {
+    const client = new Client({
+        authStrategy: new LocalAuth({ dataPath: SESSION_DIR }),
+        puppeteer: {
+            headless: true,
+            executablePath: require('puppeteer').executablePath(),
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--disable-extensions',
+                '--disable-background-networking',
+                '--disable-default-apps',
+                '--disable-sync',
+                '--no-first-run',
+                '--mute-audio',
+                '--disable-features=TranslateUI,BlinkGenPropertyTrees',
+                '--disable-ipc-flooding-protection',
+                '--disable-renderer-backgrounding',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-client-side-phishing-detection',
+                '--disable-hang-monitor',
+                '--disable-popup-blocking',
+                '--disable-prompt-on-repost',
+                '--disable-domain-reliability',
+                '--disable-component-update',
+                '--no-default-browser-check',
+                '--metrics-recording-only',
+                '--safebrowsing-disable-auto-update',
+                '--password-store=basic',
+                '--use-mock-keychain',
+                // Speed up subsequent startups by keeping the disk cache warm
+                '--disk-cache-size=67108864',          // 64 MB cache
+                '--media-cache-size=16777216',          // 16 MB media cache
+                '--aggressive-cache-discard',
+                // Reduce process startup overhead
+                '--single-process',                    // eliminates renderer fork latency on Linux/Windows
+                '--js-flags=--max-old-space-size=256', // cap V8 heap to avoid OOM on low-RAM servers
+            ],
+        },
+    });
 
-waClient.on('qr', async (qr) => {
-    log('QR received — scan with WhatsApp');
-    clearQrTimer();
-    state.phase       = 'qr';
-    state.clientInfo  = null;
+    client.on('loading_screen', (percent, message) => {
+        log(`Loading ${percent}% — ${message}`);
+    });
 
-    try {
-        state.qrDataUrl   = await qrcode.toDataURL(qr, { width: 280, margin: 2 });
+    client.on('qr', async (qr) => {
+        log('QR received — scan with WhatsApp');
+        clearQrTimer();
+        state.phase      = 'qr';
+        state.clientInfo = null;
+        // Set expiry immediately so the browser can start the countdown
+        // while we encode the QR (encoding is fast but we don't block state update)
+        state.qrDataUrl   = null;
         state.qrExpiresAt = new Date(Date.now() + QR_TTL_MS).toISOString();
-    } catch (e) {
-        log(`QR encode error: ${e.message}`, 'error');
+
+        // Encode in background — setImmediate yields to the event loop first
+        setImmediate(async () => {
+            try {
+                state.qrDataUrl = await qrcode.toDataURL(qr, { width: 280, margin: 2 });
+            } catch (e) {
+                log(`QR encode error: ${e.message}`, 'error');
+                state.qrDataUrl   = null;
+                state.qrExpiresAt = null;
+            }
+        });
+
+        // Auto-clear QR after TTL so browser shows "Generating..." again
+        state.qrTimer = setTimeout(() => {
+            if (state.phase === 'qr') {
+                log('QR expired — waiting for new QR from client');
+                state.qrDataUrl   = null;
+                state.qrExpiresAt = null;
+                // stay in 'qr' phase; new QR event will arrive
+            }
+        }, QR_TTL_MS);
+    });
+
+    client.on('authenticated', () => {
+        log('Authenticated ?');
+        clearQrTimer();
+        state.phase       = 'authenticating';
         state.qrDataUrl   = null;
         state.qrExpiresAt = null;
-    }
+    });
 
-    // Auto-clear QR after TTL so browser shows "Generating..." again
-    state.qrTimer = setTimeout(() => {
-        if (state.phase === 'qr') {
-            log('QR expired — waiting for new QR');
-            state.qrDataUrl   = null;
-            state.qrExpiresAt = null;
-            state.phase       = 'initializing';
+    client.on('auth_failure', (msg) => {
+        log(`Auth failure: ${msg}`, 'error');
+        clearQrTimer();
+        state.phase       = 'disconnected';
+        state.qrDataUrl   = null;
+        state.qrExpiresAt = null;
+        state.clientInfo  = null;
+        clearSession();
+        scheduleReinit(3000);
+    });
+
+    client.on('ready', () => {
+        const me = client.info;
+        state.phase       = 'connected';
+        state.qrDataUrl   = null;
+        state.qrExpiresAt = null;
+        state.clientInfo  = {
+            wid:      me.wid.user,
+            phone:    '+' + me.wid.user,
+            pushname: me.pushname,
+        };
+        log(`Connected as ${state.clientInfo.pushname} (${state.clientInfo.phone}) ?`);
+    });
+
+    client.on('disconnected', (reason) => {
+        log(`Disconnected: ${reason}`, 'warn');
+        clearQrTimer();
+        state.phase       = 'disconnected';
+        state.qrDataUrl   = null;
+        state.qrExpiresAt = null;
+        state.clientInfo  = null;
+
+        if (state.intentionalDisconnect) {
+            state.intentionalDisconnect = false;
+            log('Intentional disconnect — not reinitialising.');
+            return;
         }
-    }, QR_TTL_MS);
-});
 
-waClient.on('authenticated', () => {
-    log('Authenticated ?');
-    clearQrTimer();
-    state.phase       = 'authenticating';
-    state.qrDataUrl   = null;
-    state.qrExpiresAt = null;
-});
+        // Unexpected disconnect — destroy and recreate after short delay
+        log('Scheduling reinitialise in 5s...');
+        try { client.destroy().catch(() => {}); } catch (_) {}
+        scheduleReinit(5000);
+    });
 
-waClient.on('auth_failure', (msg) => {
-    log(`Auth failure: ${msg}`, 'error');
-    clearQrTimer();
-    state.phase       = 'disconnected';
-    state.qrDataUrl   = null;
-    state.qrExpiresAt = null;
-    state.clientInfo  = null;
-    clearSession();
-    log('Session cleared — restart the server to get a new QR');
-});
+                client.on('message', async (msg) => {
+                    if (msg.isGroupMsg || msg.from === 'status@broadcast') return;
+                    const from = msg.from.replace('@c.us', '');
+                    const body = msg.body?.trim();
+                    if (!body) return;
+                    log(`Incoming from ${from}: ${body.substring(0, 100)}`);
+                    await forwardWithRetry({ from, body, businessId: Number(BUSINESS_ID) });
+                });
 
-waClient.on('ready', () => {
-    const me = waClient.info;
-    state.phase       = 'connected';
-    state.qrDataUrl   = null;
-    state.qrExpiresAt = null;
-    state.clientInfo  = {
-        wid:      me.wid.user,
-        phone:    '+' + me.wid.user,
-        pushname: me.pushname,
-    };
-    log(`Connected as ${state.clientInfo.pushname} (${state.clientInfo.phone}) ?`);
-});
+                return client;
+            }
 
-waClient.on('disconnected', (reason) => {
-    log(`Disconnected: ${reason}`, 'warn');
-    clearQrTimer();
-    state.phase       = 'disconnected';
-    state.qrDataUrl   = null;
-    state.qrExpiresAt = null;
-    state.clientInfo  = null;
-});
+    function scheduleReinit(delayMs) {
+    setTimeout(() => {
+        log(`Reinitialising client (new instance)...`);
+        state.phase = 'initializing';
+        clearChromeLocks();
+        waClient = createClient();
+        waClient.initialize().catch(err => {
+            log(`Reinitialize error: ${err.message}`, 'error');
+            state.phase = 'disconnected';
+            scheduleReinit(10000); // back-off and retry
+        });
+    }, delayMs);
+}
 
-// ?? Incoming message ? forward to .NET with retries ??????????????????????????
-waClient.on('message', async (msg) => {
-    if (msg.isGroupMsg || msg.from === 'status@broadcast') return;
-
-    const from = msg.from.replace('@c.us', '');
-    const body = msg.body?.trim();
-    if (!body) return;
-
-    log(`Incoming from ${from}: ${body.substring(0, 100)}`);
-    await forwardWithRetry({ from, body, businessId: Number(BUSINESS_ID) });
-});
-
+// ?? Incoming message helpers ?????????????????????????????????????????????????
 async function forwardWithRetry(payload, attempt = 1) {
     try {
         await axios.post(WEBHOOK_URL, payload, { timeout: 8000 });
@@ -166,9 +232,12 @@ async function forwardWithRetry(payload, attempt = 1) {
 }
 
 // ?? Initialize ????????????????????????????????????????????????????????????????
+clearChromeLocks();
+waClient = createClient();
 waClient.initialize().catch(err => {
     log(`Initialize error: ${err.message}`, 'error');
     state.phase = 'disconnected';
+    scheduleReinit(5000);
 });
 
 // ?? Express API ???????????????????????????????????????????????????????????????
@@ -177,14 +246,34 @@ app.use(express.json());
 app.disable('x-powered-by');
 
 // Status — polled by .NET proxy every ~1-3 s
+// Supports ETag via ?qrHash=<prev> to skip re-sending the QR base64 if unchanged.
 app.get('/status', (req, res) => {
-    res.json({
+    const payload = {
         state:       state.phase,
         connected:   state.phase === 'connected',
         qrDataUrl:   state.qrDataUrl,
         qrExpiresAt: state.qrExpiresAt,
         info:        state.clientInfo,
-    });
+    };
+
+    // If the caller already has this QR, strip the heavy base64 payload.
+    // The browser compares qrHash; if equal it keeps the cached <img> src.
+    const prevHash = req.query.qrHash;
+    if (prevHash && state.qrDataUrl) {
+        const curHash = Buffer.from(state.qrDataUrl).length.toString(16); // fast surrogate hash
+        if (prevHash === curHash) {
+            res.json({ ...payload, qrDataUrl: null, qrHash: curHash, unchanged: true });
+            return;
+        }
+        res.json({ ...payload, qrHash: curHash });
+        return;
+    }
+    if (state.qrDataUrl) {
+        const qrHash = Buffer.from(state.qrDataUrl).length.toString(16);
+        res.json({ ...payload, qrHash });
+        return;
+    }
+    res.json(payload);
 });
 
 // Health check
@@ -212,11 +301,13 @@ app.post('/send', async (req, res) => {
 // Logout
 app.post('/disconnect', async (req, res) => {
     clearQrTimer();
+    state.intentionalDisconnect = true;  // prevent auto-reinit on the disconnected event
     state.phase       = 'disconnected';
     state.qrDataUrl   = null;
     state.qrExpiresAt = null;
     state.clientInfo  = null;
     try { await waClient.logout(); } catch (_) {}
+    try { await waClient.destroy(); } catch (_) {}
     res.json({ ok: true });
 });
 
@@ -229,7 +320,7 @@ const server = app.listen(PORT, () => {
 async function shutdown(signal) {
     log(`${signal} received — shutting down gracefully`);
     server.close();
-    try { await waClient.destroy(); } catch (_) {}
+    try { if (waClient) await waClient.destroy(); } catch (_) {}
     process.exit(0);
 }
 process.on('SIGTERM', () => shutdown('SIGTERM'));
@@ -242,6 +333,26 @@ function clearSession() {
     try {
         if (fs.existsSync(SESSION_DIR)) fs.rmSync(SESSION_DIR, { recursive: true, force: true });
     } catch (e) { log(`Could not clear session: ${e.message}`, 'warn'); }
+}
+
+// Remove Chrome/Chromium lock files that get left behind after a crash or
+// an unclean shutdown. These cause "browser already running" errors on the
+// next initialize() without losing the WhatsApp auth session.
+function clearChromeLocks() {
+    const lockFiles = ['lockfile', 'SingletonLock', 'SingletonCookie', 'SingletonSocket'];
+    // LocalAuth nests the profile under SESSION_DIR/session/
+    const profileDir = path.join(SESSION_DIR, 'session');
+    for (const name of lockFiles) {
+        const p = path.join(profileDir, name);
+        try {
+            if (fs.existsSync(p)) {
+                fs.rmSync(p, { force: true });
+                log(`Removed stale lock: ${name}`);
+            }
+        } catch (e) {
+            log(`Could not remove lock ${name}: ${e.message}`, 'warn');
+        }
+    }
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }

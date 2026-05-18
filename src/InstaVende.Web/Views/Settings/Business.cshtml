@@ -6,16 +6,16 @@
         <div class="a-card">
             <div class="a-card-body p-0">
                 <nav class="py-2">
-                    <a asp-controller="Settings" asp-action="Account" class="sb-link"><i class="bi bi-person"></i> Mi perfil</a>
-                    <a asp-controller="Settings" asp-action="Business" class="sb-link active"><i class="bi bi-building"></i> Negocio</a>
-                    <a asp-controller="Settings" asp-action="Password" class="sb-link"><i class="bi bi-key"></i> Contraseña</a>
+                    <a asp-controller="Settings" asp-action="Account" class="settings-nav-link"><i class="bi bi-person"></i> Mi perfil</a>
+                    <a asp-controller="Settings" asp-action="Business" class="settings-nav-link active"><i class="bi bi-building"></i> Negocio</a>
+                    <a asp-controller="Settings" asp-action="Password" class="settings-nav-link"><i class="bi bi-key"></i> ContraseÃ±a</a>
                 </nav>
             </div>
         </div>
     </div>
     <div class="col-lg-9">
         <div class="a-card">
-            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-building"></i> Información del negocio</div></div>
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-building"></i> InformaciÃ³n del negocio</div></div>
             <div class="a-card-body">
                 <form asp-action="Business" method="post">
                     <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
@@ -27,19 +27,19 @@
                     <div class="f-group">
                         <label class="f-label">Sector / Rubro</label>
                         <select asp-for="Sector" class="f-input">
-                            <option value="">— Seleccionar —</option>
-                            <option>Ropa y calzado</option><option>Tecnología</option><option>Alimentos y bebidas</option>
+                            <option value="">Â— Seleccionar Â—</option>
+                            <option>Ropa y calzado</option><option>TecnologÃ­a</option><option>Alimentos y bebidas</option>
                             <option>Belleza y cuidado personal</option><option>Hogar y deco</option><option>Deportes</option>
-                            <option>Salud</option><option>Servicios</option><option>Educación</option><option>Otro</option>
+                            <option>Salud</option><option>Servicios</option><option>EducaciÃ³n</option><option>Otro</option>
                         </select>
                     </div>
                     <div class="f-group">
-                        <label class="f-label">Descripción</label>
+                        <label class="f-label">DescripciÃ³n</label>
                         <textarea asp-for="Description" class="f-input" rows="3" placeholder="Describe brevemente tu negocio..."></textarea>
                     </div>
                     <div class="f-row">
                         <div class="f-group">
-                            <label class="f-label">Teléfono</label>
+                            <label class="f-label">TelÃ©fono</label>
                             <input asp-for="Phone" class="f-input" placeholder="+54 11 1234 5678" />
                         </div>
                         <div class="f-group">

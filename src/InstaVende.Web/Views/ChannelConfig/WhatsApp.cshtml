@@ -1,221 +1,351 @@
 @{
-    ViewData["Title"] = "Conectar WhatsApp";
+    ViewData["Title"] = "WhatsApp";
     bool isConnected  = ViewBag.IsConnected == true;
     string phoneNumber = ViewBag.PhoneNumber as string ?? "";
     DateTime? connectedAt = ViewBag.ConnectedAt as DateTime?;
 }
 
-<div class="mb-4">
+<div class="page-header mb-4">
     <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-1" style="font-size:.78rem">
+        <ol class="breadcrumb mb-1">
             <li class="breadcrumb-item"><a href="/ChannelConfig" class="text-muted">Canales</a></li>
             <li class="breadcrumb-item active">WhatsApp</li>
         </ol>
     </nav>
-    <h1 class="topbar-page-title mb-0">Conectar WhatsApp</h1>
+    <h1 class="topbar-page-title mb-0"><i class="bi bi-whatsapp me-2" style="color:#25D366"></i>WhatsApp</h1>
+    <p class="text-muted small mb-0 mt-1">Conecta tu numero escaneando el codigo QR desde tu celular</p>
 </div>
 
-<div class="row justify-content-center">
-<div class="col-lg-5">
+<div class="wa-layout">
 
 @if (isConnected)
 {
-    <div class="a-card text-center" style="padding:2.5rem 2rem">
-        <div style="width:96px;height:96px;border-radius:50%;background:#dcfce7;
-                    display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem">
-            <i class="bi bi-check-circle-fill" style="font-size:2.4rem;color:#16a34a"></i>
+    <!-- === CONECTADO === -->
+    <div class="wa-qr-col">
+        <div class="a-card">
+            <div class="a-card-body text-center" style="padding:2.5rem 2rem">
+                <div class="wa-status-icon wa-status-icon--ok mx-auto mb-3">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h4 class="fw-bold mb-1">WhatsApp conectado</h4>
+                <p class="text-muted mb-3" style="font-size:.88rem">El bot esta activo y respondiendo mensajes.</p>
+                @if (!string.IsNullOrEmpty(phoneNumber))
+                {
+                    <div class="wa-phone-badge mx-auto mb-3">
+                        <i class="bi bi-whatsapp"></i>+@phoneNumber
+                    </div>
+                }
+                @if (connectedAt.HasValue)
+                {
+                    <p class="text-muted mb-4" style="font-size:.8rem">
+                        Conectado el @connectedAt.Value.ToLocalTime().ToString("d MMM yyyy", new System.Globalization.CultureInfo("es-PE"))
+                    </p>
+                }
+                else { <div class="mb-4"></div> }
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="/Inbox" class="btn btn-primary">
+                        <i class="bi bi-chat-dots me-1"></i>Ir a Mensajes
+                    </a>
+                    <form asp-action="Disconnect" method="post" id="frmDisconnect" onsubmit="return false">
+                        @Html.AntiForgeryToken()
+                        <button type="button" class="btn btn-outline-danger" onclick="confirmDisconnect()">
+                            <i class="bi bi-plug me-1"></i>Desconectar
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-        <h4 class="fw-bold mb-1" style="color:#0f172a">WhatsApp conectado</h4>
-        <p class="text-muted mb-2" style="font-size:.88rem">El bot está activo y respondiendo mensajes.</p>
-        @if (!string.IsNullOrEmpty(phoneNumber))
-        {
-            <p class="fw-semibold mb-1" style="color:#25D366;font-size:.95rem">
-                <i class="bi bi-whatsapp me-1"></i>+@phoneNumber
-            </p>
-        }
-        @if (connectedAt.HasValue)
-        {
-            <p class="text-muted mb-4" style="font-size:.8rem">
-                Conectado el @connectedAt.Value.ToLocalTime().ToString("d MMM yyyy",
-                    new System.Globalization.CultureInfo("es-PE"))
-            </p>
-        }
-        else
-        {
-            <div class="mb-4"></div>
-        }
-        <div class="d-flex gap-3 justify-content-center flex-wrap">
-            <a href="/Inbox" class="btn btn-primary">
-                <i class="bi bi-chat-dots me-2"></i>Ir a Mensajes
-            </a>
-            <form asp-action="Disconnect" method="post"
-                  onsubmit="return confirm('Desconectar WhatsApp? El bot dejara de responder.')">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-danger">
-                    <i class="bi bi-plug me-2"></i>Desconectar
-                </button>
-            </form>
+    </div>
+
+    <div class="wa-info-col">
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-info-circle"></i>Estado del servicio</div></div>
+            <div class="a-card-body">
+                <div class="wa-info-item">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">Sesion activa</div>
+                        <div class="text-muted" style="font-size:.78rem">La sesion se mantiene activa automaticamente</div>
+                    </div>
+                </div>
+                <div class="wa-info-item">
+                    <i class="bi bi-robot" style="color:#7c3aed"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">Bot respondiendo</div>
+                        <div class="text-muted" style="font-size:.78rem">Los mensajes entrantes se procesan con IA</div>
+                    </div>
+                </div>
+                <div class="wa-info-item">
+                    <i class="bi bi-arrow-repeat" style="color:#f59e0b"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">Reconexion automatica</div>
+                        <div class="text-muted" style="font-size:.78rem">El servicio se reinicia solo si se desconecta</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 }
 else
 {
-    <div class="a-card" style="padding:2rem">
+    <!-- === DESCONECTADO / QR === -->
+    <div class="wa-qr-col">
+        <div class="a-card">
+            <div class="a-card-body" style="padding:2rem">
 
-        <div class="text-center mb-4">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width:72px;height:72px;background:#dcfce7">
-                <i class="bi bi-whatsapp" style="font-size:2rem;color:#25D366"></i>
-            </div>
-            <h4 class="fw-bold mb-1" style="color:#0f172a">Escanea el codigo QR</h4>
-            <p class="text-muted mb-0" style="font-size:.86rem">
-                Abre WhatsApp &rarr; <strong>Dispositivos vinculados</strong> &rarr; <strong>Vincular dispositivo</strong>
-            </p>
-        </div>
-
-        <div class="text-center mb-3">
-
-            <div id="qrSpinner" class="py-4">
-                <div class="spinner-border text-success mb-3" style="width:2.5rem;height:2.5rem"></div>
-                <p id="qrSpinnerText" class="text-muted mb-0" style="font-size:.84rem">Iniciando servicio...</p>
-            </div>
-
-            <div id="qrImageWrap" style="display:none;flex-direction:column;align-items:center;gap:.75rem">
-                <img id="qrImage" src="" alt="QR WhatsApp"
-                     style="width:260px;height:260px;border-radius:12px;border:3px solid #bbf7d0;display:block" />
-                <div style="width:260px;background:#f1f5f9;border-radius:99px;height:6px;overflow:hidden">
-                    <div id="qrCountdownBar"
-                         style="height:100%;width:100%;border-radius:99px;background:#25D366;
-                                transition:width .9s linear,background .9s linear"></div>
+                <div class="text-center mb-4">
+                    <div class="wa-status-icon wa-status-icon--idle mx-auto mb-3">
+                        <i class="bi bi-whatsapp"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">Escanea el codigo QR</h4>
+                    <p class="text-muted mb-0" style="font-size:.86rem">
+                        Abre WhatsApp &rarr; <strong>Dispositivos vinculados</strong> &rarr; <strong>Vincular dispositivo</strong>
+                    </p>
                 </div>
-                <span id="qrCountdownText" class="text-muted" style="font-size:.78rem"></span>
-            </div>
 
-            <div id="qrAuthWrap" style="display:none" class="py-4">
-                <div class="spinner-border text-success mb-3" style="width:2.5rem;height:2.5rem"></div>
-                <p class="text-muted mb-0" style="font-size:.84rem">
-                    <i class="bi bi-shield-check me-1"></i>Verificando sesion...
-                </p>
-            </div>
+                <!-- Vista: cargando / inicializando -->
+                <div id="viewSpinner" class="qr-view text-center py-4">
+                    <div class="spinner-border text-success mb-3" style="width:2.5rem;height:2.5rem"></div>
+                    <p id="spinnerText" class="text-muted mb-0" style="font-size:.84rem">Iniciando servicio...</p>
+                </div>
 
-            <div id="qrError" style="display:none" class="py-3">
-                <i class="bi bi-exclamation-triangle-fill text-warning fs-3 mb-2 d-block"></i>
-                <p class="text-muted mb-2" style="font-size:.85rem">No se pudo conectar al servicio WhatsApp local.</p>
-                <p class="text-muted mb-3" style="font-size:.8rem">
-                    Asegurate de que el servidor Node.js este corriendo:<br>
-                    <code>cd wa-client &amp;&amp; npm start</code>
-                </p>
-                <button class="btn btn-sm btn-outline-secondary" onclick="WaQr.start()">
-                    <i class="bi bi-arrow-repeat me-1"></i>Reintentar
-                </button>
+                <!-- Vista: QR listo -->
+                <div id="viewQr" class="qr-view text-center" style="display:none">
+                    <div class="d-inline-flex flex-column align-items-center gap-2">
+                        <img id="qrImage" src="" alt="QR WhatsApp" class="qr-img" />
+                        <div class="qr-progress-wrap">
+                            <div id="qrBar" class="qr-progress-bar"></div>
+                        </div>
+                        <span id="qrTimer" class="text-muted" style="font-size:.78rem"></span>
+                    </div>
+                </div>
+
+                <!-- Vista: autenticando (QR escaneado) -->
+                <div id="viewAuth" class="qr-view text-center py-4" style="display:none">
+                    <div class="spinner-border text-success mb-3" style="width:2.5rem;height:2.5rem"></div>
+                    <p class="text-muted mb-0" style="font-size:.84rem">
+                        <i class="bi bi-shield-check me-1"></i>QR escaneado, verificando sesion...
+                    </p>
+                </div>
+
+                <!-- Vista: error / servicio offline -->
+                <div id="viewError" class="qr-view text-center py-3" style="display:none">
+                    <i class="bi bi-exclamation-triangle-fill text-warning d-block mb-2" style="font-size:2rem"></i>
+                    <p class="fw-semibold mb-1" style="font-size:.9rem;color:#1e293b">No se pudo mostrar el codigo QR.</p>
+                    <p id="errorDetail" class="text-muted mb-4" style="font-size:.82rem">El servicio no esta disponible.</p>
+                    <button class="btn btn-success px-5" id="btnGetQr" onclick="WaQr.getQr()">
+                        <i class="bi bi-qr-code me-2"></i>Obtener codigo QR
+                    </button>
+                    <p id="restartMsg" class="mt-3 mb-0 small"></p>
+                </div>
+
+                <!-- Barra de estado (visible cuando QR o auth) -->
+                <div id="statusBar" class="wa-status-bar mt-3" style="display:none">
+                    <span id="statusSpinner" class="spinner-border spinner-border-sm text-secondary flex-shrink-0"></span>
+                    <span id="statusText" class="small text-muted">Procesando...</span>
+                </div>
+
             </div>
         </div>
+    </div>
 
-        <div class="d-flex align-items-center justify-content-center gap-2 py-2 px-3 rounded-3 mb-4"
-             style="background:#f8fafc;border:1px solid #e2e8f0;font-size:.83rem;color:#475569">
-            <span id="statusSpinner" class="spinner-border spinner-border-sm text-secondary"></span>
-            <span id="statusText">Iniciando...</span>
+    <!-- Instrucciones + info -->
+    <div class="wa-info-col">
+        <div class="a-card mb-3">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-list-ol"></i>Como conectar</div></div>
+            <div class="a-card-body">
+                <ol class="wa-steps">
+                    <li>Abre <strong>WhatsApp</strong> en tu celular</li>
+                    <li>Toca <strong>Mas opciones</strong> &rarr; <strong>Dispositivos vinculados</strong></li>
+                    <li>Toca <strong>Vincular un dispositivo</strong></li>
+                    <li>Apunta la camara al codigo QR de la izquierda</li>
+                </ol>
+            </div>
         </div>
-
-        <hr class="my-3" />
-        <ol class="ps-3 mb-0" style="font-size:.84rem;line-height:2.2;color:#475569">
-            <li>Abre <strong>WhatsApp</strong> en tu telefono</li>
-            <li>Toca <strong>Mas opciones &rarr; Dispositivos vinculados</strong></li>
-            <li>Toca <strong>Vincular un dispositivo</strong></li>
-            <li>Escanea el codigo QR de arriba</li>
-        </ol>
+        <div class="a-card">
+            <div class="a-card-header"><div class="a-card-title"><i class="bi bi-lightbulb"></i>Ten en cuenta</div></div>
+            <div class="a-card-body">
+                <div class="wa-info-item">
+                    <i class="bi bi-clock" style="color:#f59e0b"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">El QR expira en 20 segundos</div>
+                        <div class="text-muted" style="font-size:.78rem">Se genera uno nuevo automaticamente</div>
+                    </div>
+                </div>
+                <div class="wa-info-item">
+                    <i class="bi bi-wifi" style="color:#2563eb"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">Tu celular necesita internet</div>
+                        <div class="text-muted" style="font-size:.78rem">WhatsApp Web requiere conexion activa</div>
+                    </div>
+                </div>
+                <div class="wa-info-item">
+                    <i class="bi bi-shield-check text-success"></i>
+                    <div>
+                        <div class="fw-semibold" style="font-size:.85rem">Sesion segura y persistente</div>
+                        <div class="text-muted" style="font-size:.78rem">No necesitas volver a escanear cada vez</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
-</div>
-</div>
+</div><!-- /.wa-layout -->
 
-@section Scripts {
 @Html.AntiForgeryToken()
+
 <script>
-var WaQr = (function () {
+(function () {
   'use strict';
 
   var STATUS_URL  = '/ChannelConfig/WaStatus';
   var SAVE_URL    = '/ChannelConfig/SaveQrConnection';
-  var POLL_FAST   = 1000;
-  var POLL_NORMAL = 3000;
-  var MAX_ERRORS  = 8;
+  var RESTART_URL = '/ChannelConfig/WaRestart';
   var QR_TTL_MS   = 18000;
+  var MAX_ERRORS  = 8;
+  var POLL_FAST   = 1000;
+  var POLL_NORMAL = 2000;
+  var POLL_SLOW   = 5000;   // used after 'disconnected' — Node reinits in ~5s
 
-  var _timer       = null;
-  var _errors      = 0;
-  var _lastQrUrl   = null;
-  var _saving      = false;
-  var _countdownId = null;
+  var _timer      = null;
+  var _cTimer     = null;
+  var _errors     = 0;
+  var _lastQrUrl  = null;
+  var _lastQrHash = null;   // ETag surrogate: skip re-rendering if QR unchanged
+  var _saving     = false;
+  var _restarting = false;
 
   var el = {
-    spinner:       document.getElementById('qrSpinner'),
-    spinnerText:   document.getElementById('qrSpinnerText'),
-    imageWrap:     document.getElementById('qrImageWrap'),
-    image:         document.getElementById('qrImage'),
-    authWrap:      document.getElementById('qrAuthWrap'),
-    error:         document.getElementById('qrError'),
+    viewSpinner:   document.getElementById('viewSpinner'),
+    viewQr:        document.getElementById('viewQr'),
+    viewAuth:      document.getElementById('viewAuth'),
+    viewError:     document.getElementById('viewError'),
+    spinnerText:   document.getElementById('spinnerText'),
+    qrImage:       document.getElementById('qrImage'),
+    qrBar:         document.getElementById('qrBar'),
+    qrTimer:       document.getElementById('qrTimer'),
+    statusBar:     document.getElementById('statusBar'),
     statusSpinner: document.getElementById('statusSpinner'),
     statusText:    document.getElementById('statusText'),
-    countdownBar:  document.getElementById('qrCountdownBar'),
-    countdownText: document.getElementById('qrCountdownText'),
+    errorDetail:   document.getElementById('errorDetail'),
+    btnGetQr:      document.getElementById('btnGetQr'),
+    restartMsg:    document.getElementById('restartMsg'),
   };
 
-  // Guard: elements only exist on the QR (not-connected) view
-  if (!el.spinner) return { start: function () {} };
+  // Guard: only active on the QR / not-connected page
+  if (!el.viewSpinner) return;
 
+  // Public API
+  window.WaQr = { getQr: getQr, start: start };
+
+  // ?? helpers ???????????????????????????????????????????????????????????????
+  function tok() {
+    var inp = document.querySelector('input[name="__RequestVerificationToken"]');
+    return inp ? inp.value : '';
+  }
+  function clearTimer()     { if (_timer)  { clearTimeout(_timer);  _timer  = null; } }
+  function clearCountdown() { if (_cTimer) { clearTimeout(_cTimer); _cTimer = null; } }
+
+  function showView(name) {
+    el.viewSpinner.style.display = name === 'spinner' ? '' : 'none';
+    el.viewQr.style.display      = name === 'qr'      ? '' : 'none';
+    el.viewAuth.style.display    = name === 'auth'    ? '' : 'none';
+    el.viewError.style.display   = name === 'error'   ? '' : 'none';
+    el.statusBar.style.display   = (name === 'qr' || name === 'auth') ? 'flex' : 'none';
+  }
+
+  function setStatus(text, spinning) {
+    if (el.statusText)    el.statusText.textContent      = text;
+    if (el.statusSpinner) el.statusSpinner.style.display = spinning ? '' : 'none';
+  }
+
+  function resetBtn() {
+    if (el.btnGetQr) {
+      el.btnGetQr.disabled  = false;
+      el.btnGetQr.innerHTML = '<i class="bi bi-qr-code me-2"></i>Obtener codigo QR';
+    }
+  }
+
+  // ?? countdown bar ?????????????????????????????????????????????????????????
+  function startCountdown(iso) {
+    clearCountdown();
+    var end = new Date(iso).getTime();
+    (function tick() {
+      var rem  = Math.max(0, end - Date.now());
+      var pct  = (rem / QR_TTL_MS) * 100;
+      var secs = Math.ceil(rem / 1000);
+      if (el.qrBar) {
+        el.qrBar.style.width      = pct + '%';
+        el.qrBar.style.background = pct > 50 ? '#25D366' : pct > 25 ? '#f59e0b' : '#ef4444';
+      }
+      if (el.qrTimer) el.qrTimer.textContent = secs > 0 ? 'Expira en ' + secs + ' s' : 'Generando nuevo QR...';
+      if (rem > 0) _cTimer = setTimeout(tick, 500);
+    }());
+  }
+
+  function stopCountdown() {
+    clearCountdown();
+    if (el.qrBar)   { el.qrBar.style.width = '100%'; el.qrBar.style.background = '#25D366'; }
+    if (el.qrTimer) el.qrTimer.textContent = '';
+  }
+
+  // ?? main poll loop ????????????????????????????????????????????????????????
   function start() {
-    _errors    = 0;
-    _saving    = false;
-    _lastQrUrl = null;
+    _errors     = 0;
+    _saving     = false;
+    _restarting = false;
+    _lastQrUrl  = null;
+    _lastQrHash = null;
     clearTimer();
     stopCountdown();
     showView('spinner');
-    setStatus('Iniciando...', true);
+    if (el.spinnerText) el.spinnerText.textContent = 'Iniciando servicio...';
     poll();
   }
 
   function poll() {
     if (document.hidden) { _timer = setTimeout(poll, 5000); return; }
 
-    fetch(STATUS_URL, { cache: 'no-store' })
+    // Append the current QR hash so the server can skip sending the base64 if unchanged
+    var url = STATUS_URL + (_lastQrHash ? '?qrHash=' + _lastQrHash : '');
+    fetch(url, { cache: 'no-store' })
       .then(function (r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
-      .then(function (data) {
-        _errors = 0;
-        dispatch(data);
-      })
-      .catch(function () {
+      .then(function (data) { _errors = 0; dispatch(data); })
+      .catch(function (err) {
         _errors++;
+        console.warn('[WaQr] poll #' + _errors + ':', err.message);
         if (_errors >= MAX_ERRORS) {
           stopCountdown();
           showView('error');
-          setStatus('Servicio no disponible', false);
+          if (el.errorDetail) el.errorDetail.textContent = 'El servicio no esta disponible en este momento.';
+          resetBtn();
           return;
         }
-        setStatus('Reintentando (' + _errors + '/' + MAX_ERRORS + ')...', true);
+        setStatus('Reintentando... (' + _errors + '/' + MAX_ERRORS + ')', true);
         _timer = setTimeout(poll, POLL_NORMAL * 2);
       });
   }
 
   function dispatch(data) {
-    var phase = data.state || (data.connected ? 'connected' : 'initializing');
+    var state = data.state || (data.connected ? 'connected' : 'initializing');
 
-    if (phase === 'connected') {
+    if (state === 'connected') {
       if (_saving) return;
       _saving = true;
+      clearTimer();
       stopCountdown();
       showView('spinner');
-      el.spinnerText.textContent = 'Conectado. Guardando...';
-      setStatus('Conectado', false);
-      persist(data.info);
+      if (el.spinnerText) el.spinnerText.textContent = 'Conectado. Guardando sesion...';
+      saveConnection(data.info);
       return;
     }
 
-    if (phase === 'authenticating') {
+    if (state === 'authenticating') {
+      clearTimer();
       stopCountdown();
       showView('auth');
       setStatus('QR escaneado, verificando...', true);
@@ -223,93 +353,126 @@ var WaQr = (function () {
       return;
     }
 
-    if (phase === 'qr' && data.qrDataUrl) {
-      if (data.qrDataUrl !== _lastQrUrl) {
-        _lastQrUrl   = data.qrDataUrl;
-        el.image.src = data.qrDataUrl;
+    if (state === 'qr') {
+      // Server sends qrDataUrl=null + unchanged=true when the QR hasn't changed
+      if (data.qrHash) _lastQrHash = data.qrHash;
+      var newQrUrl = data.qrDataUrl;
+      if (newQrUrl && newQrUrl !== _lastQrUrl) {
+        _lastQrUrl = newQrUrl;
+        if (el.qrImage) el.qrImage.src = newQrUrl;
         stopCountdown();
         if (data.qrExpiresAt) startCountdown(data.qrExpiresAt);
+      } else if (!newQrUrl && !data.unchanged) {
+        // QR not yet encoded — stay on spinner
+        if (el.spinnerText) el.spinnerText.textContent = 'Generando codigo QR...';
+        showView('spinner');
+        _timer = setTimeout(poll, POLL_NORMAL);
+        return;
       }
-      showView('image');
-      setStatus('Escanea el QR con tu telefono', true);
+      if (_lastQrUrl) {
+        showView('qr');
+        setStatus('Escanea el QR con tu celular', true);
+      } else {
+        if (el.spinnerText) el.spinnerText.textContent = 'Generando codigo QR...';
+        showView('spinner');
+      }
       _timer = setTimeout(poll, POLL_NORMAL);
       return;
     }
 
-    var msg = phase === 'disconnected'
-      ? 'Servicio desconectado - reinicia wa-client'
-      : 'Generando codigo QR...';
-    el.spinnerText.textContent = msg;
+    if (state === 'disconnected') {
+      // Node auto-reinitialises in ~5s — keep polling
+      stopCountdown();
+      if (el.spinnerText) el.spinnerText.textContent = 'Reconectando, espera un momento...';
+      showView('spinner');
+      setStatus('Esperando al servicio...', true);
+      _timer = setTimeout(poll, POLL_SLOW);
+      return;
+    }
+
+    // initializing or unknown — poll fast so QR appears as soon as it's ready
+    if (el.spinnerText) el.spinnerText.textContent = 'Iniciando, por favor espera...';
     showView('spinner');
-    setStatus(msg, phase !== 'disconnected');
     _timer = setTimeout(poll, POLL_FAST);
   }
 
-  function persist(info) {
-    clearTimer();
-    var token = '';
-    var inp = document.querySelector('[name="__RequestVerificationToken"]');
-    if (inp) token = inp.value;
+  // ?? persist session to DB ?????????????????????????????????????????????????
+  function saveConnection(info) {
     fetch(SAVE_URL, {
       method:  'POST',
-      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': tok() },
       body:    JSON.stringify({ phone: info ? (info.phone || info.wid || null) : null }),
     })
-    .then(function (r) {
-      if (!r.ok) throw new Error('Save failed: ' + r.status);
-      window.location.reload();
-    })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function () { window.location.reload(); })
     .catch(function (err) {
+      console.error('[WaQr] saveConnection:', err.message);
       _saving = false;
       showView('error');
-      setStatus('Error al guardar la conexion', false);
-      console.error('[WaQr] persist error:', err);
+      if (el.errorDetail) el.errorDetail.textContent = 'Error al guardar la conexion. Intenta de nuevo.';
+      resetBtn();
     });
   }
 
-  function startCountdown(iso) {
-    stopCountdown();
-    var expiresAt = new Date(iso).getTime();
-    (function tick() {
-      var rem  = Math.max(0, expiresAt - Date.now());
-      var pct  = (rem / QR_TTL_MS) * 100;
-      var secs = Math.ceil(rem / 1000);
-      el.countdownBar.style.width      = pct + '%';
-      el.countdownBar.style.background = pct > 50 ? '#25D366' : pct > 25 ? '#f59e0b' : '#ef4444';
-      el.countdownText.textContent     = secs > 0 ? 'Expira en ' + secs + ' s' : 'QR expirado';
-      if (rem > 0) _countdownId = setTimeout(tick, 500);
-    }());
+  // ?? manual "Obtener QR" ????????????????????????????????????????????????????
+  function getQr() {
+    if (_restarting) return;
+    _restarting = true;
+    _errors     = 0;
+
+    if (el.btnGetQr) {
+      el.btnGetQr.disabled  = true;
+      el.btnGetQr.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Iniciando...';
+    }
+    if (el.restartMsg) el.restartMsg.textContent = '';
+
+    fetch(RESTART_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': tok() },
+      body:    '{}',
+    })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(function (d) {
+      _restarting = false;
+      if (d.ok) {
+        start();  // service started (or was already running) — begin polling
+      } else {
+        resetBtn();
+        if (el.restartMsg) {
+          el.restartMsg.textContent = d.message || 'No se pudo iniciar el servicio.';
+          el.restartMsg.className   = 'mt-3 mb-0 small text-danger';
+        }
+      }
+    })
+    .catch(function (err) {
+      console.error('[WaQr] getQr:', err.message);
+      _restarting = false;
+      resetBtn();
+      if (el.restartMsg) {
+        el.restartMsg.textContent = 'Error de red. Verifica tu conexion e intenta de nuevo.';
+        el.restartMsg.className   = 'mt-3 mb-0 small text-danger';
+      }
+    });
   }
 
-  function stopCountdown() {
-    if (_countdownId) { clearTimeout(_countdownId); _countdownId = null; }
-    if (el.countdownBar)  el.countdownBar.style.width = '100%';
-    if (el.countdownText) el.countdownText.textContent = '';
-  }
-
-  function showView(name) {
-    el.spinner.style.display   = name === 'spinner' ? ''     : 'none';
-    el.imageWrap.style.display = name === 'image'   ? 'flex' : 'none';
-    el.authWrap.style.display  = name === 'auth'    ? ''     : 'none';
-    el.error.style.display     = name === 'error'   ? ''     : 'none';
-  }
-
-  function setStatus(text, spinning) {
-    el.statusText.textContent      = text;
-    el.statusSpinner.style.display = spinning ? '' : 'none';
-  }
-
-  function clearTimer() {
-    if (_timer) { clearTimeout(_timer); _timer = null; }
-  }
-
+  // Resume when tab becomes visible again
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden && !_saving) { clearTimer(); poll(); }
+    if (!document.hidden && !_saving && !_restarting) { clearTimer(); poll(); }
   });
 
+  // Boot
   start();
-  return { start: start };
 
 }());
-</script>
+
+function confirmDisconnect() {
+    ivConfirm({
+        title:   '\u00bfDesconectar WhatsApp?',
+        message: 'El bot dejar\u00e1 de responder mensajes hasta que vuelvas a conectar.',
+        okLabel: 'Desconectar',
+        type:    'danger'
+    }).then(function (ok) {
+        if (ok) document.getElementById('frmDisconnect').submit();
+    });
 }
+</script>

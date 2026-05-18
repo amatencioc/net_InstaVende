@@ -1,17 +1,19 @@
-var token = $('[name="__RequestVerificationToken"]').first().val();
+var token = document.querySelector('[name=__RequestVerificationToken]')?.value || '';
 var currentSearch = '', currentCategory = '';
 
 function loadProducts() {
-    $.getJSON('/Products/GetAll', { search: currentSearch, categoryId: currentCategory }, function(data) {
+    $.getJSON('/Products/GetList', { search: currentSearch, categoryId: currentCategory }, function(data) {
         var grid = $('#productGrid').empty();
         if (!data.length) { grid.html('<div class="col-12 text-muted">No se encontraron productos.</div>'); return; }
         data.forEach(function(p) {
+            var safeName = $('<span>').text(p.name).html();
+            var safeImg  = p.imageUrl ? $('<span>').text(p.imageUrl).html() : '';
             grid.append(
                 '<div class="col-md-3 col-sm-6">' +
                 '<div class="card h-100">' +
-                (p.imageUrl ? '<img src="' + p.imageUrl + '" class="card-img-top" style="height:160px;object-fit:cover">' : '<div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height:160px"><i class="bi bi-image fs-1"></i></div>') +
+                (safeImg ? '<img src="' + safeImg + '" class="card-img-top" style="height:160px;object-fit:cover">' : '<div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="height:160px"><i class="bi bi-image fs-1"></i></div>') +
                 '<div class="card-body">' +
-                '<h6 class="card-title">' + p.name + '</h6>' +
+                '<h6 class="card-title">' + safeName + '</h6>' +
                 '<p class="card-text text-primary fw-bold">$' + p.price.toFixed(2) + '</p>' +
                 '<p class="card-text small text-muted">Stock: ' + p.stock + '</p>' +
                 (p.isActive ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>') +
@@ -23,6 +25,8 @@ function loadProducts() {
                 '</div></div></div>'
             );
         });
+    }).fail(function() {
+        $('#productGrid').html('<div class="col-12 text-danger small">Error al cargar los productos.</div>');
     });
 }
 

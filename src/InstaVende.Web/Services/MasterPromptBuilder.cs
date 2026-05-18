@@ -109,7 +109,7 @@ public class MasterPromptBuilder
         foreach (var kv in values)
             template = template.Replace($"{{{{{kv.Key}}}}}", kv.Value);
 
-        // 2. Replace {{KEY | "default"}} patterns — extract the default value
+        // 2. Replace {{KEY | "default"}} patterns â€” extract the default value
         template = Regex.Replace(
             template,
             @"\{\{[^|}]+\|\s*""([^""]*)""\s*\}\}",

@@ -39,7 +39,7 @@ public class OrdersController : Controller
 
         ViewBag.StatusFilter = status;
         ViewBag.TotalOrders = orders.Count;
-        ViewBag.TotalRevenue = orders.Where(o => o.Status != OrderStatus.Cancelled).Sum(o => o.Total);
+        ViewBag.TotalRevenue = orders.Where(o => o.Status != OrderStatus.Cancelled && o.Status != OrderStatus.Refunded).Sum(o => o.Total);
         ViewBag.PendingOrders = orders.Count(o => o.Status == OrderStatus.Pending);
 
         return View(orders.Select(o => MapToVm(o)).ToList());
@@ -48,21 +48,23 @@ public class OrdersController : Controller
     public async Task<IActionResult> Detail(int id)
     {
         var biz = await _user.GetBusinessAsync();
+        if (biz == null) return RedirectToAction("Index", "Dashboard");
         var order = await _db.Orders
             .Include(o => o.Contact)
             .Include(o => o.Items).ThenInclude(i => i.Product)
             .Include(o => o.Conversation)
-            .FirstOrDefaultAsync(o => o.Id == id && o.BusinessId == biz!.Id);
+            .FirstOrDefaultAsync(o => o.Id == id && o.BusinessId == biz.Id);
 
         if (order == null) return NotFound();
         return View(MapToVm(order));
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(int id, OrderStatus status)
     {
         var biz = await _user.GetBusinessAsync();
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id && o.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == id && o.BusinessId == biz.Id);
         if (order == null) return Json(new { ok = false });
 
         order.Status = status;
@@ -91,18 +93,23 @@ public class OrdersController : Controller
             UpdatedAt = DateTime.UtcNow
         };
 
+        // 1 sola query en lugar de N FindAsync individuales (N+1)
+        var productIds = vm.Items.Select(i => i.ProductId).Distinct().ToList();
+        var products   = await _db.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
+
         foreach (var item in vm.Items)
         {
-            var product = await _db.Products.FindAsync(item.ProductId);
-            if (product == null) continue;
+            if (!products.TryGetValue(item.ProductId, out var product)) continue;
             var oi = new OrderItem
             {
-                ProductId = item.ProductId,
-                ProductName = product.Name,
+                ProductId          = item.ProductId,
+                ProductName        = product.Name,
                 VariantDescription = item.VariantDescription,
-                Quantity = item.Quantity,
-                UnitPrice = item.UnitPrice,
-                Subtotal = item.Quantity * item.UnitPrice
+                Quantity           = item.Quantity,
+                UnitPrice          = item.UnitPrice,
+                Subtotal           = item.Quantity * item.UnitPrice
             };
             order.Items.Add(oi);
         }
@@ -113,7 +120,7 @@ public class OrdersController : Controller
         _db.Orders.Add(order);
         await _db.SaveChangesAsync();
 
-        // Actualizar estadísticas del contacto
+        // Actualizar estadÃ­sticas del contacto
         var contact = await _db.Contacts.FindAsync(vm.ContactId);
         if (contact != null)
         {
@@ -135,21 +142,37 @@ public class OrdersController : Controller
         var now        = DateTime.UtcNow;
         var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        var totalMonth   = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.CreatedAt >= monthStart);
-        var revenueMonth = await _db.Orders
-            .Where(o => o.BusinessId == biz.Id && o.CreatedAt >= monthStart && o.Status != OrderStatus.Cancelled)
-            .SumAsync(o => (decimal?)o.Total) ?? 0m;
-        var pending   = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == OrderStatus.Pending);
-        var delivered = await _db.Orders.CountAsync(o => o.BusinessId == biz.Id && o.Status == OrderStatus.Delivered);
+        var stats = await _db.Orders
+            .AsNoTracking()
+            .Where(o => o.BusinessId == biz.Id)
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                TotalMonth   = g.Count(o => o.CreatedAt >= monthStart),
+                RevenueMonth = g.Where(o => o.CreatedAt >= monthStart && o.Status != OrderStatus.Cancelled)
+                                .Sum(o => (decimal?)o.Total) ?? 0m,
+                Pending   = g.Count(o => o.Status == OrderStatus.Pending),
+                Delivered = g.Count(o => o.Status == OrderStatus.Delivered),
+            })
+            .FirstOrDefaultAsync();
 
-        return Json(new { totalMonth, revenueMonth, pending, delivered });
+        return stats is null
+            ? Json(new { totalMonth = 0, revenueMonth = 0m, pending = 0, delivered = 0 })
+            : Json(new
+            {
+                totalMonth   = stats.TotalMonth,
+                revenueMonth = stats.RevenueMonth,
+                pending      = stats.Pending,
+                delivered    = stats.Delivered,
+            });
     }
 
     [HttpPost]
     public async Task<IActionResult> UpdateSubStatus([FromBody] UpdateSubStatusRequest req)
     {
         var biz = await _user.GetBusinessAsync();
-        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == req.Id && o.BusinessId == biz!.Id);
+        if (biz == null) return Json(new { ok = false });
+        var order = await _db.Orders.FirstOrDefaultAsync(o => o.Id == req.Id && o.BusinessId == biz.Id);
         if (order == null) return Json(new { ok = false });
         order.SubStatus = (OrderSubStatus)req.SubStatus;
         order.UpdatedAt = DateTime.UtcNow;
@@ -168,15 +191,15 @@ public class OrdersController : Controller
         var orders = await q.OrderByDescending(o => o.CreatedAt).ToListAsync();
 
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine("N°Pedido,Estado,Sub-estado,Cliente,Total,Fecha");
+        sb.AppendLine("N\u00b0Pedido,Estado,Sub-estado,Cliente,Total,Fecha");
         foreach (var o in orders)
         {
             var vm = MapToVm(o);
             sb.AppendLine($"\"{o.OrderNumber}\",\"{vm.StatusLabel}\",\"{vm.SubStatusLabel}\",\"{o.Contact?.Name ?? ""}\",{o.Total},{o.CreatedAt:yyyy-MM-dd}");
         }
 
-        var bytes = System.Text.Encoding.UTF8.GetBytes(sb.ToString());
-        return File(bytes, "text/csv", $"pedidos-{DateTime.UtcNow:yyyyMMdd}.csv");
+        var bytes = System.Text.Encoding.UTF8.GetPreamble().Concat(System.Text.Encoding.UTF8.GetBytes(sb.ToString())).ToArray();
+        return File(bytes, "text/csv; charset=utf-8", $"pedidos-{DateTime.UtcNow:yyyyMMdd}.csv");
     }
 
     private static string GenerateOrderNumber() =>

@@ -100,7 +100,9 @@ public class AccountConfigController : Controller
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> SaveOrganizacion([FromBody] OrganizacionViewModel model)
     {
-        var biz = await _cu.GetBusinessAsync();
+        var bid = await _cu.GetBusinessIdAsync();
+        if (bid == null) return Unauthorized();
+        var biz = await _db.Businesses.FirstOrDefaultAsync(b => b.Id == bid);
         if (biz == null) return Unauthorized();
         biz.Name = model.Name;
         biz.Country = model.Country;
@@ -120,7 +122,7 @@ public class AccountConfigController : Controller
         var existing = await _db.UserInvitations
             .FirstOrDefaultAsync(i => i.BusinessId == biz.Id && i.Email == model.Email && i.Status == InvitationStatus.Pending);
         if (existing != null)
-            return BadRequest(new { error = "Ya existe una invitación pendiente para este email." });
+            return BadRequest(new { error = "Ya existe una invitaciÃ³n pendiente para este email." });
 
         _db.UserInvitations.Add(new UserInvitation
         {

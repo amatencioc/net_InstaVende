@@ -168,6 +168,23 @@ textarea.f-input { resize: vertical; min-height: 88px }
   border-radius: 0 3px 3px 0;
 }
 .sb-link.active i { color: var(--brand-l) }
+
+/* Settings sidebar nav — light background variant */
+.settings-nav-link {
+  display: flex; align-items: center; gap: .6rem;
+  padding: .6rem 1.1rem;
+  font-size: .875rem; font-weight: 500;
+  color: #475569;
+  border-radius: 6px; margin: 1px 8px;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.settings-nav-link i { font-size: .95rem; color: #94a3b8; flex-shrink: 0 }
+.settings-nav-link:hover { background: #f1f5f9; color: #1e293b; }
+.settings-nav-link:hover i { color: var(--brand) }
+.settings-nav-link.active { background: #f0fdf4; color: var(--brand-d); font-weight: 600 }
+.settings-nav-link.active i { color: var(--brand) }
+
 .sb-badge {
   margin-left: auto;
   background: var(--brand); color: #fff;
@@ -245,6 +262,12 @@ body.sb-collapsed .app-content { margin-left: var(--sb-w-col) }
 .topbar-subtitle { font-size: .75rem; color: #94a3b8; margin-top: .05rem }
 .sb-toggle { display: none; background: none; border: none; color: #475569; padding: .4rem; border-radius: 7px; cursor: pointer; font-size: 1.2rem }
 .sb-toggle:hover { color: #0f172a }
+.topbar-mobile-title {
+  display: none;
+  font-size: .9rem; font-weight: 700; color: #0f172a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 180px;
+}
 .app-content {
   margin-left: var(--sb-w);
   padding: 1.75rem 2rem;
@@ -393,6 +416,75 @@ body.sb-collapsed .app-content { margin-left: var(--sb-w-col) }
 .alert             { border-radius: var(--admin-radius) }
 
 /* ================================================================
+   SETTINGS SIDEBAR NAV
+   ================================================================ */
+.settings-nav { padding: .5rem 0 }
+.settings-nav-link {
+  display: flex; align-items: center; gap: .65rem;
+  padding: .58rem 1.1rem;
+  font-size: .84rem; font-weight: 500;
+  color: #475569;
+  border-radius: 8px; margin: 1px .4rem;
+  transition: background .15s, color .15s;
+  position: relative;
+}
+.settings-nav-link i { font-size: .92rem; width: 18px; text-align: center; flex-shrink: 0; color: #94a3b8 }
+.settings-nav-link:hover { background: #f1f5f9; color: #1e293b }
+.settings-nav-link:hover i { color: var(--brand) }
+.settings-nav-link.active { background: #f0fdf4; color: var(--brand); font-weight: 600 }
+.settings-nav-link.active i { color: var(--brand) }
+.settings-nav-link.active::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--brand); border-radius: 0 3px 3px 0;
+}
+.settings-sidebar-header {
+  padding: 1.1rem 1.1rem .8rem;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: center;
+}
+.settings-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand), #7c3aed);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; color: #fff; font-weight: 700; margin-bottom: .45rem;
+}
+.settings-user-name { font-size: .87rem; font-weight: 700; color: #1e293b }
+.settings-user-email { font-size: .75rem; color: #94a3b8 }
+
+/* ================================================================
+   CONFIRM MODAL (global)
+   ================================================================ */
+.iv-confirm-backdrop {
+  position: fixed; inset: 0; background: rgba(15,23,42,.45);
+  z-index: 1060; display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .18s;
+  pointer-events: none;
+}
+.iv-confirm-backdrop.show { opacity: 1; pointer-events: auto; }
+.iv-confirm-box {
+  background: #fff; border-radius: 14px; padding: 1.6rem 1.75rem 1.3rem;
+  max-width: 400px; width: calc(100% - 2rem);
+  box-shadow: 0 20px 60px rgba(0,0,0,.20);
+  transform: scale(.93); transition: transform .18s;
+  text-align: center;
+}
+.iv-confirm-backdrop.show .iv-confirm-box { transform: scale(1) }
+.iv-confirm-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; margin-bottom: .75rem;
+}
+.iv-confirm-icon.danger { background: #fef2f2; color: #dc2626 }
+.iv-confirm-icon.warning { background: #fffbeb; color: #d97706 }
+.iv-confirm-icon.info    { background: #eff6ff; color: #2563eb }
+.iv-confirm-title { font-size: 1rem; font-weight: 700; color: #1e293b; margin-bottom: .3rem }
+.iv-confirm-message { font-size: .84rem; color: #64748b; margin-bottom: 1.2rem; line-height: 1.5 }
+.iv-confirm-actions { display: flex; gap: .6rem; justify-content: center }
+.iv-confirm-actions .btn { min-width: 100px; font-size: .84rem }
+.iv-confirm-actions #ivConfirmCancel { background: #f1f5f9; border: 1px solid #cbd5e1; color: #475569; }
+.iv-confirm-actions #ivConfirmCancel:hover { background: #e2e8f0; }
+
+/* ================================================================
    MISC OVERRIDES
    ================================================================ */
 .card   { border-radius: var(--admin-radius); border: 1px solid var(--admin-border); box-shadow: var(--admin-shadow) }
@@ -400,6 +492,202 @@ body.sb-collapsed .app-content { margin-left: var(--sb-w-col) }
 .conversation-item:hover  { background-color: rgba(22,163,74,.06) }
 .conversation-item.active { background-color: rgba(22,163,74,.10) }
 #messageThread, #previewMessages { scroll-behavior: smooth }
+
+/* ================================================================
+   SIDEBAR OVERLAY (mobile)
+   ================================================================ */
+.sb-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.45); z-index: 199;
+  opacity: 0; transition: opacity .22s;
+}
+.sb-overlay.open { opacity: 1 }
+
+/* ================================================================
+   RESPONSIVE — BREAKPOINTS
+   ================================================================ */
+
+/* Large desktops (?1400px): maximize content area */
+@media (min-width: 1400px) {
+  .app-content { padding: 1.75rem 2.5rem }
+}
+
+/* ?1200px: tighten content padding */
+@media (max-width: 1199px) {
+  .app-content { padding: 1.5rem 1.5rem }
+  .stat-grid   { grid-template-columns: repeat(2, 1fr) }
+}
+
+/* ?992px: sidebar collapses by default, sb-toggle appears */
+@media (max-width: 991px) {
+  .sb-toggle { display: flex !important }
+  .topbar-mobile-title { display: block }
+  .app-sidebar {
+    transform: translateX(-100%);
+    transition: transform .22s ease, width .22s ease;
+    width: var(--sb-w) !important;
+    box-shadow: none;
+  }
+  .app-sidebar.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 32px rgba(0,0,0,.25);
+  }
+  .sb-overlay { display: block }
+  .app-topbar { margin-left: 0 !important }
+  .app-content { margin-left: 0 !important; padding: 1.25rem 1rem }
+  /* Undo desktop collapse class on mobile */
+  body.sb-collapsed .app-topbar  { margin-left: 0 }
+  body.sb-collapsed .app-content { margin-left: 0 }
+  .sb-collapse-btn { display: none }
+}
+
+/* ?768px: denser UI */
+@media (max-width: 767px) {
+  .app-content { padding: 1rem .75rem }
+  .stat-grid   { grid-template-columns: 1fr 1fr }
+  .a-card-header { padding: .75rem 1rem }
+  .a-card-body   { padding: 1rem }
+  .topbar-page-title { font-size: 1rem }
+  .f-row { grid-template-columns: 1fr }
+}
+
+/* ?576px: single column, full-width cards */
+@media (max-width: 575px) {
+  .stat-grid { grid-template-columns: 1fr }
+  .app-content { padding: .85rem .6rem }
+  .a-card-body { padding: .85rem .9rem }
+  .nav-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch }
+  .nav-tabs .nav-link { padding: .55rem .75rem; font-size: .8rem }
+}
+
+/* ================================================================
+   PAGE HELPERS (max-width pages that should fill larger screens)
+   ================================================================ */
+/* Forms that were capped at 700px now grow on large screens */
+.page-form-wrap {
+  width: 100%;
+  max-width: 860px;
+}
+@media (min-width: 1400px) {
+  .page-form-wrap { max-width: 1020px }
+}
+
+/* .wa-qr-col kept for legacy references — layout now uses .wa-layout grid */
+.wa-qr-col { width: 100% }
+
+/* ================================================================
+   PAGE HEADER (used by most views)
+   ================================================================ */
+.page-header { margin-bottom: 1.5rem }
+.page-header .breadcrumb { font-size: .75rem; margin-bottom: .25rem }
+
+/* ================================================================
+   WHATSAPP PAGE LAYOUT
+   ================================================================ */
+.wa-layout {
+  display: grid;
+  grid-template-columns: 520px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 1100px) {
+  .wa-layout { grid-template-columns: 1fr 1fr }
+}
+@media (max-width: 767px) {
+  .wa-layout { grid-template-columns: 1fr }
+}
+
+/* QR image */
+.qr-img {
+  width: min(300px, 90vw);
+  height: min(300px, 90vw);
+  border-radius: 12px;
+  border: 3px solid #bbf7d0;
+  display: block;
+}
+/* countdown progress */
+.qr-progress-wrap {
+  width: min(300px, 90vw);
+  background: #f1f5f9;
+  border-radius: 99px;
+  height: 6px;
+  overflow: hidden;
+}
+.qr-progress-bar {
+  height: 100%;
+  width: 100%;
+  border-radius: 99px;
+  background: #25D366;
+  transition: width .9s linear, background .9s linear;
+}
+
+/* Status bar below QR / auth */
+.wa-status-bar {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .55rem .85rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: .83rem;
+  color: #475569;
+}
+
+/* Connected / idle status icon */
+.wa-status-icon {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+}
+.wa-status-icon--ok   { background: #dcfce7; color: #16a34a }
+.wa-status-icon--idle { background: #dcfce7; color: #25D366 }
+
+/* Phone badge */
+.wa-phone-badge {
+  display: inline-flex; align-items: center; gap: .5rem;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  color: #166534; border-radius: 99px;
+  padding: .4rem 1.1rem; font-weight: 600; font-size: .92rem;
+}
+
+/* Info items (icon + text rows) */
+.wa-info-item {
+  display: flex; align-items: flex-start; gap: .75rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+.wa-info-item:last-child { border-bottom: none; padding-bottom: 0 }
+.wa-info-item > i { font-size: 1.1rem; margin-top: .1rem; flex-shrink: 0 }
+
+/* Steps list */
+.wa-steps {
+  padding-left: 1.25rem;
+  margin: 0;
+  font-size: .85rem;
+  color: #475569;
+  line-height: 2.1;
+}
+.wa-steps li { padding-left: .25rem }
+
+/* ================================================================
+   VENDOR SETTINGS (Personalidad / Entrega / Pagos) — sticky sidebar
+   ================================================================ */
+/* On mobile push the action sidebar to the top */
+@media (max-width: 991px) {
+  #frmPersonalidad .row.g-4,
+  #frmEntrega      .row.g-4,
+  #frmPagos        .row.g-4 {
+    flex-direction: column-reverse;
+  }
+  #frmPersonalidad .col-lg-4 .a-card,
+  #frmEntrega      .col-lg-4 .a-card,
+  #frmPagos        .col-lg-4 .a-card {
+    position: static !important;
+    margin-bottom: 1.25rem;
+  }
+}
 #productGrid .card-img-top { object-fit: cover }
 .dataTables_wrapper .dataTables_filter input { border-radius: 8px; border: 1.5px solid #e2e8f0; padding: .28rem .55rem; font-size: .83rem }
 .form-control:focus, .form-select:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(22,163,74,.10) }
@@ -409,20 +697,32 @@ body.sb-collapsed .app-content { margin-left: var(--sb-w-col) }
 .page-link { color: var(--brand) }
 .page-item.active .page-link { background-color: var(--brand); border-color: var(--brand) }
 
+/* legacy responsive block removed — see RESPONSIVE BREAKPOINTS section above */
+
 /* ================================================================
-   RESPONSIVE — sidebar oculto solo en mobile (<768px)
+   INBOX RESPONSIVE
    ================================================================ */
-@media(max-width:900px) {
-  .app-sidebar { transform: translateX(-100%); transition: width .22s ease, transform .25s }
-  .app-sidebar.open { transform: translateX(0) }
-  .app-topbar, .app-content { margin-left: 0 !important }
-  .sb-toggle { display: inline-flex; align-items: center }
-  .sb-collapse-btn { display: none }
-  .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 199 }
-  .sb-overlay.open { display: block }
-  .stat-grid { grid-template-columns: repeat(2,1fr) }
+/* On small screens collapse the conversation list below the chat area */
+@media (max-width: 767px) {
+  .inbox-wrap { flex-direction: column !important; height: auto !important }
+  .inbox-list  { width: 100% !important; max-height: 42vh; border-right: none !important; border-bottom: 1px solid #e2e8f0 }
+  .inbox-chat  { height: 60vh }
 }
-@media(max-width:560px) {
-  .stat-grid { grid-template-columns: 1fr 1fr }
-  .app-content { padding: 1.1rem 1rem }
+
+/* ================================================================
+   TABLE RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+  .table-responsive-stack thead { display: none }
+  .table-responsive-stack tbody td {
+    display: flex; justify-content: space-between;
+    padding: .45rem .75rem; border: none; border-bottom: 1px solid #f1f5f9;
+  }
+  .table-responsive-stack tbody td::before {
+    content: attr(data-label);
+    font-weight: 600; font-size: .72rem; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-right: .5rem; flex-shrink: 0;
+  }
+  .table-responsive-stack tbody tr { border-bottom: 3px solid #f1f5f9 }
 }

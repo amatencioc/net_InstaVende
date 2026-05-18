@@ -157,7 +157,7 @@ public class ProductsController : Controller
         Stock = p.Stock, CategoryId = p.CategoryId, CategoryName = p.Category?.Name,
         ImageUrl = p.ImageUrl, IsActive = p.IsActive, IsFeatured = p.IsFeatured,
         SortOrder = p.SortOrder, CreatedAt = p.CreatedAt,
-        Variants = p.Variants.Select(v => new ProductVariantViewModel
+        Variants = (p.Variants ?? Enumerable.Empty<ProductVariant>()).Select(v => new ProductVariantViewModel
         {
             Id = v.Id, ProductId = v.ProductId, AttributeName = v.AttributeName,
             AttributeValue = v.AttributeValue, PriceModifier = v.PriceModifier,

@@ -5,7 +5,7 @@
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
         <h1 class="topbar-page-title mb-0">Recordatorios</h1>
-        <p class="text-muted small mb-0">Programa mensajes de seguimiento automático para tus clientes</p>
+        <p class="text-muted small mb-0">Programa mensajes de seguimiento automÃ¡tico para tus clientes</p>
     </div>
     <button class="btn btn-primary" onclick="openModal(0)"><i class="bi bi-plus-circle me-1"></i> Nuevo recordatorio</button>
 </div>
@@ -30,7 +30,7 @@
         {
         <div class="a-card text-center py-5">
             <i class="bi bi-alarm" style="font-size:2.5rem;color:#cbd5e1"></i>
-            <p class="text-muted mt-3 mb-0">No hay recordatorios en esta sección</p>
+            <p class="text-muted mt-3 mb-0">No hay recordatorios en esta secciÃ³n</p>
         </div>
         }
         else
@@ -83,7 +83,7 @@
                 <div class="f-group">
                     <label class="f-label">Cliente <span class="text-danger">*</span></label>
                     <select class="f-input" id="remContact">
-                        <option value="">— Seleccionar —</option>
+                        <option value="">â€” Seleccionar â€”</option>
                         @foreach (dynamic c in ViewBag.Contacts)
                         { <option value="@c.Id">@(c.Name ?? c.Phone ?? "Sin nombre")</option> }
                     </select>
@@ -98,10 +98,10 @@
                 </div>
                 <div class="f-group">
                     <label class="f-label">Mensaje <span class="text-danger">*</span></label>
-                    <textarea class="f-input" id="remMessage" rows="3" placeholder="Ej: Hola! ¿Pudiste revisar el producto que te ofrecí?"></textarea>
+                    <textarea class="f-input" id="remMessage" rows="3" placeholder="Ej: Hola! Â¿Pudiste revisar el producto que te ofrecÃ­?"></textarea>
                 </div>
                 <div class="f-group">
-                    <label class="f-label">Fecha y hora de envío <span class="text-danger">*</span></label>
+                    <label class="f-label">Fecha y hora de envÃ­o <span class="text-danger">*</span></label>
                     <input type="datetime-local" class="f-input" id="remScheduled" />
                 </div>
             </div>
@@ -141,25 +141,34 @@ function saveReminder() {
     var contactId = document.getElementById('remContact').value;
     var msg = document.getElementById('remMessage').value.trim();
     var sched = document.getElementById('remScheduled').value;
-    if (!contactId) { alert('Selecciona un cliente.'); return; }
-    if (!msg) { alert('El mensaje es obligatorio.'); return; }
-    if (!sched) { alert('La fecha y hora son obligatorias.'); return; }
+    if (!contactId) { ivAlert('Selecciona un cliente.', 'warning'); return; }
+    if (!msg) { ivAlert('El mensaje es obligatorio.', 'warning'); return; }
+    if (!sched) { ivAlert('La fecha y hora son obligatorias.', 'warning'); return; }
     fetch('/Reminders/Save', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': $('input[name=__RequestVerificationToken]').val() },
+        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('input[name=__RequestVerificationToken]')?.value || '' },
         body: JSON.stringify({ Id: parseInt(document.getElementById('remId').value), ContactId: parseInt(contactId), ChannelType: parseInt(document.getElementById('remChannel').value), Message: msg, ScheduledAt: sched })
-    }).then(r => r.json()).then(d => { if (d.ok) { modal.hide(); location.reload(); } });
+    }).then(r => r.json()).then(d => {
+        if (d.ok) { modal.hide(); location.reload(); }
+        else { ivAlert('No se pudo guardar el recordatorio.', 'danger'); }
+    }).catch(() => ivAlert('Error de conexiÃ³n al guardar.', 'danger'));
 }
 
 function cancelReminder(id) {
-    if (!confirm('¿Cancelar este recordatorio?')) return;
-    fetch('/Reminders/Cancel', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':$('input[name=__RequestVerificationToken]').val()}, body:'id='+id })
-        .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); });
+    ivConfirm({ title: 'Â¿Cancelar recordatorio?', message: 'Â¿Seguro que deseas cancelar este recordatorio?', okLabel: 'SÃ­, cancelar', type: 'warning' }).then(function(ok) {
+        if (!ok) return;
+        fetch('/Reminders/Cancel', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':document.querySelector('input[name=__RequestVerificationToken]')?.value || ''}, body:'id='+id })
+            .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); else ivAlert('No se pudo cancelar el recordatorio.', 'danger'); })
+            .catch(() => ivAlert('Error de conexiÃ³n al cancelar.', 'danger'));
+    });
 }
 function deleteReminder(id) {
-    if (!confirm('¿Eliminar este recordatorio?')) return;
-    fetch('/Reminders/Delete', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':$('input[name=__RequestVerificationToken]').val()}, body:'id='+id })
-        .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); });
+    ivConfirm({ title: 'Â¿Eliminar recordatorio?', message: 'Esta acciÃ³n no se puede deshacer.', okLabel: 'Eliminar', type: 'danger' }).then(function(ok) {
+        if (!ok) return;
+        fetch('/Reminders/Delete', { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','RequestVerificationToken':document.querySelector('input[name=__RequestVerificationToken]')?.value || ''}, body:'id='+id })
+            .then(r=>r.json()).then(d=>{ if(d.ok) location.reload(); else ivAlert('No se pudo eliminar el recordatorio.', 'danger'); })
+            .catch(() => ivAlert('Error de conexiÃ³n al eliminar.', 'danger'));
+    });
 }
 </script>
 }

@@ -19,17 +19,17 @@ public class ReminderTemplatesController : Controller
     {
         [CustomerSegment.Frio] =
         [
-            (1, "Hola ??, gracias por contactarnos. ¿En qué puedo ayudarte hoy?", "2-3h")
+            (1, "Hola ðŸ‘‹, gracias por contactarnos. Â¿En quÃ© puedo ayudarte hoy?", "2-3h")
         ],
         [CustomerSegment.Tibio] =
         [
-            (1, "Gracias por escribirnos ?? ¿Tienes alguna duda sobre nuestros productos?", "2-3h"),
-            (2, "¡Hola! Ayer hablamos un poquito. ¿Te animas a revisar de nuevo?", "22-23h")
+            (1, "Gracias por escribirnos ðŸ˜Š Â¿Tienes alguna duda sobre nuestros productos?", "2-3h"),
+            (2, "Â¡Hola! Ayer hablamos un poquito. Â¿Te animas a revisar de nuevo?", "22-23h")
         ],
         [CustomerSegment.Caliente] =
         [
-            (1, "Gracias por tu interés ?? Estás a un paso de tener tu pedido listo.", "2-3h"),
-            (2, "¡Hola! Solo queríamos recordarte que tu pedido sigue apartado ??", "22-23h")
+            (1, "Gracias por tu interÃ©s ðŸ›’ EstÃ¡s a un paso de tener tu pedido listo.", "2-3h"),
+            (2, "Â¡Hola! Solo querÃ­amos recordarte que tu pedido sigue apartado ðŸ“¦", "22-23h")
         ]
     };
 

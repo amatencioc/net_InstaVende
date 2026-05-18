@@ -136,7 +136,9 @@ public class ProductRepositoryTests
         var products = (await repo.GetByBusinessIdAsync(1, false)).ToList();
         var toDelete = products.First();
 
-        await repo.DeleteAsync(toDelete);
+        // Re-attach the no-tracked entity before removing
+        var tracked = await db.Products.FindAsync(toDelete.Id);
+        await repo.DeleteAsync(tracked!);
         await db.SaveChangesAsync();
 
         var remaining = await db.Products.FindAsync(toDelete.Id);

@@ -89,7 +89,9 @@ public class SettingsController : Controller
         ViewData["Title"] = "Perfil del negocio";
         if (!ModelState.IsValid) return View(vm);
 
-        var biz = await _user.GetBusinessAsync();
+        var bid = await _user.GetBusinessIdAsync();
+        if (bid == null) return View(vm);
+        var biz = await _db.Businesses.FirstOrDefaultAsync(b => b.Id == bid);
         if (biz == null) return View(vm);
 
         biz.Name = vm.Name;
@@ -108,14 +110,14 @@ public class SettingsController : Controller
 
     public IActionResult Password()
     {
-        ViewData["Title"] = "Cambiar contraseña";
+        ViewData["Title"] = "Cambiar contraseÃ±a";
         return View(new ChangePasswordViewModel());
     }
 
     [HttpPost]
     public async Task<IActionResult> Password(ChangePasswordViewModel vm)
     {
-        ViewData["Title"] = "Cambiar contraseña";
+        ViewData["Title"] = "Cambiar contraseÃ±a";
         if (!ModelState.IsValid) return View(vm);
 
         var appUser = await _userManager.GetUserAsync(User);
@@ -128,7 +130,7 @@ public class SettingsController : Controller
             return View(vm);
         }
 
-        TempData["Success"] = "Contraseña actualizada correctamente.";
+        TempData["Success"] = "ContraseÃ±a actualizada correctamente.";
         return RedirectToAction(nameof(Account));
     }
 }

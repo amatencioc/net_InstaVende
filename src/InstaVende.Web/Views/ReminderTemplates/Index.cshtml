@@ -1,6 +1,6 @@
 @model InstaVende.Web.ViewModels.ReminderSegmentViewModel
 @using InstaVende.Core.Enums
-@{ ViewData["Title"] = "Recordatorios autom·ticos"; }
+@{ ViewData["Title"] = "Recordatorios autom√°ticos"; }
 
 <div class="d-flex align-items-center justify-content-between mb-4">
     <div>
@@ -11,7 +11,7 @@
 
 <p class="text-muted small mb-4">
     <i class="bi bi-info-circle me-1"></i>
-    Usamos modelos por segmento (FrÌo, Tibio, Caliente) con ventanas de 2-3h y una segunda de 22-23h cuando aplica.
+    Usamos modelos por segmento (Fr√≠o, Tibio, Caliente) con ventanas de 2-3h y una segunda de 22-23h cuando aplica.
 </p>
 
 <!-- Tabs de segmento -->
@@ -21,7 +21,18 @@
         <li class="nav-item">
             <a class="nav-link @(Model.ActiveSegment == seg ? "active" : "")"
                href="/ReminderTemplates/Index?segment=@((int)seg)">
-                @(seg == CustomerSegment.Frio ? "?? FrÌo" : seg == CustomerSegment.Tibio ? "??? Tibio" : "?? Caliente")
+                @if (seg == CustomerSegment.Frio)
+                {
+                    <i class="bi bi-thermometer-low me-1 text-primary"></i><text>Fr√≠o</text>
+                }
+                else if (seg == CustomerSegment.Tibio)
+                {
+                    <i class="bi bi-thermometer-half me-1 text-warning"></i><text>Tibio</text>
+                }
+                else
+                {
+                    <i class="bi bi-thermometer-high me-1 text-danger"></i><text>Caliente</text>
+                }
             </a>
         </li>
     }
@@ -69,38 +80,36 @@
                     </div>
 
                     <div class="d-flex gap-2 mt-2">
-                        <button class="btn btn-sm btn-outline-secondary">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="openTemplatesPicker(@r.Id)">
                             <i class="bi bi-magic me-1"></i> Plantillas
                         </button>
                     </div>
-
-                    <!-- Paywall multimedia -->
-                    <div class="d-flex align-items-center justify-content-between p-2 rounded-2 mt-3"
-                         style="background:#fefce8;border:1px solid #fde68a">
-                        <span style="font-size:.78rem;color:#92400e">
-                            <i class="bi bi-image me-1"></i>
-                            Adjuntar imagen, video o PDF ó <strong>Disponible desde el plan Gold</strong>
-                        </span>
-                        <a href="/Plans" class="btn btn-xs btn-warning btn-sm py-0 px-2" style="font-size:.72rem">
-                            Actualizar plan
-                        </a>
+                    <!-- Adjuntar multimedia (disponible sin restricciones) -->
+                    <div class="d-flex align-items-center gap-2 p-2 rounded-2 mt-3"
+                         style="background:#f8fafc;border:1px solid #e2e8f0">
+                        <i class="bi bi-image text-muted"></i>
+                        <span style="font-size:.78rem;color:#64748b">Adjuntar imagen, video o PDF</span>
+                        <input type="file" class="form-control form-control-sm ms-auto"
+                               accept="image/*,video/*,application/pdf"
+                               style="max-width:200px;font-size:.75rem"
+                               onchange="attachMedia(this, @r.Id)" />
                     </div>
                 </div>
             </div>
         }
 
         <div class="text-end">
-            <button class="btn btn-primary" onclick="saveAll()">
+            <button type="button" class="btn btn-primary" onclick="saveAll()">
                 <i class="bi bi-floppy me-1"></i> Guardar cambios
             </button>
         </div>
     </div>
 
-    <!-- PrevisualizaciÛn -->
+    <!-- Previsualizaci√≥n -->
     <div class="col-lg-5">
         <div class="a-card sticky-top" style="top:80px">
             <div class="a-card-header">
-                <div class="a-card-title"><i class="bi bi-whatsapp me-1 text-success"></i> PrevisualizaciÛn</div>
+                <div class="a-card-title"><i class="bi bi-whatsapp me-1 text-success"></i> Previsualizaci√≥n</div>
             </div>
             <div class="a-card-body" style="background:#e5ddd5;border-radius:0 0 12px 12px;min-height:300px;padding:1.5rem">
                 <div id="previewBubbles">
@@ -116,7 +125,7 @@
                                  id="bubble-@r.Id"
                                  style="max-width:80%;background:#dcf8c6;margin-left:auto;word-break:break-word;font-size:.85rem;line-height:1.5">
                                 @(string.IsNullOrEmpty(r.Message) ? "..." : r.Message)
-                                <div class="text-end text-muted mt-1" style="font-size:.65rem">18:20 ??</div>
+                                <div class="text-end text-muted mt-1" style="font-size:.65rem">&#10003;&#10003; 18:20</div>
                             </div>
                         </div>
                     }
@@ -128,19 +137,24 @@
 
 @Html.AntiForgeryToken()
 
+@section Scripts {
 <script>
-const token = document.querySelector('[name=__RequestVerificationToken]').value;
+const token = document.querySelector('[name=__RequestVerificationToken]')?.value || '';
 
 function updateCounter(ta) {
-    const id = ta.id.replace('msg-','');
-    document.getElementById('cnt-'+id).textContent = ta.value.length;
+    const id = ta.id.replace('msg-', '');
+    const el = document.getElementById('cnt-' + id);
+    if (el) el.textContent = ta.value.length;
 }
 
 function updatePreview() {
     document.querySelectorAll('.tmpl-message').forEach(ta => {
-        const id = ta.id.replace('msg-','');
-        const bubble = document.getElementById('bubble-'+id);
-        if (bubble) bubble.childNodes[0].textContent = ta.value || '...';
+        const id = ta.id.replace('msg-', '');
+        const bubble = document.getElementById('bubble-' + id);
+        if (bubble) {
+            const textNode = bubble.childNodes[0];
+            if (textNode) textNode.textContent = ta.value || '...';
+        }
     });
 }
 
@@ -149,34 +163,63 @@ function toggleTemplate(id, cb) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
         body: JSON.stringify({ id })
-    }).then(r => r.json()).then(d => {
+    })
+    .then(r => r.json())
+    .then(d => {
         cb.checked = d.isActive;
-        cb.nextElementSibling.textContent = d.isActive ? 'Activo' : 'Inactivo';
-    });
+        const lbl = cb.nextElementSibling;
+        if (lbl) lbl.textContent = d.isActive ? 'Activo' : 'Inactivo';
+    })
+    .catch(() => ivAlert('Error al cambiar el estado. Intenta de nuevo.', 'danger'));
+}
+
+function attachMedia(input, templateId) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    const maxMB = 16;
+    if (file.size > maxMB * 1024 * 1024) {
+        ivAlert('El archivo supera los ' + maxMB + ' MB permitidos.', 'warning');
+        input.value = '';
+    }
+}
+
+function openTemplatesPicker(templateId) {
+    ivAlert('Selecci√≥n de plantillas pr√≥ximamente disponible.', 'info');
 }
 
 function saveAll() {
     const data = [];
-    document.querySelectorAll('.tmpl-id').forEach((inp, i) => {
+    const ids     = document.querySelectorAll('.tmpl-id');
+    const msgs    = document.querySelectorAll('.tmpl-message');
+    const toggles = document.querySelectorAll('.toggle-active');
+
+    ids.forEach((inp, i) => {
         data.push({
-            id: parseInt(inp.value),
-            message: document.querySelectorAll('.tmpl-message')[i].value,
-            isActive: document.querySelectorAll('.toggle-active')[i].checked
+            id:       parseInt(inp.value),
+            message:  msgs[i].value,
+            isActive: toggles[i].checked
         });
     });
+
     fetch('/ReminderTemplates/Save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
         body: JSON.stringify(data)
-    }).then(r => r.json()).then(d => {
+    })
+    .then(r => r.json())
+    .then(d => {
         if (d.success) {
             const t = document.createElement('div');
             t.className = 'app-alert app-alert-success';
-            t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999';
+            t.style.cssText = 'position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;animation:fadeInUp .25s';
             t.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Cambios guardados';
             document.body.appendChild(t);
             setTimeout(() => t.remove(), 3000);
+        } else {
+            ivAlert('No se pudo guardar. Intenta de nuevo.', 'danger');
         }
-    });
+    })
+    .catch(() => ivAlert('Error de conexi√≥n al guardar.', 'danger'));
 }
 </script>
+}

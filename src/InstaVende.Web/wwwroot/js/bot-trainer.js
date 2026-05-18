@@ -1,4 +1,4 @@
-var token = $('[name="__RequestVerificationToken"]').first().val();
+var token = document.querySelector('[name=__RequestVerificationToken]')?.value || '';
 
 // Config form
 $('#formConfig').on('submit', function(e) {
@@ -19,12 +19,15 @@ $('#formConfig').on('submit', function(e) {
 function openIntentModal(id) {
     $('#intentId').val(id);
     if (id > 0) {
-        $.getJSON('/Bot/GetIntent/' + id, function(d) {
-            $('#intentName').val(d.intentName);
-            $('#intentPhrases').val(d.triggerPhrases);
-            $('#intentResponse').val(d.response);
-            $('#intentPriority').val(d.priority);
-            $('#intentActive').prop('checked', d.isActive);
+        $.ajax({ url: '/Bot/GetIntent', method: 'POST', contentType: 'application/json',
+            headers: { 'RequestVerificationToken': token }, data: JSON.stringify({ id: id }),
+            success: function(d) {
+                $('#intentName').val(d.intentName);
+                $('#intentPhrases').val(d.triggerPhrases);
+                $('#intentResponse').val(d.response);
+                $('#intentPriority').val(d.priority);
+                $('#intentActive').prop('checked', d.isActive);
+            }
         });
     } else {
         $('#formIntent')[0].reset();
@@ -52,7 +55,8 @@ $('#formIntent').on('submit', function(e) {
 
 function deleteIntent(id) {
     if (!confirm('¿Eliminar esta intención?')) return;
-    $.ajax({ url: '/Bot/DeleteIntent/' + id, method: 'POST', headers: { 'RequestVerificationToken': token },
+    $.ajax({ url: '/Bot/DeleteIntent', method: 'POST', contentType: 'application/json',
+        headers: { 'RequestVerificationToken': token }, data: JSON.stringify({ id: id }),
         success: function() { location.reload(); }, error: function() { alert('Error al eliminar.'); }
     });
 }
@@ -61,11 +65,14 @@ function deleteIntent(id) {
 function openKbModal(id) {
     $('#kbId').val(id);
     if (id > 0) {
-        $.getJSON('/Bot/GetKnowledge/' + id, function(d) {
-            $('#kbQuestion').val(d.question);
-            $('#kbAnswer').val(d.answer);
-            $('#kbCategory').val(d.category);
-            $('#kbActive').prop('checked', d.isActive);
+        $.ajax({ url: '/Bot/GetKnowledge', method: 'POST', contentType: 'application/json',
+            headers: { 'RequestVerificationToken': token }, data: JSON.stringify({ id: id }),
+            success: function(d) {
+                $('#kbQuestion').val(d.question);
+                $('#kbAnswer').val(d.answer);
+                $('#kbCategory').val(d.category);
+                $('#kbActive').prop('checked', d.isActive);
+            }
         });
     } else {
         $('#formKb')[0].reset();
@@ -92,7 +99,8 @@ $('#formKb').on('submit', function(e) {
 
 function deleteKb(id) {
     if (!confirm('¿Eliminar esta entrada?')) return;
-    $.ajax({ url: '/Bot/DeleteKnowledge/' + id, method: 'POST', headers: { 'RequestVerificationToken': token },
+    $.ajax({ url: '/Bot/DeleteKnowledge', method: 'POST', contentType: 'application/json',
+        headers: { 'RequestVerificationToken': token }, data: JSON.stringify({ id: id }),
         success: function() { location.reload(); }, error: function() { alert('Error al eliminar.'); }
     });
 }
@@ -108,7 +116,7 @@ function sendPreview() {
     $('#previewInput').val('');
     $.ajax({ url: '/Bot/Preview', method: 'POST', contentType: 'application/json',
         headers: { 'RequestVerificationToken': token }, data: JSON.stringify({ message: msg }),
-        success: function(r) { appendMessage('bot', r.response); },
+        success: function(r) { appendMessage('bot', r.reply); },
         error: function() { appendMessage('bot', 'Error al conectar con el bot.'); }
     });
 }

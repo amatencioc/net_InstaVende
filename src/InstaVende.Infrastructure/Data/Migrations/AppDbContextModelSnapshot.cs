@@ -220,7 +220,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<string>("IntentName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -481,6 +482,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BusinessId", "LastSeenAt");
+
                     b.HasIndex("BusinessId", "ChannelType", "ExternalId")
                         .IsUnique();
 
@@ -535,11 +538,17 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasIndex("AssignedAgentId");
 
-                    b.HasIndex("BusinessId");
-
-                    b.HasIndex("ContactId");
-
                     b.HasIndex("LabelId");
+
+                    b.HasIndex("BusinessId", "CreatedAt");
+
+                    b.HasIndex("BusinessId", "Status");
+
+                    b.HasIndex("BusinessId", "UpdatedAt");
+
+                    b.HasIndex("ContactId", "Status");
+
+                    b.HasIndex("BusinessId", "Status", "UpdatedAt");
 
                     b.ToTable("Conversations");
                 });
@@ -602,7 +611,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -643,7 +653,7 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "SortOrder");
 
                     b.ToTable("DeliveryZones");
                 });
@@ -681,7 +691,7 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "IsFavorite", "CreatedAt");
 
                     b.ToTable("KnowledgeEntries");
                 });
@@ -725,6 +735,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ConversationId");
+
+                    b.HasIndex("ConversationId", "SentAt");
 
                     b.ToTable("Messages");
                 });
@@ -860,11 +872,13 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
-
                     b.HasIndex("ContactId");
 
-                    b.HasIndex("ConversationId");
+                    b.HasIndex("BusinessId", "Status");
+
+                    b.HasIndex("ConversationId", "Status");
+
+                    b.HasIndex("BusinessId", "CreatedAt", "Status");
 
                     b.ToTable("Orders");
                 });
@@ -978,7 +992,7 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "SortOrder");
 
                     b.ToTable("PaymentMethods");
                 });
@@ -1037,9 +1051,15 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
-
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("BusinessId", "CreatedAt");
+
+                    b.HasIndex("BusinessId", "IsActive", "CategoryId");
+
+                    b.HasIndex("BusinessId", "IsActive", "Name");
+
+                    b.HasIndex("BusinessId", "IsActive", "SortOrder");
 
                     b.ToTable("Products");
                 });
@@ -1063,7 +1083,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
@@ -1182,11 +1203,13 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
-
                     b.HasIndex("ContactId");
 
                     b.HasIndex("CreatedByAgentId");
+
+                    b.HasIndex("ScheduledAt");
+
+                    b.HasIndex("BusinessId", "Status");
 
                     b.ToTable("Reminders");
                 });
@@ -1231,7 +1254,7 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "Segment");
 
                     b.ToTable("ReminderTemplates");
                 });
@@ -1269,10 +1292,10 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
-
                     b.HasIndex("Token")
                         .IsUnique();
+
+                    b.HasIndex("BusinessId", "Status");
 
                     b.ToTable("UserInvitations");
                 });

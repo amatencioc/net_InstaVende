@@ -12,7 +12,7 @@ public class OrderViewModel
     {
         OrderStatus.Pending    => "Pendiente",
         OrderStatus.Confirmed  => "Confirmado",
-        OrderStatus.Preparing  => "En preparación",
+        OrderStatus.Preparing  => "En preparaciÃ³n",
         OrderStatus.Shipped    => "Enviado",
         OrderStatus.Delivered  => "Entregado",
         OrderStatus.Cancelled  => "Cancelado",
@@ -21,9 +21,9 @@ public class OrderViewModel
     };
     public string SubStatusLabel => SubStatus switch
     {
-        OrderSubStatus.EnValidacion   => "En validación",
-        OrderSubStatus.EnPreparacion  => "En preparación",
-        OrderSubStatus.ListoParaEnvio => "Listo para envío",
+        OrderSubStatus.EnValidacion   => "En validaciÃ³n",
+        OrderSubStatus.EnPreparacion  => "En preparaciÃ³n",
+        OrderSubStatus.ListoParaEnvio => "Listo para envÃ­o",
         OrderSubStatus.Enviado        => "Enviado",
         OrderSubStatus.Entregado      => "Entregado",
         OrderSubStatus.Finalizado     => "Finalizado",

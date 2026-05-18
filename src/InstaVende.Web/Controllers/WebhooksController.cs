@@ -79,7 +79,7 @@ public class WebhooksController : ControllerBase
             if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(text))
                 return Ok();
 
-            // Verify the channel is active — use AsNoTracking since we don't modify cfg here
+            // Verify the channel is active â€” use AsNoTracking since we don't modify cfg here
             var active = await _db.ChannelConfigs
                 .AsNoTracking()
                 .AnyAsync(c => c.BusinessId == merchantId
@@ -148,9 +148,9 @@ public class WebhooksController : ControllerBase
             if (!value.TryGetProperty("messages", out var msgs)) continue;
             foreach (var msg in msgs.EnumerateArray())
             {
-                var from = msg.GetProperty("from").GetString()!;
-                var text = msg.TryGetProperty("text", out var t) ? t.GetProperty("body").GetString()! : string.Empty;
-                if (!string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.WhatsApp, from, text);
+                var from = msg.GetProperty("from").GetString();
+                var text = msg.TryGetProperty("text", out var t) ? t.GetProperty("body").GetString() : string.Empty;
+                if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.WhatsApp, from, text);
             }
         }
     }
@@ -160,7 +160,8 @@ public class WebhooksController : ControllerBase
         foreach (var entry in payload.GetProperty("entry").EnumerateArray())
         foreach (var messaging in entry.GetProperty("messaging").EnumerateArray())
         {
-            var sender = messaging.GetProperty("sender").GetProperty("id").GetString()!;
+            var sender = messaging.GetProperty("sender").GetProperty("id").GetString();
+            if (sender == null) continue;
             if (!messaging.TryGetProperty("message", out var msg)) continue;
             var text = msg.TryGetProperty("text", out var t) ? t.GetString() : null;
             if (!string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.FacebookMessenger, sender, text!);
@@ -172,7 +173,8 @@ public class WebhooksController : ControllerBase
         foreach (var entry in payload.GetProperty("entry").EnumerateArray())
         foreach (var messaging in entry.GetProperty("messaging").EnumerateArray())
         {
-            var sender = messaging.GetProperty("sender").GetProperty("id").GetString()!;
+            var sender = messaging.GetProperty("sender").GetProperty("id").GetString();
+            if (sender == null) continue;
             if (!messaging.TryGetProperty("message", out var msg)) continue;
             var text = msg.TryGetProperty("text", out var t) ? t.GetString() : null;
             if (!string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.Instagram, sender, text!);
@@ -207,7 +209,10 @@ public class WebhooksController : ControllerBase
                 contact.Name = pushname;
         }
 
-        // ?? 2. Upsert conversation ???????????????????????????????????????????
+        // ?? 2. Flush contact so contact.Id is populated before querying conversations
+        await _db.SaveChangesAsync();
+
+        // ?? 3. Upsert conversation ??????????????????????????????????????????????????????
         var conv = await _db.Conversations
             .Where(c => c.ContactId   == contact.Id
                      && c.ChannelType == channel
@@ -217,13 +222,12 @@ public class WebhooksController : ControllerBase
 
         if (conv == null)
         {
-            // SaveChanges first to get contact.Id if it was just inserted
-            await _db.SaveChangesAsync();
             conv = new Conversation { BusinessId = bid, ContactId = contact.Id, ChannelType = channel };
             _db.Conversations.Add(conv);
+            await _db.SaveChangesAsync(); // get conv.Id before creating messages
         }
 
-        // ?? 3. Save inbound message ??????????????????????????????????????????
+        // ?? 4. Save inbound message ?????????????????????????????????????????
         var inMsg = new Message
         {
             ConversationId = conv.Id,
@@ -235,9 +239,9 @@ public class WebhooksController : ControllerBase
         conv.LastMessageAt      = DateTime.UtcNow;
         conv.LastMessagePreview = text.Length > 120 ? text[..120] + "..." : text;
         conv.UnreadCount++;
-        await _db.SaveChangesAsync();   // single save for contact + conv + inMsg
+        await _db.SaveChangesAsync();   // save inMsg + conv updates
 
-        // ?? 4. Push inbound to SignalR ???????????????????????????????????????
+        // ?? 5. Push inbound to SignalR ???????????????????????????????????????
         await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new
         {
             conversationId = conv.Id,
@@ -249,7 +253,7 @@ public class WebhooksController : ControllerBase
             channel        = (int)channel,
         });
 
-        // ?? 5. Bot reply (only when bot is active) ???????????????????????????
+        // ?? 6. Bot reply (only when bot is active) ???????????????????????????
         if (conv.Status != ConversationStatus.BotActive) return;
 
         var reply = await _engine.ProcessMessageAsync(bid, conv.Id, text);
@@ -266,7 +270,7 @@ public class WebhooksController : ControllerBase
         // TransferirAHumanoAsync already called SaveChangesAsync and updated conv.Status
         // in the DB. Reload the tracked entity to pick up any status change made by tools.
         await _db.Entry(conv).ReloadAsync();
-        // Reassign UpdatedAt after reload — ReloadAsync overwrites it with the stale DB value
+        // Reassign UpdatedAt after reload â€” ReloadAsync overwrites it with the stale DB value
         conv.UpdatedAt          = DateTime.UtcNow;
         conv.LastMessageAt      = DateTime.UtcNow;
         conv.LastMessagePreview = reply.Length > 120 ? reply[..120] + "..." : reply;
@@ -297,6 +301,7 @@ public class WebhooksController : ControllerBase
         if (!signature.StartsWith("sha256=")) return false;
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
         var hash = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payload))).ToLowerInvariant();
-        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(signature[7..]));
+        var sigHex = signature[7..].ToLowerInvariant();
+        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(sigHex));
     }
 }
