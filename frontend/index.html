@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#16a34a" />
+    <meta name="description" content="InstaVende: tu vendedor con IA que atiende y vende 24/7 por WhatsApp, Instagram y Messenger." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>InstaVende</title>
+    <script>
+      // Aplica el tema antes de pintar para evitar parpadeo
+      try {
+        const t = localStorage.getItem('iv-theme')
+        const dark = t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.classList.toggle('dark', dark)
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

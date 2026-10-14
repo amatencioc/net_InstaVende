@@ -78,12 +78,15 @@ internal static class ServiceCollectionExtensions
 
     public static IServiceCollection AddInstaVendeApi(this IServiceCollection services, IConfiguration configuration)
     {
+        // Mismas reglas JSON para MVC y para el generador OpenAPI (enums como texto, números estrictos)
+        static void ConfigureJson(System.Text.Json.JsonSerializerOptions json)
+        {
+            json.Converters.Add(new JsonStringEnumConverter());
+            json.NumberHandling = JsonNumberHandling.Strict;
+        }
         services.AddControllers(o => o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()))
-            .AddJsonOptions(o =>
-            {
-                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
-            });
+            .AddJsonOptions(o => ConfigureJson(o.JsonSerializerOptions));
+        services.ConfigureHttpJsonOptions(o => ConfigureJson(o.SerializerOptions));
         services.AddProblemDetails();
         services.AddOpenApi(o => o.AddDocumentTransformer((doc, _, _) =>
         {
