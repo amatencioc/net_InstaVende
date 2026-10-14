@@ -1,7 +1,7 @@
-# An·lisis de MÛdulos y Funcionalidades ó InstaVende
+# An√°lisis de M√≥dulos y Funcionalidades ‚Äî InstaVende
 ## Basado en: Referencia visual (ya.onl / yavendio) vs. Proyecto actual
 
-> **Fuente de an·lisis:** 39 capturas de pantalla de la app de referencia + revisiÛn completa del cÛdigo fuente del proyecto InstaVende.
+> **Fuente de an√°lisis:** 39 capturas de pantalla de la app de referencia + revisi√≥n completa del c√≥digo fuente del proyecto InstaVende.
 > **Fecha:** 2025
 
 ---
@@ -10,13 +10,13 @@
 
 | Estado | Cantidad | Detalle |
 |--------|----------|---------|
-| ? Implementado | 7 mÛdulos | Funcional, puede mejorar UI |
-| ?? Parcial | 5 mÛdulos | Existe la base pero faltan funcionalidades clave |
-| ? Faltante | 6 mÛdulos | No existe en el proyecto, debe construirse |
+| ? Implementado | 7 m√≥dulos | Funcional, puede mejorar UI |
+| ?? Parcial | 5 m√≥dulos | Existe la base pero faltan funcionalidades clave |
+| ? Faltante | 6 m√≥dulos | No existe en el proyecto, debe construirse |
 
 ---
 
-## M”DULOS PRIORITARIOS (solicitados)
+## M√ìDULOS PRIORITARIOS (solicitados)
 
 ---
 
@@ -24,20 +24,20 @@
 **Pantallas de referencia:** `dashboard-v2-assistant` (2 pantallas)
 
 #### Estado actual: ?? PARCIAL
-- ? Existe `Bot/Index.cshtml` con tabs (ConfiguraciÛn, Intenciones, Conocimiento, Probar)
-- ? Nombre del bot, personalidad, prompt base, nivel de interacciÛn
+- ? Existe `Bot/Index.cshtml` con tabs (Configuraci√≥n, Intenciones, Conocimiento, Probar)
+- ? Nombre del bot, personalidad, prompt base, nivel de interacci√≥n
 - ? Handoff a humano, frase de transferencia
-- ? Descuentos por nivel (1, 2, 3), margen mÌnimo, umbral envÌo gratis
+- ? Descuentos por nivel (1, 2, 3), margen m√≠nimo, umbral env√≠o gratis
 
 #### ? FALTA implementar:
 - [ ] **Wizard de onboarding** para configurar el bot paso a paso (4 pasos como en la referencia)
-  - Paso 1: InformaciÛn del negocio (sector, horario, zona)
+  - Paso 1: Informaci√≥n del negocio (sector, horario, zona)
   - Paso 2: Tono y personalidad del bot (formal, amigable, vendedor)
-  - Paso 3: PolÌticas (devoluciones, garantÌa, envÌos)
-  - Paso 4: ActivaciÛn y prueba
-- [ ] **SecciÛn visual de "PolÌticas"** dedicada (ReturnPolicy, WarrantyPolicy, ShippingTimes est·n en BD pero sin UI propia)
-- [ ] **Campo de horario de atenciÛn** con selector visual (hoy solo es texto libre `BusinessHours`)
-- [ ] **SecciÛn "Promociones activas"** (`ActivePromotions` existe en BD pero sin UI)
+  - Paso 3: Pol√≠ticas (devoluciones, garant√≠a, env√≠os)
+  - Paso 4: Activaci√≥n y prueba
+- [ ] **Secci√≥n visual de "Pol√≠ticas"** dedicada (ReturnPolicy, WarrantyPolicy, ShippingTimes est√°n en BD pero sin UI propia)
+- [ ] **Campo de horario de atenci√≥n** con selector visual (hoy solo es texto libre `BusinessHours`)
+- [ ] **Secci√≥n "Promociones activas"** (`ActivePromotions` existe en BD pero sin UI)
 - [ ] **Preview del bot** en tiempo real mientras se configura (tipo chat embed)
 - [ ] **Indicador visual de estado** del bot (activo / pausado / en entrenamiento)
 
@@ -49,39 +49,39 @@
 #### Estado actual: ?? PARCIAL
 - ? Tab "Base de Conocimiento" dentro de `Bot/Index.cshtml`
 - ? Entidad `BotKnowledge` con Question, Answer, Category, IsActive
-- ? CRUD b·sico vÌa AJAX
+- ? CRUD b√°sico v√≠a AJAX
 
 #### ? FALTA implementar:
-- [ ] **P·gina dedicada** (no un tab secundario) ó la referencia lo muestra como mÛdulo independiente
-- [ ] **CategorÌas visuales** para organizar el conocimiento (ej: Precios, EnvÌos, GarantÌas)
+- [ ] **P√°gina dedicada** (no un tab secundario) ‚Äî la referencia lo muestra como m√≥dulo independiente
+- [ ] **Categor√≠as visuales** para organizar el conocimiento (ej: Precios, Env√≠os, Garant√≠as)
 - [ ] **Import masivo** desde archivo CSV / Excel
-- [ ] **B˙squeda y filtro** por categorÌa y texto
-- [ ] **Contador de uso** ó cu·ntas veces el bot usÛ cada respuesta
-- [ ] **Sugerencias autom·ticas** basadas en preguntas frecuentes de conversaciones
+- [ ] **B√∫squeda y filtro** por categor√≠a y texto
+- [ ] **Contador de uso** ‚Äî cu√°ntas veces el bot us√≥ cada respuesta
+- [ ] **Sugerencias autom√°ticas** basadas en preguntas frecuentes de conversaciones
 
 ---
 
-### 3. ?? M…TODOS DE PAGO
+### 3. ?? M√âTODOS DE PAGO
 **Pantallas de referencia:** dentro de `dashboard-v2-assistant` y `welcome-form`
 
 #### Estado actual: ? FALTANTE COMO UI
 - ? Campo `PaymentMethods` existe en `BotConfig` (solo texto libre en BD)
-- ? **No existe pantalla dedicada** de configuraciÛn de mÈtodos de pago
+- ? **No existe pantalla dedicada** de configuraci√≥n de m√©todos de pago
 
-#### ? FALTA implementar (mÛdulo completo):
-- [ ] **Pantalla "MÈtodos de Pago"** con lista visual de opciones:
+#### ? FALTA implementar (m√≥dulo completo):
+- [ ] **Pantalla "M√©todos de Pago"** con lista visual de opciones:
   - Transferencia bancaria (datos de cuenta)
-  - Tarjeta de crÈdito/dÈbito
+  - Tarjeta de cr√©dito/d√©bito
   - Efectivo / contra entrega
-  - Mercado Pago / PayPal / Stripe (integraciÛn futura)
+  - Mercado Pago / PayPal / Stripe (integraci√≥n futura)
   - Criptomonedas (opcional)
-- [ ] **Por cada mÈtodo**: nombre, instrucciones, CBU/alias/link, activo/inactivo
-- [ ] **El bot debe usar estos datos** al responder "øCÛmo pago?"
+- [ ] **Por cada m√©todo**: nombre, instrucciones, CBU/alias/link, activo/inactivo
+- [ ] **El bot debe usar estos datos** al responder "¬øC√≥mo pago?"
 - [ ] Entidad nueva: `PaymentMethod` (Id, BusinessId, Type, Name, Instructions, IsActive)
 
 ---
 
-### 4. ?? CONEXI”N WHATSAPP Y META
+### 4. ?? CONEXI√ìN WHATSAPP Y META
 **Pantallas de referencia:** `dashboard-v2-channels-whatsapp` (2 pantallas), `setup-session` (2 pantallas)
 
 #### Estado actual: ?? PARCIAL
@@ -91,19 +91,19 @@
 - ? Tokens encriptados en BD
 
 #### ? FALTA implementar:
-- [ ] **Estado de conexiÛn en tiempo real** ó indicador verde/rojo con ˙ltimo mensaje recibido
-- [ ] **BotÛn "Probar conexiÛn"** ó envÌa mensaje de prueba y confirma que el webhook funciona
-- [ ] **GuÌa paso a paso** visual para obtener el AccessToken desde Meta Business Manager
+- [ ] **Estado de conexi√≥n en tiempo real** ‚Äî indicador verde/rojo con √∫ltimo mensaje recibido
+- [ ] **Bot√≥n "Probar conexi√≥n"** ‚Äî env√≠a mensaje de prueba y confirma que el webhook funciona
+- [ ] **Gu√≠a paso a paso** visual para obtener el AccessToken desde Meta Business Manager
   - Links directos a Meta Developer Console
   - Instrucciones con screenshots para cada campo
 - [ ] **Sync / QR WhatsApp** (pantallas `setup-session`):
-  - Si usan WhatsApp Web API (no oficial): mostrar QR para vincular sesiÛn
-  - Status de la sesiÛn: conectado / desconectado / esperando QR
-- [ ] **Webhook URL copiable** con un click (actualmente es texto est·tico)
+  - Si usan WhatsApp Web API (no oficial): mostrar QR para vincular sesi√≥n
+  - Status de la sesi√≥n: conectado / desconectado / esperando QR
+- [ ] **Webhook URL copiable** con un click (actualmente es texto est√°tico)
 - [ ] **Test de webhook** desde el panel (verificar que Meta puede hacer ping)
-- [ ] **Instagram**: el form actual tiene `InstagramAccountId` pero la conexiÛn real requiere OAuth de Meta ó **falta el flujo OAuth**
-- [ ] **Facebook Messenger**: igual, requiere Page Token renovable ó falta indicador de expiraciÛn
-- [ ] **Historial de conexiones** ó log de cu·ndo se conectÛ/desconectÛ cada canal
+- [ ] **Instagram**: el form actual tiene `InstagramAccountId` pero la conexi√≥n real requiere OAuth de Meta ‚Äî **falta el flujo OAuth**
+- [ ] **Facebook Messenger**: igual, requiere Page Token renovable ‚Äî falta indicador de expiraci√≥n
+- [ ] **Historial de conexiones** ‚Äî log de cu√°ndo se conect√≥/desconect√≥ cada canal
 
 ---
 
@@ -116,16 +116,16 @@
 - ? SignalR Hub (`InboxHub`) para tiempo real
 
 #### ? FALTA implementar:
-- [ ] **Layout split-panel** (lista izquierda + chat derecho) ó la referencia muestra este patrÛn
-- [ ] **Filtros de conversaciÛn**: Por canal (WA/IG/FB), por estado (Bot / Agente / Resuelto), por fecha
-- [ ] **B˙squeda** de contacto o mensaje dentro del inbox
-- [ ] **Vista de chat completa** con burbujas de mensaje (actualmente puede ser b·sico)
-- [ ] **Indicador de canal** por conversaciÛn (Ìcono WhatsApp/Instagram/Facebook)
-- [ ] **Tomar control / devolver al bot** ó botÛn de handoff visible en cada conversaciÛn
-- [ ] **Notas internas** del agente por conversaciÛn (no se envÌan al cliente)
-- [ ] **InformaciÛn del contacto** en panel lateral (nombre, historial de compras, conversaciones previas)
-- [ ] **Estado de lectura** de mensajes (leÌdo / no leÌdo)
-- [ ] **Respuestas r·pidas** predefinidas (shortcuts para el agente humano)
+- [ ] **Layout split-panel** (lista izquierda + chat derecho) ‚Äî la referencia muestra este patr√≥n
+- [ ] **Filtros de conversaci√≥n**: Por canal (WA/IG/FB), por estado (Bot / Agente / Resuelto), por fecha
+- [ ] **B√∫squeda** de contacto o mensaje dentro del inbox
+- [ ] **Vista de chat completa** con burbujas de mensaje (actualmente puede ser b√°sico)
+- [ ] **Indicador de canal** por conversaci√≥n (√≠cono WhatsApp/Instagram/Facebook)
+- [ ] **Tomar control / devolver al bot** ‚Äî bot√≥n de handoff visible en cada conversaci√≥n
+- [ ] **Notas internas** del agente por conversaci√≥n (no se env√≠an al cliente)
+- [ ] **Informaci√≥n del contacto** en panel lateral (nombre, historial de compras, conversaciones previas)
+- [ ] **Estado de lectura** de mensajes (le√≠do / no le√≠do)
+- [ ] **Respuestas r√°pidas** predefinidas (shortcuts para el agente humano)
 - [ ] **Contador de conversaciones** sin atender en el sidebar (badge)
 
 ---
@@ -136,30 +136,30 @@
 #### Estado actual: ?? PARCIAL
 - ? `Products/Index.cshtml`, `Create.cshtml`, `Edit.cshtml`
 - ? Entidad `Product` con Name, Description, Price, Stock, ImageUrl, IsActive, IsFeatured
-- ? CategorÌas b·sicas
+- ? Categor√≠as b√°sicas
 
 #### ? FALTA implementar:
-- [ ] **Variantes de producto** ó la referencia muestra tallas, colores, etc.
+- [ ] **Variantes de producto** ‚Äî la referencia muestra tallas, colores, etc.
   - Entidad nueva: `ProductVariant` (Id, ProductId, AttributeName, AttributeValue, PriceModifier, Stock)
   - Ejemplos: Talla S/M/L/XL, Color Rojo/Azul/Negro, Material
-- [ ] **GalerÌa de im·genes** ó actualmente solo 1 imagen URL, la referencia muestra m˙ltiples fotos
-- [ ] **SKU / CÛdigo de producto** ó campo faltante en entidad
-- [ ] **Precio de oferta / tachado** ó PriceOriginal vs PriceSale
-- [ ] **GestiÛn visual de categorÌas** ó CRUD de categorÌas con Ìcono/color
-- [ ] **Import masivo CSV** ó para cargar cat·logo de golpe
-- [ ] **Filtros y b˙squeda avanzada** en la lista (por categorÌa, estado, stock bajo)
-- [ ] **Vista de cards vs. tabla** ó toggle de visualizaciÛn
+- [ ] **Galer√≠a de im√°genes** ‚Äî actualmente solo 1 imagen URL, la referencia muestra m√∫ltiples fotos
+- [ ] **SKU / C√≥digo de producto** ‚Äî campo faltante en entidad
+- [ ] **Precio de oferta / tachado** ‚Äî PriceOriginal vs PriceSale
+- [ ] **Gesti√≥n visual de categor√≠as** ‚Äî CRUD de categor√≠as con √≠cono/color
+- [ ] **Import masivo CSV** ‚Äî para cargar cat√°logo de golpe
+- [ ] **Filtros y b√∫squeda avanzada** en la lista (por categor√≠a, estado, stock bajo)
+- [ ] **Vista de cards vs. tabla** ‚Äî toggle de visualizaci√≥n
 - [ ] **Indicador de stock bajo** con alerta visual (ej: menos de 5 unidades)
-- [ ] **Historial de precios** ó registrar cambios de precio
+- [ ] **Historial de precios** ‚Äî registrar cambios de precio
 
 ---
 
-## M”DULOS COMPLETAMENTE FALTANTES
+## M√ìDULOS COMPLETAMENTE FALTANTES
 
 ---
 
-### 7. ?? PEDIDOS / ”RDENES
-**Pantallas de referencia:** `dashboard-v2-orders` (**6 pantallas!** ó el mÛdulo m·s complejo faltante)
+### 7. ?? PEDIDOS / √ìRDENES
+**Pantallas de referencia:** `dashboard-v2-orders` (**6 pantallas!** ‚Äî el m√≥dulo m√°s complejo faltante)
 
 #### Estado actual: ? NO EXISTE
 No hay entidad `Order`, ni controller, ni vista.
@@ -168,12 +168,12 @@ No hay entidad `Order`, ni controller, ni vista.
 - [ ] **Entidad `Order`**: Id, BusinessId, ContactId, ConversationId, Status, Total, PaymentMethod, ShippingAddress, Notes, CreatedAt
 - [ ] **Entidad `OrderItem`**: OrderId, ProductId, VariantId, Quantity, UnitPrice, Subtotal
 - [ ] **Lista de pedidos** con filtros (estado, fecha, canal, monto)
-- [ ] **Estados del pedido**: Pendiente ? Confirmado ? En preparaciÛn ? Enviado ? Entregado ? Cancelado
-- [ ] **Detalle del pedido** ó items, datos de contacto, mÈtodo de pago, direcciÛn
-- [ ] **Cambio de estado** con notificaciÛn autom·tica al cliente via bot
-- [ ] **GeneraciÛn de orden desde conversaciÛn** ó el bot crea la orden al cerrar venta
+- [ ] **Estados del pedido**: Pendiente ? Confirmado ? En preparaci√≥n ? Enviado ? Entregado ? Cancelado
+- [ ] **Detalle del pedido** ‚Äî items, datos de contacto, m√©todo de pago, direcci√≥n
+- [ ] **Cambio de estado** con notificaci√≥n autom√°tica al cliente via bot
+- [ ] **Generaci√≥n de orden desde conversaci√≥n** ‚Äî el bot crea la orden al cerrar venta
 - [ ] **Exportar pedidos** a CSV/Excel
-- [ ] **MÈtricas de pedidos** en dashboard (pedidos hoy, semana, mes)
+- [ ] **M√©tricas de pedidos** en dashboard (pedidos hoy, semana, mes)
 
 ---
 
@@ -184,44 +184,44 @@ No hay entidad `Order`, ni controller, ni vista.
 
 #### ? Debe construirse desde cero:
 - [ ] **Entidad `Reminder`**: Id, BusinessId, ContactId, Message, ScheduledAt, ChannelType, Status, CreatedAt
-- [ ] **Crear recordatorio** ó seleccionar contacto, fecha/hora, mensaje personalizado, canal
+- [ ] **Crear recordatorio** ‚Äî seleccionar contacto, fecha/hora, mensaje personalizado, canal
 - [ ] **Lista de recordatorios** programados con estado (pendiente / enviado / fallido)
-- [ ] **Recordatorio autom·tico** ó el bot puede programar follow-ups al cerrar conversaciÛn
-  - Ej: "Te recuerdo maÒana sobre tu pedido"
-  - Ej: "Seguimiento 48hs despuÈs si no comprÛ"
+- [ ] **Recordatorio autom√°tico** ‚Äî el bot puede programar follow-ups al cerrar conversaci√≥n
+  - Ej: "Te recuerdo ma√±ana sobre tu pedido"
+  - Ej: "Seguimiento 48hs despu√©s si no compr√≥"
 - [ ] **Templates de mensaje** para recordatorios frecuentes
 - [ ] **Historial** de recordatorios enviados por contacto
 
 ---
 
-### 9. ?? M…TRICAS Y ANALYTICS AVANZADO
+### 9. ?? M√âTRICAS Y ANALYTICS AVANZADO
 **Pantallas de referencia:** `dashboard-v2-metrics` (1 pantalla dedicada)
 
-#### Estado actual: ?? B¡SICO (solo en Dashboard)
-- ? 4 KPIs b·sicos en dashboard (Total, Resueltas, Bot Activo, Tasa)
-- ? Gr·fico lÌnea de conversaciones diarias
-- ? Gr·fico dona por canal
+#### Estado actual: ?? B√ÅSICO (solo en Dashboard)
+- ? 4 KPIs b√°sicos en dashboard (Total, Resueltas, Bot Activo, Tasa)
+- ? Gr√°fico l√≠nea de conversaciones diarias
+- ? Gr√°fico dona por canal
 
-#### ? FALTA implementar (p·gina dedicada de mÈtricas):
-- [ ] **MÈtricas de ventas**: Total facturado, ticket promedio, conversiones por canal
-- [ ] **MÈtricas del bot**: Tasa de respuesta autom·tica, tiempo promedio de respuesta, escalaciones
-- [ ] **Funnel de conversiÛn**: Contactos ? Interesados ? Ofertas ? Ventas cerradas
-- [ ] **Top productos** m·s consultados y m·s vendidos
-- [ ] **Ranking de clientes** (m·s activos, mayor gasto)
-- [ ] **Comparativa de perÌodos**: semana vs semana anterior, mes vs mes anterior
+#### ? FALTA implementar (p√°gina dedicada de m√©tricas):
+- [ ] **M√©tricas de ventas**: Total facturado, ticket promedio, conversiones por canal
+- [ ] **M√©tricas del bot**: Tasa de respuesta autom√°tica, tiempo promedio de respuesta, escalaciones
+- [ ] **Funnel de conversi√≥n**: Contactos ? Interesados ? Ofertas ? Ventas cerradas
+- [ ] **Top productos** m√°s consultados y m√°s vendidos
+- [ ] **Ranking de clientes** (m√°s activos, mayor gasto)
+- [ ] **Comparativa de per√≠odos**: semana vs semana anterior, mes vs mes anterior
 - [ ] **Exportar reporte** en PDF o Excel
 
 ---
 
-### 10. ?? CONFIGURACI”N DE CUENTA
+### 10. ?? CONFIGURACI√ìN DE CUENTA
 **Pantallas de referencia:** `dashboard-v2-settings-account` (4 pantallas)
 
 #### Estado actual: ? NO EXISTE (solo Login/Register/Logout)
 
 #### ? Debe construirse desde cero:
-- [ ] **Perfil personal**: FirstName, LastName, Email, cambio de contraseÒa, foto de perfil
-- [ ] **Perfil del negocio**: Nombre, descripciÛn, logo, telÈfono, email, website, sector
-- [ ] **Plan y facturaciÛn**: plan actual, prÛxima fecha de cobro, historial de pagos
+- [ ] **Perfil personal**: FirstName, LastName, Email, cambio de contrase√±a, foto de perfil
+- [ ] **Perfil del negocio**: Nombre, descripci√≥n, logo, tel√©fono, email, website, sector
+- [ ] **Plan y facturaci√≥n**: plan actual, pr√≥xima fecha de cobro, historial de pagos
 - [ ] **Equipo / Agentes**: agregar agentes humanos que reciben handoffs del bot
   - Nombre, email, rol (Admin / Agente)
   - Activar/desactivar acceso
@@ -232,36 +232,36 @@ No hay entidad `Order`, ni controller, ni vista.
 **Pantallas de referencia:** `welcome-form` (4 pasos), `onboarding-shopify-setup`, `onboarding-contact-support`, `get-started`
 
 #### Estado actual: ? NO EXISTE
-El usuario llega al dashboard directamente despuÈs de registrarse.
+El usuario llega al dashboard directamente despu√©s de registrarse.
 
 #### ? Debe construirse:
 - [ ] **Wizard de bienvenida** (4 pasos tras el registro):
-  1. øA quÈ se dedica tu negocio? (sector, descripciÛn)
-  2. øQuÈ canales quieres conectar? (WA/IG/FB)
+  1. ¬øA qu√© se dedica tu negocio? (sector, descripci√≥n)
+  2. ¬øQu√© canales quieres conectar? (WA/IG/FB)
   3. Configura tu primer producto
   4. Personaliza tu bot
 - [ ] **Pantalla "Get Started"** con checklist de tareas pendientes:
   - [ ] Conectar WhatsApp
   - [ ] Agregar 5 productos
-  - [ ] Configurar mÈtodos de pago
+  - [ ] Configurar m√©todos de pago
   - [ ] Probar el bot
-- [ ] **Barra de progreso de configuraciÛn** visible en el dashboard
+- [ ] **Barra de progreso de configuraci√≥n** visible en el dashboard
 
 ---
 
-## GAPS T…CNICOS IDENTIFICADOS EN EL C”DIGO
+## GAPS T√âCNICOS IDENTIFICADOS EN EL C√ìDIGO
 
-### Base de datos ó Entidades faltantes:
+### Base de datos ‚Äî Entidades faltantes:
 | Entidad | Motivo |
 |---------|--------|
-| `Order` | MÛdulo de pedidos completo faltante |
+| `Order` | M√≥dulo de pedidos completo faltante |
 | `OrderItem` | Detalle de cada pedido |
 | `ProductVariant` | Variantes de talla/color por producto |
-| `ProductImage` | GalerÌa multi-imagen por producto |
-| `PaymentMethod` | MÈtodos de pago configurables del negocio |
+| `ProductImage` | Galer√≠a multi-imagen por producto |
+| `PaymentMethod` | M√©todos de pago configurables del negocio |
 | `Reminder` | Recordatorios y seguimientos programados |
 | `AgentProfile` | Agentes humanos adicionales por negocio |
-| `OnboardingProgress` | Control del wizard de configuraciÛn inicial |
+| `OnboardingProgress` | Control del wizard de configuraci√≥n inicial |
 
 ### Campos faltantes en entidades existentes:
 | Entidad | Campo faltante |
@@ -272,45 +272,45 @@ El usuario llega al dashboard directamente despuÈs de registrarse.
 | `Contact` | TotalPurchases, TotalSpent, LastPurchaseAt |
 | `Conversation` | UnreadCount, LastMessagePreview |
 
-### Funcionalidades tÈcnicas faltantes:
+### Funcionalidades t√©cnicas faltantes:
 | Funcionalidad | Prioridad |
 |--------------|-----------|
 | WhatsApp QR / Session sync (no-oficial API) | Alta |
 | Meta OAuth flow para Facebook/Instagram | Alta |
 | Job scheduler para Reminders (Hangfire / Quartz) | Media |
 | Sistema de notificaciones push en el panel | Media |
-| Export a CSV/Excel (pedidos, productos, mÈtricas) | Media |
-| Upload m˙ltiple de im·genes (galerÌa productos) | Media |
-| ImportaciÛn masiva de productos CSV | Baja |
+| Export a CSV/Excel (pedidos, productos, m√©tricas) | Media |
+| Upload m√∫ltiple de im√°genes (galer√≠a productos) | Media |
+| Importaci√≥n masiva de productos CSV | Baja |
 
 ---
 
-## ORDEN DE IMPLEMENTACI”N SUGERIDO
+## ORDEN DE IMPLEMENTACI√ìN SUGERIDO
 
-### Fase 1 ó N˙cleo operativo (inmediato)
-1. **MÈtodos de Pago** ó UI + entidad (requieren el bot para responder correctamente)
-2. **Mejora Canal WhatsApp** ó estado de conexiÛn + botÛn test + guÌa visual
-3. **Panel de Conversaciones** ó split-panel + filtros + handoff visual
-4. **ConfiguraciÛn de Cuenta** ó perfil + negocio (funcionalidad b·sica)
+### Fase 1 ‚Äî N√∫cleo operativo (inmediato)
+1. **M√©todos de Pago** ‚Äî UI + entidad (requieren el bot para responder correctamente)
+2. **Mejora Canal WhatsApp** ‚Äî estado de conexi√≥n + bot√≥n test + gu√≠a visual
+3. **Panel de Conversaciones** ‚Äî split-panel + filtros + handoff visual
+4. **Configuraci√≥n de Cuenta** ‚Äî perfil + negocio (funcionalidad b√°sica)
 
-### Fase 2 ó MÛdulos de negocio
-5. **Pedidos / ”rdenes** ó mÛdulo completo (es el m·s solicitado comercialmente)
-6. **Variantes de Producto** ó entidad + UI
-7. **MÈtricas avanzadas** ó p·gina dedicada de analytics
+### Fase 2 ‚Äî M√≥dulos de negocio
+5. **Pedidos / √ìrdenes** ‚Äî m√≥dulo completo (es el m√°s solicitado comercialmente)
+6. **Variantes de Producto** ‚Äî entidad + UI
+7. **M√©tricas avanzadas** ‚Äî p√°gina dedicada de analytics
 
-### Fase 3 ó Engagement y retenciÛn
-8. **Recordatorios y Seguimiento** ó programar follow-ups
-9. **Onboarding Wizard** ó flujo inicial para nuevos usuarios
-10. **Base de Conocimiento** ó p·gina dedicada + import CSV
+### Fase 3 ‚Äî Engagement y retenci√≥n
+8. **Recordatorios y Seguimiento** ‚Äî programar follow-ups
+9. **Onboarding Wizard** ‚Äî flujo inicial para nuevos usuarios
+10. **Base de Conocimiento** ‚Äî p√°gina dedicada + import CSV
 
 ---
 
 ## NOTAS FINALES
 
-- La app de referencia (yavendio) usa una arquitectura similar pero con m·s mÛdulos maduros.
-- El mayor gap comercial es el mÛdulo de **Pedidos** ó sin Èl, el bot puede vender pero no hay trazabilidad de las ventas.
-- La **conexiÛn WhatsApp** necesita mejorar la UX significativamente ó actualmente es tÈcnica y confusa para el usuario final.
-- Los **MÈtodos de Pago** son urgentes porque el bot hoy no puede responder con datos concretos de pago.
+- La app de referencia (yavendio) usa una arquitectura similar pero con m√°s m√≥dulos maduros.
+- El mayor gap comercial es el m√≥dulo de **Pedidos** ‚Äî sin √©l, el bot puede vender pero no hay trazabilidad de las ventas.
+- La **conexi√≥n WhatsApp** necesita mejorar la UX significativamente ‚Äî actualmente es t√©cnica y confusa para el usuario final.
+- Los **M√©todos de Pago** son urgentes porque el bot hoy no puede responder con datos concretos de pago.
 
 ---
-*Documento generado por an·lisis de capturas de referencia + revisiÛn de cÛdigo fuente del proyecto InstaVende*
+*Documento generado por an√°lisis de capturas de referencia + revisi√≥n de c√≥digo fuente del proyecto InstaVende*

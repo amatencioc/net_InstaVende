@@ -12,7 +12,6 @@ public class Business
     public string? WebsiteUrl { get; set; }
     public string? Phone { get; set; }
     public string? Email { get; set; }
-    public string? BusinessSector { get; set; }
     public string? SocialMedia { get; set; }
     public string? Sector { get; set; }
     public int CompletionPercent { get; set; }

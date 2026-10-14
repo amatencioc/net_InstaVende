@@ -17,7 +17,7 @@ namespace InstaVende.Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -287,9 +287,6 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("BusinessSector")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("CompletionPercent")
                         .HasColumnType("int");
 
@@ -375,9 +372,10 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("BusinessId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("BusinessUsers");
                 });
@@ -541,8 +539,6 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasIndex("LabelId");
 
                     b.HasIndex("BusinessId", "CreatedAt");
-
-                    b.HasIndex("BusinessId", "Status");
 
                     b.HasIndex("BusinessId", "UpdatedAt");
 
@@ -711,17 +707,22 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.Property<int>("ConversationId")
                         .HasColumnType("int");
 
+                    b.Property<int>("DeliveryStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("Direction")
                         .HasColumnType("int");
 
                     b.Property<string>("ExternalMessageId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
                     b.Property<string>("MediaType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MediaUrl")
                         .HasColumnType("nvarchar(max)");
@@ -734,7 +735,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ConversationId");
+                    b.HasIndex("ExternalMessageId")
+                        .IsUnique()
+                        .HasFilter("[ExternalMessageId] IS NOT NULL");
 
                     b.HasIndex("ConversationId", "SentAt");
 
@@ -874,7 +877,11 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasIndex("ContactId");
 
+                    b.HasIndex("BusinessId", "OrderNumber");
+
                     b.HasIndex("BusinessId", "Status");
+
+                    b.HasIndex("BusinessId", "SubStatus");
 
                     b.HasIndex("ConversationId", "Status");
 
@@ -1187,7 +1194,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("datetime2");
@@ -1207,9 +1215,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasIndex("CreatedByAgentId");
 
-                    b.HasIndex("ScheduledAt");
+                    b.HasIndex("BusinessId", "ScheduledAt");
 
-                    b.HasIndex("BusinessId", "Status");
+                    b.HasIndex("Status", "ScheduledAt");
 
                     b.ToTable("Reminders");
                 });
@@ -1381,6 +1389,25 @@ namespace InstaVende.Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("VendorConfigs");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FriendlyName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Xml")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DataProtectionKeys");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

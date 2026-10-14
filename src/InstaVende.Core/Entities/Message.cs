@@ -11,6 +11,7 @@ public class Message
     public string? ExternalMessageId { get; set; }
     public bool IsRead { get; set; }
     public bool SentByBot { get; set; }
+    public MessageDeliveryStatus DeliveryStatus { get; set; } = MessageDeliveryStatus.Sent;
     public DateTime SentAt { get; set; } = DateTime.UtcNow;
     public Conversation Conversation { get; set; } = null!;
 }

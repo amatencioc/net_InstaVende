@@ -1,0 +1,20 @@
+@model InstaVende.Web.ViewModels.SetupBusinessViewModel
+@{
+    ViewData["Title"] = "Configura tu negocio";
+    ViewData["Tagline"] = "Un último paso para empezar";
+    Layout = "_AuthLayout";
+}
+<h1 class="auth-box-title">Configura tu negocio</h1>
+<p class="auth-box-sub">Tu usuario aún no tiene un negocio asociado. Créalo ahora o pide al administrador de tu equipo que te invite.</p>
+<form asp-action="SetupBusiness" method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
+    <div class="f-group">
+        <label asp-for="BusinessName" class="f-label">Nombre del negocio</label>
+        <input asp-for="BusinessName" class="f-input" placeholder="Mi Tienda" autocomplete="organization" autofocus />
+        <span asp-validation-for="BusinessName" class="f-val-msg"></span>
+    </div>
+    <button type="submit" class="btn-auth">Crear negocio</button>
+</form>
+<form asp-action="Logout" method="post" class="auth-footer">
+    <button type="submit" class="f-link btn btn-link p-0">Cerrar sesión</button>
+</form>

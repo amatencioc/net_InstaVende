@@ -1,10 +1,12 @@
 using InstaVende.Core.Entities;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InstaVende.Infrastructure.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -35,6 +37,26 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<DeliveryZone> DeliveryZones => Set<DeliveryZone>();
     public DbSet<PaymentImage> PaymentImages => Set<PaymentImage>();
     public DbSet<ConversationLabel> ConversationLabels => Set<ConversationLabel>();
+    public DbSet<DataProtectionKey> DataProtectionKeys => Set<DataProtectionKey>();
+
+    /// <summary>
+    /// Todas las fechas se guardan en UTC. Al leerlas, EF las devuelve con
+    /// <see cref="DateTimeKind.Utc"/> para que se serialicen con sufijo "Z"
+    /// y el navegador/servidor las conviertan correctamente a hora local.
+    /// </summary>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
+
+    private sealed class UtcDateTimeConverter() : ValueConverter<DateTime, DateTime>(
+        v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v,
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+    private sealed class NullableUtcDateTimeConverter() : ValueConverter<DateTime?, DateTime?>(
+        v => v.HasValue && v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : v,
+        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -52,11 +74,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.Property(p => p.Price).HasColumnType("decimal(18,2)");
             e.Property(p => p.PriceOriginal).HasColumnType("decimal(18,2)");
             e.Property(p => p.Name).HasMaxLength(300).IsRequired();
-            // Bot: cat�logo, add_to_cart, buscar_productos
+            // Bot: catálogo, add_to_cart, buscar_productos
             e.HasIndex(p => new { p.BusinessId, p.IsActive, p.SortOrder });
             // Bot: buscar_alternativas
             e.HasIndex(p => new { p.BusinessId, p.IsActive, p.CategoryId });
-            // ProductsController.Index: listado admin ordenado por fecha de creaci�n
+            // ProductsController.Index: listado admin ordenado por fecha de creación
             e.HasIndex(p => new { p.BusinessId, p.CreatedAt });
             // ProductsController.GetList: selector ordenado por nombre
             e.HasIndex(p => new { p.BusinessId, p.IsActive, p.Name });
@@ -65,13 +87,6 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<ProductVariant>(e =>
         {
             e.Property(v => v.PriceModifier).HasColumnType("decimal(18,2)");
-        });
-
-        builder.Entity<PaymentMethod>(e =>
-        {
-            e.Property(p => p.Name).HasMaxLength(150).IsRequired();
-            e.HasOne(p => p.Business).WithMany(b => b.PaymentMethods)
-                .HasForeignKey(p => p.BusinessId).OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<Order>(e =>
@@ -84,6 +99,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             e.HasIndex(o => new { o.ConversationId, o.Status });
             e.HasIndex(o => new { o.BusinessId, o.Status });
             e.HasIndex(o => new { o.BusinessId, o.CreatedAt, o.Status });
+            // Tablero kanban: WHERE BusinessId AND SubStatus
+            e.HasIndex(o => new { o.BusinessId, o.SubStatus });
+            // rastrear_pedido / búsqueda por número
+            e.HasIndex(o => new { o.BusinessId, o.OrderNumber });
             e.HasOne(o => o.Business).WithMany(b => b.Orders)
                 .HasForeignKey(o => o.BusinessId).OnDelete(DeleteBehavior.NoAction);
             e.HasOne(o => o.Contact).WithMany(c => c.Orders)
@@ -108,8 +127,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(r => r.ContactId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(r => r.CreatedByAgent).WithMany()
                 .HasForeignKey(r => r.CreatedByAgentId).OnDelete(DeleteBehavior.SetNull);
-            e.HasIndex(r => new { r.BusinessId, r.Status });
-            e.HasIndex(r => r.ScheduledAt);
+            e.HasIndex(r => new { r.BusinessId, r.ScheduledAt });
+            // ReminderDispatcher: WHERE Status = Pending AND ScheduledAt <= now
+            e.HasIndex(r => new { r.Status, r.ScheduledAt });
+            e.Property(r => r.Message).HasMaxLength(1000).IsRequired();
         });
 
         builder.Entity<OnboardingProgress>(e =>
@@ -145,8 +166,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<Message>(e =>
         {
-            e.HasIndex(m => m.ConversationId);
             e.HasIndex(m => new { m.ConversationId, m.SentAt });
+            // Idempotencia de webhooks: un mismo mensaje externo no se procesa dos veces
+            e.Property(m => m.ExternalMessageId).HasMaxLength(200);
+            e.HasIndex(m => m.ExternalMessageId).IsUnique().HasFilter("[ExternalMessageId] IS NOT NULL");
+            e.Property(m => m.MediaType).HasMaxLength(50);
         });
 
         builder.Entity<BotIntent>(e =>
@@ -163,13 +187,12 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Conversation>(e =>
         {
             e.HasIndex(c => new { c.ContactId, c.Status });
-            e.HasIndex(c => new { c.BusinessId, c.Status });
             e.HasIndex(c => new { c.BusinessId, c.CreatedAt });
             e.HasIndex(c => new { c.BusinessId, c.UpdatedAt });
             e.HasIndex(c => new { c.BusinessId, c.Status, c.UpdatedAt });
             e.HasOne(c => c.AssignedAgent).WithMany()
                 .HasForeignKey(c => c.AssignedAgentId).OnDelete(DeleteBehavior.SetNull);
-            // Business ? Conversation: NoAction para no crear ciclo con Business ? Contact ? Conversation
+            // Business → Conversation: NoAction para no crear ciclo con Business → Contact → Conversation
             e.HasOne(c => c.Business).WithMany(b => b.Conversations)
                 .HasForeignKey(c => c.BusinessId).OnDelete(DeleteBehavior.NoAction);
         });
@@ -209,6 +232,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
 
         builder.Entity<PaymentMethod>(e =>
         {
+            e.Property(p => p.Name).HasMaxLength(150).IsRequired();
             e.HasOne(p => p.Business).WithMany(b => b.PaymentMethods)
                 .HasForeignKey(p => p.BusinessId).OnDelete(DeleteBehavior.Cascade);
             // PaymentMethodsController.Index: WHERE BusinessId ORDER BY SortOrder, Id
@@ -221,8 +245,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
                 .HasForeignKey(bu => bu.BusinessId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(bu => bu.User).WithMany()
                 .HasForeignKey(bu => bu.UserId).OnDelete(DeleteBehavior.Restrict);
-            // AccountConfigController.Index: WHERE BusinessId
-            e.HasIndex(bu => bu.BusinessId);
+            // Un usuario pertenece una sola vez a cada negocio; CurrentUserService busca por UserId
+            e.HasIndex(bu => new { bu.BusinessId, bu.UserId }).IsUnique();
+            e.HasIndex(bu => bu.UserId);
         });
 
         builder.Entity<UserInvitation>(e =>

@@ -1,307 +1,157 @@
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
-using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
-using InstaVende.Core.Interfaces;
-using InstaVende.Infrastructure.Data;
-using InstaVende.Infrastructure.Services;
-using InstaVende.Web.Hubs;
+using InstaVende.Web.Infrastructure;
+using InstaVende.Web.Services.Channels;
+using InstaVende.Web.Services.Messaging;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 
 namespace InstaVende.Web.Controllers;
 
+/// <summary>
+/// Webhooks de Meta (WhatsApp Cloud, Messenger, Instagram) y de wa-client (sesiones QR).
+/// Solo validan la firma sobre los bytes crudos, normalizan y encolan: el procesamiento
+/// (bot incluido) ocurre en segundo plano y la respuesta es inmediata para evitar reintentos.
+/// </summary>
 [ApiController]
 [Route("api/webhooks")]
 [IgnoreAntiforgeryToken]
-public class WebhooksController : ControllerBase
+[EnableRateLimiting(RateLimitPolicies.Webhooks)]
+[ApiExplorerSettings(IgnoreApi = true)]
+public sealed class WebhooksController(
+    ChannelConfigProvider channels,
+    InboundMessageQueue queue,
+    IOptions<WhatsAppClientOptions> waOptions,
+    ILogger<WebhooksController> logger) : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IBotEngineService _engine;
-    private readonly IEnumerable<IChannelMessageSender> _senders;
-    private readonly DataProtectionService _dp;
-    private readonly IHubContext<InboxHub> _hub;
-    private readonly ILogger<WebhooksController> _logger;
+    private const int MaxBodyBytes = 1024 * 1024;
 
-    public WebhooksController(AppDbContext db, IBotEngineService engine, IEnumerable<IChannelMessageSender> senders, DataProtectionService dp, IHubContext<InboxHub> hub, ILogger<WebhooksController> logger)
-    { _db = db; _engine = engine; _senders = senders; _dp = dp; _hub = hub; _logger = logger; }
+    // ── Verificación de suscripción (GET hub.challenge) ──────────────────────
 
-    [HttpGet("whatsapp/{merchantId:int}")]
-    public async Task<IActionResult> VerifyWhatsApp(int merchantId, [FromQuery(Name = "hub.mode")] string mode, [FromQuery(Name = "hub.challenge")] string challenge, [FromQuery(Name = "hub.verify_token")] string verifyToken)
+    [HttpGet("whatsapp/{businessId:int}")]
+    public Task<IActionResult> VerifyWhatsApp(int businessId,
+        [FromQuery(Name = "hub.mode")] string? mode, [FromQuery(Name = "hub.challenge")] string? challenge,
+        [FromQuery(Name = "hub.verify_token")] string? verifyToken)
+        => VerifyAsync(businessId, [ChannelType.WhatsApp], mode, challenge, verifyToken);
+
+    [HttpGet("meta/{businessId:int}")]
+    public Task<IActionResult> VerifyMeta(int businessId,
+        [FromQuery(Name = "hub.mode")] string? mode, [FromQuery(Name = "hub.challenge")] string? challenge,
+        [FromQuery(Name = "hub.verify_token")] string? verifyToken)
+        => VerifyAsync(businessId, [ChannelType.FacebookMessenger, ChannelType.Instagram], mode, challenge, verifyToken);
+
+    private async Task<IActionResult> VerifyAsync(int businessId, ChannelType[] candidates, string? mode, string? challenge, string? verifyToken)
     {
-        var cfg = await _db.ChannelConfigs
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.BusinessId == merchantId && c.ChannelType == ChannelType.WhatsApp);
-        if (cfg == null || cfg.WebhookVerifyToken != verifyToken || mode != "subscribe") return Forbid();
-        return Ok(challenge);
-    }
-
-    [HttpPost("whatsapp/{merchantId:int}")]
-    public async Task<IActionResult> WhatsAppEvent(int merchantId)
-    {
-        Request.EnableBuffering();
-        using var sr = new StreamReader(Request.Body, leaveOpen: true);
-        var body = await sr.ReadToEndAsync(); Request.Body.Position = 0;
-        var cfg = await _db.ChannelConfigs
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.BusinessId == merchantId
-                                   && c.ChannelType == ChannelType.WhatsApp
-                                   && c.IsActive);
-        if (cfg == null) return Ok();
-        if (!string.IsNullOrWhiteSpace(cfg.AppSecretEncrypted))
+        if (mode != "subscribe" || string.IsNullOrEmpty(challenge)) return StatusCode(StatusCodes.Status403Forbidden);
+        foreach (var channel in candidates)
         {
-            var secret = _dp.Decrypt(cfg.AppSecretEncrypted);
-            var sig = Request.Headers["X-Hub-Signature-256"].ToString();
-            if (!ValidateHmac(body, secret, sig)) { _logger.LogWarning("Bad HMAC for {Id}", merchantId); return Forbid(); }
+            var cfg = await channels.GetAsync(businessId, channel, HttpContext.RequestAborted);
+            if (cfg != null && WebhookSignature.FixedTimeEquals(cfg.WebhookVerifyToken, verifyToken))
+                return Content(challenge, "text/plain");
         }
-        try { await ProcessWhatsApp(merchantId, JsonDocument.Parse(body).RootElement); } catch (Exception ex) { _logger.LogError(ex, "WA payload error {Id}", merchantId); }
-        return Ok();
+        return StatusCode(StatusCodes.Status403Forbidden);
     }
 
-    // Local whatsapp-web.js client webhook
-    // Expected payload: { "from": "521234567890", "body": "text", "businessId": 1, "pushname": "Juan" }
-    [HttpPost("whatsapp-local/{merchantId:int}")]
-    public async Task<IActionResult> WhatsAppLocalEvent(int merchantId)
+    // ── Eventos ──────────────────────────────────────────────────────────────
+
+    [HttpPost("whatsapp/{businessId:int}"), RequestSizeLimit(MaxBodyBytes)]
+    public async Task<IActionResult> WhatsAppCloud(int businessId)
+    {
+        var cfg = await channels.GetAsync(businessId, ChannelType.WhatsApp, HttpContext.RequestAborted);
+        if (cfg is not { IsActive: true }) return Ok(); // canal no configurado: se acepta y se ignora
+
+        var body = await ReadBodyAsync();
+        if (!WebhookSignature.IsValid(body, cfg.AppSecret, Request.Headers["X-Hub-Signature-256"]))
+            return Rejected(businessId, "WhatsApp Cloud", cfg.AppSecret == null);
+
+        return Enqueue(Parse(body, root => WebhookPayloadParser.ParseWhatsAppCloud(businessId, root)));
+    }
+
+    [HttpPost("meta/{businessId:int}"), RequestSizeLimit(MaxBodyBytes)]
+    public async Task<IActionResult> Meta(int businessId)
+    {
+        var body = await ReadBodyAsync();
+        var channel = ReadObjectType(body) switch
+        {
+            "page"      => ChannelType.FacebookMessenger,
+            "instagram" => ChannelType.Instagram,
+            _           => (ChannelType?)null,
+        };
+        if (channel == null) return Ok();
+
+        var cfg = await channels.GetAsync(businessId, channel.Value, HttpContext.RequestAborted);
+        if (cfg is not { IsActive: true }) return Ok();
+        if (!WebhookSignature.IsValid(body, cfg.AppSecret, Request.Headers["X-Hub-Signature-256"]))
+            return Rejected(businessId, channel.Value.ToString(), cfg.AppSecret == null);
+
+        return Enqueue(Parse(body, root => WebhookPayloadParser.ParseMetaMessaging(businessId, root, channel.Value)));
+    }
+
+    /// <summary>Mensajes de las sesiones QR, firmados por wa-client con el secreto compartido.</summary>
+    [HttpPost("whatsapp-local/{businessId:int}"), RequestSizeLimit(MaxBodyBytes)]
+    public async Task<IActionResult> WhatsAppLocal(int businessId)
+    {
+        var body = await ReadBodyAsync();
+        if (!WebhookSignature.IsValid(body, waOptions.Value.SharedSecret, Request.Headers["X-WA-Signature"]))
+            return Rejected(businessId, "wa-client", secretMissing: false);
+
+        var message = Parse(body, root => WebhookPayloadParser.ParseWhatsAppLocal(businessId, root) is { } m ? [m] : []);
+        return Enqueue(message);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private async Task<byte[]> ReadBodyAsync()
+    {
+        using var ms = new MemoryStream();
+        await Request.Body.CopyToAsync(ms, HttpContext.RequestAborted);
+        return ms.ToArray();
+    }
+
+    private IReadOnlyList<InboundMessage> Parse(byte[] body, Func<JsonElement, IEnumerable<InboundMessage>> parser)
     {
         try
         {
-            using var sr  = new StreamReader(Request.Body);
-            var raw       = await sr.ReadToEndAsync();
-            using var doc = JsonDocument.Parse(raw);
-            var root      = doc.RootElement;
-
-            var from     = root.TryGetProperty("from",     out var f) ? f.GetString()?.Trim() : null;
-            var text     = root.TryGetProperty("body",     out var b) ? b.GetString()?.Trim() : null;
-            var pushname = root.TryGetProperty("pushname", out var p) ? p.GetString()?.Trim() : null;
-
-            if (string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(text))
-                return Ok();
-
-            // Verify the channel is active — use AsNoTracking since we don't modify cfg here
-            var active = await _db.ChannelConfigs
-                .AsNoTracking()
-                .AnyAsync(c => c.BusinessId == merchantId
-                            && c.ChannelType == ChannelType.WhatsApp
-                            && c.IsActive);
-            if (!active) return Ok();
-
-            await HandleIncoming(merchantId, ChannelType.WhatsApp, from, text, pushname);
+            using var doc = JsonDocument.Parse(body);
+            return parser(doc.RootElement).ToList();
         }
-        catch (Exception ex)
+        catch (JsonException ex)
         {
-            _logger.LogError(ex, "WhatsApp local event error for business {Id}", merchantId);
+            logger.LogWarning(ex, "Payload de webhook inválido");
+            return [];
         }
-        return Ok();
     }
 
-    [HttpGet("meta/{merchantId:int}")]
-    public async Task<IActionResult> VerifyMeta(int merchantId, [FromQuery(Name = "hub.mode")] string mode, [FromQuery(Name = "hub.challenge")] string challenge, [FromQuery(Name = "hub.verify_token")] string verifyToken)
+    private static string? ReadObjectType(byte[] body)
     {
-        var cfg = await _db.ChannelConfigs
-            .AsNoTracking()
-            .Where(c => c.BusinessId == merchantId
-                     && (c.ChannelType == ChannelType.FacebookMessenger
-                      || c.ChannelType == ChannelType.Instagram))
-            .FirstOrDefaultAsync(c => c.WebhookVerifyToken == verifyToken);
-        if (cfg == null || mode != "subscribe") return Forbid();
-        return Ok(challenge);
-    }
-
-    [HttpPost("meta/{merchantId:int}")]
-    public async Task<IActionResult> MetaEvent(int merchantId)
-    {
-        Request.EnableBuffering();
-        using var sr = new StreamReader(Request.Body, leaveOpen: true);
-        var body = await sr.ReadToEndAsync(); Request.Body.Position = 0;
-
-        var cfg = await _db.ChannelConfigs
-            .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.BusinessId == merchantId
-                && (c.ChannelType == ChannelType.FacebookMessenger || c.ChannelType == ChannelType.Instagram)
-                && c.IsActive);
-        if (cfg != null && !string.IsNullOrWhiteSpace(cfg.AppSecretEncrypted))
-        {
-            var secret = _dp.Decrypt(cfg.AppSecretEncrypted);
-            var sig = Request.Headers["X-Hub-Signature-256"].ToString();
-            if (!ValidateHmac(body, secret, sig)) { _logger.LogWarning("Bad HMAC for Meta {Id}", merchantId); return Forbid(); }
-        }
-
         try
         {
-            var doc = JsonDocument.Parse(body).RootElement;
-            var obj = doc.TryGetProperty("object", out var o) ? o.GetString() : null;
-            if (obj == "page") await ProcessMessenger(merchantId, doc);
-            else if (obj == "instagram") await ProcessInstagram(merchantId, doc);
+            using var doc = JsonDocument.Parse(body);
+            return doc.RootElement.TryGetProperty("object", out var o) && o.ValueKind == JsonValueKind.String ? o.GetString() : null;
         }
-        catch (Exception ex) { _logger.LogError(ex, "Meta payload error {Id}", merchantId); }
-        return Ok();
+        catch (JsonException) { return null; }
     }
 
-    private async Task ProcessWhatsApp(int bid, JsonElement payload)
+    private IActionResult Enqueue(IReadOnlyList<InboundMessage> messages)
     {
-        foreach (var entry in payload.GetProperty("entry").EnumerateArray())
-        foreach (var change in entry.GetProperty("changes").EnumerateArray())
+        foreach (var m in messages)
         {
-            var value = change.GetProperty("value");
-            if (!value.TryGetProperty("messages", out var msgs)) continue;
-            foreach (var msg in msgs.EnumerateArray())
+            if (!queue.TryEnqueue(m))
             {
-                var from = msg.GetProperty("from").GetString();
-                var text = msg.TryGetProperty("text", out var t) ? t.GetProperty("body").GetString() : string.Empty;
-                if (!string.IsNullOrEmpty(from) && !string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.WhatsApp, from, text);
+                logger.LogError("Cola de mensajes entrantes llena; se pide reintento al proveedor.");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
             }
         }
+        return Ok();
     }
 
-    private async Task ProcessMessenger(int bid, JsonElement payload)
+    private IActionResult Rejected(int businessId, string source, bool secretMissing)
     {
-        foreach (var entry in payload.GetProperty("entry").EnumerateArray())
-        foreach (var messaging in entry.GetProperty("messaging").EnumerateArray())
-        {
-            var sender = messaging.GetProperty("sender").GetProperty("id").GetString();
-            if (sender == null) continue;
-            if (!messaging.TryGetProperty("message", out var msg)) continue;
-            var text = msg.TryGetProperty("text", out var t) ? t.GetString() : null;
-            if (!string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.FacebookMessenger, sender, text!);
-        }
-    }
-
-    private async Task ProcessInstagram(int bid, JsonElement payload)
-    {
-        foreach (var entry in payload.GetProperty("entry").EnumerateArray())
-        foreach (var messaging in entry.GetProperty("messaging").EnumerateArray())
-        {
-            var sender = messaging.GetProperty("sender").GetProperty("id").GetString();
-            if (sender == null) continue;
-            if (!messaging.TryGetProperty("message", out var msg)) continue;
-            var text = msg.TryGetProperty("text", out var t) ? t.GetString() : null;
-            if (!string.IsNullOrEmpty(text)) await HandleIncoming(bid, ChannelType.Instagram, sender, text!);
-        }
-    }
-
-    private async Task HandleIncoming(
-        int bid, ChannelType channel, string externalId, string text, string? pushname = null)
-    {
-        // ?? 1. Upsert contact ????????????????????????????????????????????????
-        var contact = await _db.Contacts
-            .FirstOrDefaultAsync(c => c.BusinessId == bid
-                                   && c.ChannelType  == channel
-                                   && c.ExternalId   == externalId);
-        if (contact == null)
-        {
-            contact = new Contact
-            {
-                BusinessId = bid,
-                ChannelType = channel,
-                ExternalId  = externalId,
-                Name        = pushname,
-                Phone       = channel == ChannelType.WhatsApp ? externalId : null,
-            };
-            _db.Contacts.Add(contact);
-        }
+        if (secretMissing)
+            logger.LogWarning("Webhook {Source} rechazado para el negocio {BusinessId}: el canal no tiene App Secret configurado.", source, businessId);
         else
-        {
-            contact.LastSeenAt = DateTime.UtcNow;
-            // Update display name from pushname if we didn't have one yet
-            if (!string.IsNullOrWhiteSpace(pushname) && string.IsNullOrWhiteSpace(contact.Name))
-                contact.Name = pushname;
-        }
-
-        // ?? 2. Flush contact so contact.Id is populated before querying conversations
-        await _db.SaveChangesAsync();
-
-        // ?? 3. Upsert conversation ??????????????????????????????????????????????????????
-        var conv = await _db.Conversations
-            .Where(c => c.ContactId   == contact.Id
-                     && c.ChannelType == channel
-                     && c.Status      != ConversationStatus.Resolved)
-            .OrderByDescending(c => c.UpdatedAt)
-            .FirstOrDefaultAsync();
-
-        if (conv == null)
-        {
-            conv = new Conversation { BusinessId = bid, ContactId = contact.Id, ChannelType = channel };
-            _db.Conversations.Add(conv);
-            await _db.SaveChangesAsync(); // get conv.Id before creating messages
-        }
-
-        // ?? 4. Save inbound message ?????????????????????????????????????????
-        var inMsg = new Message
-        {
-            ConversationId = conv.Id,
-            Direction      = MessageDirection.Inbound,
-            Content        = text,
-        };
-        _db.Messages.Add(inMsg);
-        conv.UpdatedAt          = DateTime.UtcNow;
-        conv.LastMessageAt      = DateTime.UtcNow;
-        conv.LastMessagePreview = text.Length > 120 ? text[..120] + "..." : text;
-        conv.UnreadCount++;
-        await _db.SaveChangesAsync();   // save inMsg + conv updates
-
-        // ?? 5. Push inbound to SignalR ???????????????????????????????????????
-        await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new
-        {
-            conversationId = conv.Id,
-            messageId      = inMsg.Id,
-            content        = inMsg.Content,
-            direction      = (int)inMsg.Direction,
-            sentAt         = inMsg.SentAt,
-            contactName    = contact.Name ?? contact.ExternalId,
-            channel        = (int)channel,
-        });
-
-        // ?? 6. Bot reply (only when bot is active) ???????????????????????????
-        if (conv.Status != ConversationStatus.BotActive) return;
-
-        var reply = await _engine.ProcessMessageAsync(bid, conv.Id, text);
-
-        var outMsg = new Message
-        {
-            ConversationId = conv.Id,
-            Direction      = MessageDirection.Outbound,
-            Content        = reply,
-            IsRead         = true,
-            SentByBot      = true,
-        };
-        _db.Messages.Add(outMsg);
-        // TransferirAHumanoAsync already called SaveChangesAsync and updated conv.Status
-        // in the DB. Reload the tracked entity to pick up any status change made by tools.
-        await _db.Entry(conv).ReloadAsync();
-        // Reassign UpdatedAt after reload — ReloadAsync overwrites it with the stale DB value
-        conv.UpdatedAt          = DateTime.UtcNow;
-        conv.LastMessageAt      = DateTime.UtcNow;
-        conv.LastMessagePreview = reply.Length > 120 ? reply[..120] + "..." : reply;
-        await _db.SaveChangesAsync();
-
-        // Send outbound via channel
-        var sender = _senders.FirstOrDefault(s => s.Channel == channel);
-        if (sender != null)
-        {
-            try   { await sender.SendTextAsync(bid, externalId, reply); }
-            catch (Exception ex) { _logger.LogError(ex, "Send failed for {Channel} business {Id}", channel, bid); }
-        }
-
-        // Push outbound to SignalR
-        await _hub.Clients.Group($"business_{bid}").SendAsync("NewMessage", new
-        {
-            conversationId = conv.Id,
-            messageId      = outMsg.Id,
-            content        = outMsg.Content,
-            direction      = (int)outMsg.Direction,
-            sentAt         = outMsg.SentAt,
-            sentByBot      = true,
-        });
-    }
-
-    private static bool ValidateHmac(string payload, string secret, string signature)
-    {
-        if (!signature.StartsWith("sha256=")) return false;
-        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
-        var hash = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payload))).ToLowerInvariant();
-        var sigHex = signature[7..].ToLowerInvariant();
-        return CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(hash), Encoding.UTF8.GetBytes(sigHex));
+            logger.LogWarning("Webhook {Source} rechazado para el negocio {BusinessId}: firma inválida.", source, businessId);
+        return Unauthorized();
     }
 }

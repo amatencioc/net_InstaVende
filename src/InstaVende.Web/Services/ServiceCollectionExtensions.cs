@@ -1,114 +1,156 @@
-using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
+using InstaVende.Core.Entities;
+using InstaVende.Core.Enums;
+using InstaVende.Core.Interfaces;
+using InstaVende.Infrastructure.Data;
+using InstaVende.Infrastructure.Services;
+using InstaVende.Web.Infrastructure;
+using InstaVende.Web.Services.Bot;
+using InstaVende.Web.Services.Channels;
+using InstaVende.Web.Services.Messaging;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace InstaVende.Web.Services;
 
-/// <summary>
-/// Extensiones de <see cref="IServiceCollection"/> para registrar y validar
-/// todas las opciones tipadas de la aplicación en un único punto,
-/// y para centralizar los clientes HTTP nombrados.
-/// </summary>
+/// <summary>Registro de servicios de la aplicaciÃ³n agrupado por responsabilidad.</summary>
 internal static class ServiceCollectionExtensions
 {
-    /// <summary>
-    /// Enlaza, valida y registra todas las secciones de configuración tipadas.
-    /// Si algún valor obligatorio falta en producción, la aplicación lanzará
-    /// una excepción descriptiva antes de aceptar tráfico.
-    /// </summary>
-    public static IServiceCollection AddValidatedOptions(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddInstaVendeData(this IServiceCollection services, IConfiguration configuration, bool persistKeys = true)
     {
-        // ?? BotCache ?????????????????????????????????????????????????????????
-        // Sin validador propio: todos sus valores tienen defaults razonables.
-        services.Configure<BotCacheOptions>(
-            configuration.GetSection(BotCacheOptions.SectionName));
+        services.AddMemoryCache();
+        services.AddSingleton<BotContextInvalidationInterceptor>();
+        services.AddDbContext<AppDbContext>((sp, o) => o
+            .UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure(maxRetryCount: 3))
+            .AddInterceptors(sp.GetRequiredService<BotContextInvalidationInterceptor>()));
 
-        // ?? OpenAI ???????????????????????????????????????????????????????????
-        // Exige ApiKey fuera de Development para evitar errores en tiempo de ejecución.
-        services
-            .AddOptions<OpenAiOptions>()
-            .Bind(configuration.GetSection(OpenAiOptions.SectionName))
-            .ValidateOnStart();
-        services.AddSingleton<IValidateOptions<OpenAiOptions>, OpenAiOptionsValidator>();
-
-        // ?? WhatsAppClient ???????????????????????????????????????????????????
-        // Exige BaseUrl válida y ClientPath no vacío fuera de Development.
-        services
-            .AddOptions<WhatsAppClientOptions>()
-            .Bind(configuration.GetSection(WhatsAppClientOptions.SectionName))
-            .ValidateOnStart();
-        services.AddSingleton<IValidateOptions<WhatsAppClientOptions>, WhatsAppClientOptionsValidator>();
-
-        // ?? HttpClients ??????????????????????????????????????????????????????
-        // TimeoutSeconds > 0 en todos los entornos sin excepción.
-        foreach (var clientName in new[] { "wa-health", "wa-send" })
-        {
-            var name = clientName; // captura para el closure
-            services
-                .AddOptions<HttpClientOptions>(name)
-                .Bind(configuration.GetSection($"{HttpClientOptions.SectionName}:{name}"))
-                .ValidateOnStart();
-            services.AddSingleton<IValidateOptions<HttpClientOptions>>(
-                new HttpClientOptionsValidator(name));
-        }
-
+        // Claves en BD: los tokens cifrados sobreviven a reinicios y se comparten entre instancias.
+        var dataProtection = services.AddDataProtection().SetApplicationName("InstaVende");
+        if (persistKeys) dataProtection.PersistKeysToDbContext<AppDbContext>();
+        services.AddScoped<DataProtectionService>();
         return services;
     }
 
-    /// <summary>
-    /// Registra los clientes HTTP nombrados que usa la aplicación.
-    /// Los timeouts se leen de la sección <c>HttpClients:{name}:TimeoutSeconds</c>
-    /// en <c>appsettings.json</c>; si la clave no existe se aplica el valor por defecto indicado.
-    /// <list type="bullet">
-    ///   <item><c>wa-health</c> — sondeo rápido de disponibilidad del proceso Node (default 2 s).</item>
-    ///   <item><c>wa-send</c>   — envío de mensajes WhatsApp (default 10 s).</item>
-    /// </list>
-    /// </summary>
-    public static IServiceCollection AddHttpClients(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddInstaVendeIdentity(this IServiceCollection services, IHostEnvironment env)
     {
-        // Cliente genérico sin configuración especial (usado por servicios que no son WhatsApp)
-        services.AddHttpClient();
+        services.AddIdentity<ApplicationUser, IdentityRole>(o =>
+            {
+                o.User.RequireUniqueEmail = true;
+                o.Password.RequiredLength = 8;
+                o.Password.RequireDigit = true;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequireUppercase = false;
+                o.Lockout.MaxFailedAccessAttempts = 5;
+                o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders()
+            .AddErrorDescriber<SpanishIdentityErrorDescriber>();
 
-        // Sondeo de salud al arranque: falla rápido si Node no responde
-        services.AddNamedHttpClient(configuration, "wa-health", defaultTimeoutSeconds: 2);
-
-        // Envío de mensajes: margen mayor para la respuesta del servidor Node
-        services.AddNamedHttpClient(configuration, "wa-send", defaultTimeoutSeconds: 10);
-
-        return services;
-    }
-
-    /// <summary>
-    /// Registra un <see cref="HttpClient"/> nombrado cuyo timeout se obtiene de
-    /// <c>HttpClients:{name}:TimeoutSeconds</c> en la configuración.
-    /// Si la clave no existe se usa <paramref name="defaultTimeoutSeconds"/>.
-    /// </summary>
-    /// <param name="services">Colección de servicios.</param>
-    /// <param name="configuration">Configuración de la aplicación.</param>
-    /// <param name="name">Nombre lógico del cliente HTTP.</param>
-    /// <param name="defaultTimeoutSeconds">Timeout en segundos usado cuando la clave de configuración no existe.</param>
-    private static IServiceCollection AddNamedHttpClient(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string name,
-        int defaultTimeoutSeconds)
-    {
-        var timeoutSeconds = configuration.GetValue<int>(
-            $"HttpClients:{name}:TimeoutSeconds",
-            defaultTimeoutSeconds);
-
-        services.AddHttpClient(name, (sp, c) =>
+        services.ConfigureApplicationCookie(o =>
         {
-            // Preferir el valor validado de IOptions si está disponible;
-            // si la sección no existía en config se mantiene el default.
-            var monitor = sp.GetService<IOptionsMonitor<HttpClientOptions>>();
-            var configured = monitor?.Get(name)?.TimeoutSeconds ?? 0;
-            c.Timeout = TimeSpan.FromSeconds(configured > 0 ? configured : timeoutSeconds);
+            o.Cookie.Name = "iv.auth";
+            o.Cookie.HttpOnly = true;
+            o.Cookie.SameSite = SameSiteMode.Lax;
+            o.Cookie.SecurePolicy = env.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+            o.ExpireTimeSpan = TimeSpan.FromDays(7);
+            o.SlidingExpiration = true;
+            // API: sin redirecciones HTML, solo cÃ³digos de estado
+            o.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = StatusCodes.Status401Unauthorized; return Task.CompletedTask; };
+            o.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = StatusCodes.Status403Forbidden; return Task.CompletedTask; };
         });
 
+        services.AddAntiforgery(o =>
+        {
+            o.HeaderName = CsrfTokenIssuer.HeaderName;
+            o.Cookie.Name = "iv.af";
+            o.Cookie.SameSite = SameSiteMode.Strict;
+            o.Cookie.SecurePolicy = env.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
+        });
+        services.AddSingleton<CsrfTokenIssuer>();
+        services.AddHttpContextAccessor();
+        services.AddScoped<CurrentUserService>();
+        return services;
+    }
+
+    public static IServiceCollection AddInstaVendeApi(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddControllers(o => o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()))
+            .AddJsonOptions(o =>
+            {
+                o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                o.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+            });
+        services.AddProblemDetails();
+        services.AddOpenApi(o => o.AddDocumentTransformer((doc, _, _) =>
+        {
+            doc.Info.Title = "InstaVende API";
+            doc.Info.Description = "API del panel de InstaVende (vendedor IA multicanal). AutenticaciÃ³n por cookie + cabecera X-XSRF-TOKEN.";
+            return Task.CompletedTask;
+        }));
+        services.AddSignalR().AddJsonProtocol(o => o.PayloadSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        services.AddInstaVendeRateLimiting();
+
+        var origins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+        services.AddCors(o => o.AddDefaultPolicy(p =>
+        {
+            if (origins.Length > 0) p.WithOrigins(origins).AllowCredentials().AllowAnyHeader().AllowAnyMethod();
+        }));
+        return services;
+    }
+
+    /// <param name="validateOnStart">false al generar el documento OpenAPI en compilaciÃ³n (no hay secretos).</param>
+    public static IServiceCollection AddInstaVendeOptions(this IServiceCollection services, IConfiguration configuration, bool validateOnStart = true)
+    {
+        services.Configure<AppOptions>(configuration.GetSection(AppOptions.SectionName));
+        services.Configure<BotCacheOptions>(configuration.GetSection(BotCacheOptions.SectionName));
+
+        services.AddOptions<OpenAiOptions>().Bind(configuration.GetSection(OpenAiOptions.SectionName));
+        services.AddOptions<WhatsAppClientOptions>().Bind(configuration.GetSection(WhatsAppClientOptions.SectionName));
+        services.AddSingleton<IPostConfigureOptions<WhatsAppClientOptions>, WhatsAppClientOptionsSetup>();
+        if (!validateOnStart) return services;
+
+        services.AddOptions<OpenAiOptions>().ValidateOnStart();
+        services.AddSingleton<IValidateOptions<OpenAiOptions>, OpenAiOptionsValidator>();
+        services.AddOptions<WhatsAppClientOptions>().ValidateOnStart();
+        services.AddSingleton<IValidateOptions<WhatsAppClientOptions>, WhatsAppClientOptionsValidator>();
+        return services;
+    }
+
+    public static IServiceCollection AddInstaVendeMessaging(this IServiceCollection services)
+    {
+        // Canales
+        services.AddHttpClient<WhatsAppClientApi>();
+        services.AddHttpClient<MetaGraphClient>();
+        services.AddScoped<ChannelConfigProvider>();
+        services.AddKeyedScoped<IChannelMessageSender, WhatsAppService>(ChannelType.WhatsApp);
+        services.AddKeyedScoped<IChannelMessageSender, MetaMessengerService>(ChannelType.FacebookMessenger);
+        services.AddKeyedScoped<IChannelMessageSender, InstagramService>(ChannelType.Instagram);
+        services.AddSingleton<WaClientSupervisor>();
+        services.AddHostedService(sp => sp.GetRequiredService<WaClientSupervisor>());
+
+        // Pipeline de mensajes
+        services.AddSingleton<InboundMessageQueue>();
+        services.AddHostedService<InboundMessageProcessor>();
+        services.AddScoped<IncomingMessageHandler>();
+        services.AddScoped<MessageDispatcher>();
+        services.AddScoped<InboxNotifier>();
+        services.AddHostedService<ReminderDispatcher>();
+        return services;
+    }
+
+    public static IServiceCollection AddInstaVendeBot(this IServiceCollection services)
+    {
+        services.AddSingleton<OpenAiChatClientAccessor>();
+        services.AddSingleton<BotPromptBuilder>();
+        services.AddScoped<BotContextProvider>();
+        services.AddScoped<CartService>();
+        services.AddScoped<BotToolExecutor>();
+        services.AddScoped<IBotEngineService, BotEngineService>();
+        services.AddScoped<ImageService>();
         return services;
     }
 }

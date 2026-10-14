@@ -65,3 +65,16 @@ logs/
 ## OS
 .DS_Store
 Thumbs.db
+
+## Uploads de usuarios (contenido generado en runtime)
+src/InstaVende.Web/wwwroot/uploads/
+
+## wa-client (Node)
+wa-client/node_modules/
+wa-client/session/
+wa-client/.wwebjs_auth/
+wa-client/.wwebjs_cache/
+wa-client/.env
+
+## Claves de Data Protection
+keys/

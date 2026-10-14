@@ -35,13 +35,13 @@ internal sealed class OpenAiOptionsValidator : IValidateOptions<OpenAiOptions>
 
         if (string.IsNullOrWhiteSpace(options.ApiKey))
             return ValidateOptionsResult.Fail(
-                "OpenAI:ApiKey no est· configurado. " +
+                "OpenAI:ApiKey no est√° configurado. " +
                 "Establece el valor en appsettings.Production.json o en la " +
-                "variable de entorno OpenAI__ApiKey antes de iniciar la aplicaciÛn.");
+                "variable de entorno OpenAI__ApiKey antes de iniciar la aplicaci√≥n.");
 
         if (string.IsNullOrWhiteSpace(options.Model))
             return ValidateOptionsResult.Fail(
-                "OpenAI:Model no puede estar vacÌo. " +
+                "OpenAI:Model no puede estar vac√≠o. " +
                 "Valor recomendado: \"gpt-4o\".");
 
         return ValidateOptionsResult.Success;

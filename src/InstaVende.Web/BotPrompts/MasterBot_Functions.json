@@ -2,225 +2,138 @@
   "functions": [
     {
       "name": "buscar_productos",
-      "description": "Busca productos en el cat�logo seg�n criterios del usuario. �sala siempre antes de presentar productos.",
+      "description": "Busca productos del catálogo del negocio. Úsala siempre antes de mencionar productos, precios o stock. Devuelve también la URL de la imagen cuando existe.",
       "parameters": {
         "type": "object",
         "properties": {
-          "query": { "type": "string", "description": "T�rmino de b�squeda libre" },
-          "categoria": { "type": "string", "description": "Categor�a o subcategor�a del producto" },
-          "marca": { "type": "string", "description": "Marca preferida" },
-          "precio_min": { "type": "number", "description": "Precio m�nimo" },
-          "precio_max": { "type": "number", "description": "Precio m�ximo" },
-          "orden": {
-            "type": "string",
-            "enum": ["relevancia", "precio_asc", "precio_desc", "rating", "mas_vendido"],
-            "description": "Criterio de ordenamiento"
-          },
-          "solo_en_stock": { "type": "boolean", "description": "Mostrar solo productos en stock" }
-        },
-        "required": ["query"]
+          "query": { "type": "string", "description": "Palabras clave de lo que busca el cliente (ej. 'zapatillas negras')." },
+          "categoria": { "type": "string", "description": "Categoría del producto, si el cliente la menciona." },
+          "precio_min": { "type": "number", "description": "Precio mínimo." },
+          "precio_max": { "type": "number", "description": "Precio máximo." },
+          "solo_en_stock": { "type": "boolean", "description": "true para excluir productos agotados." },
+          "orden": { "type": "string", "enum": ["relevancia", "precio_asc", "precio_desc", "destacados", "recientes"] },
+          "limite": { "type": "integer", "minimum": 1, "maximum": 10, "description": "Cantidad máxima de resultados (por defecto 5)." }
+        }
       }
     },
     {
-      "name": "obtener_producto",
-      "description": "Obtiene informaci�n completa de un producto por su ID.",
+      "name": "obtener_detalle_producto",
+      "description": "Obtiene la ficha completa de un producto: descripción, precio, stock, variantes (talla, color, etc.) e imágenes.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string", "description": "ID �nico del producto" }
-        },
-        "required": ["product_id"]
-      }
-    },
-    {
-      "name": "obtener_imagen_producto",
-      "description": "Obtiene la URL de la imagen de un producto. SIEMPRE �sala al presentar un producto.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "product_id": { "type": "string", "description": "ID �nico del producto" }
+          "product_id": { "type": "integer", "description": "ID del producto devuelto por buscar_productos." }
         },
         "required": ["product_id"]
       }
     },
     {
       "name": "buscar_alternativas",
-      "description": "Encuentra productos similares cuando el producto exacto no est� disponible.",
+      "description": "Encuentra productos similares (misma categoría, con stock) cuando el solicitado no está disponible o no convence al cliente.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string", "description": "ID del producto original" },
-          "max_resultados": { "type": "integer", "default": 3, "description": "N�mero m�ximo de alternativas" }
+          "product_id": { "type": "integer", "description": "ID del producto de referencia." },
+          "max_resultados": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Por defecto 3." }
         },
         "required": ["product_id"]
       }
     },
     {
       "name": "verificar_stock",
-      "description": "Verifica disponibilidad en tiempo real de un producto, con variantes opcionales.",
+      "description": "Verifica la disponibilidad actual de un producto o de una variante concreta antes de confirmar una venta.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string" },
-          "talla": { "type": "string" },
-          "color": { "type": "string" }
+          "product_id": { "type": "integer" },
+          "variante_id": { "type": "integer", "description": "ID de la variante (talla/color) si aplica." }
         },
         "required": ["product_id"]
       }
     },
     {
       "name": "calcular_descuento",
-      "description": "Calcula el descuento m�ximo permitido seg�n el nivel de negociaci�n. No superar el nivel 3.",
+      "description": "Calcula el descuento permitido para la negociación actual. El servidor aplica los límites configurados y la fidelidad del cliente; nunca ofrezcas un descuento distinto al devuelto.",
       "parameters": {
         "type": "object",
         "properties": {
-          "product_id": { "type": "string" },
-          "cantidad": { "type": "integer", "default": 1 },
-          "es_cliente_recurrente": { "type": "boolean", "default": false },
-          "intento_negociacion": {
-            "type": "integer",
-            "enum": [1, 2, 3],
-            "description": "Nivel de negociaci�n: 1=bajo, 2=medio, 3=m�ximo"
-          }
+          "precio_base": { "type": "number", "description": "Precio o subtotal sobre el que se calcula el descuento." },
+          "nivel_negociacion": { "type": "integer", "minimum": 1, "maximum": 3, "description": "1 = primera objeción de precio, 2 = insiste, 3 = último intento." },
+          "cantidad_productos": { "type": "integer", "minimum": 1, "description": "Unidades que llevaría el cliente (para descuento por volumen)." }
         },
-        "required": ["product_id", "intento_negociacion"]
+        "required": ["precio_base", "nivel_negociacion"]
       }
     },
     {
       "name": "calcular_envio",
-      "description": "Calcula costo y tiempo de env�o estimado.",
+      "description": "Calcula el costo de envío según las zonas de entrega configuradas y el umbral de envío gratis.",
       "parameters": {
         "type": "object",
         "properties": {
-          "codigo_postal": { "type": "string" },
-          "productos": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "product_id": { "type": "string" },
-                "cantidad": { "type": "integer" }
-              }
-            }
-          }
+          "zona": { "type": "string", "description": "Distrito, ciudad o zona indicada por el cliente." },
+          "subtotal": { "type": "number", "description": "Subtotal de la compra, para evaluar envío gratis." }
         },
-        "required": ["productos"]
+        "required": ["zona"]
       }
     },
     {
       "name": "crear_pedido",
-      "description": "Inicia el proceso de creaci�n de pedido. Usar solo cuando el cliente confirma la compra.",
+      "description": "Registra el pedido cuando el cliente confirma explícitamente la compra. Requiere productos (o un carrito con productos), zona o dirección de entrega y método de pago. Devuelve el número de pedido real.",
       "parameters": {
         "type": "object",
         "properties": {
-          "productos": {
+          "items": {
             "type": "array",
+            "description": "Productos a comprar. Si se omite se usa el carrito actual.",
             "items": {
               "type": "object",
               "properties": {
-                "product_id": { "type": "string" },
-                "cantidad": { "type": "integer" },
-                "variante": { "type": "string" }
+                "product_id": { "type": "integer" },
+                "cantidad": { "type": "integer", "minimum": 1, "maximum": 99 },
+                "variante_id": { "type": "integer" }
               },
               "required": ["product_id", "cantidad"]
             }
           },
-          "datos_cliente": {
-            "type": "object",
-            "properties": {
-              "nombre": { "type": "string" },
-              "telefono": { "type": "string" },
-              "direccion": { "type": "string" },
-              "email": { "type": "string" }
-            }
-          },
-          "metodo_pago": {
-            "type": "string",
-            "enum": ["tarjeta", "transferencia", "contra_entrega", "paypal", "efectivo"]
-          },
-          "descuento_aplicado": { "type": "number", "description": "Porcentaje de descuento negociado" }
+          "zona_envio": { "type": "string", "description": "Nombre de la zona de entrega configurada." },
+          "direccion_envio": { "type": "string", "description": "Dirección de entrega indicada por el cliente." },
+          "metodo_pago": { "type": "string", "description": "Método de pago elegido (uno de los configurados)." },
+          "notas": { "type": "string", "description": "Indicaciones adicionales del cliente." }
         },
-        "required": ["productos"]
-      }
-    },
-    {
-      "name": "transferir_a_humano",
-      "description": "Transfiere la conversaci�n a un agente humano. Incluir siempre un resumen detallado.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "motivo": {
-            "type": "string",
-            "enum": [
-              "solicitud_cliente", "negociacion_fallida", "cliente_frustrado",
-              "consulta_compleja", "postventa", "queja", "tema_legal", "falla_tecnica"
-            ]
-          },
-          "prioridad": {
-            "type": "string",
-            "enum": ["baja", "media", "alta", "urgente"]
-          },
-          "resumen": {
-            "type": "string",
-            "description": "Resumen detallado: productos vistos, descuentos ofrecidos, necesidad del cliente, sentimiento"
-          },
-          "productos_discutidos": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "IDs de productos discutidos"
-          }
-        },
-        "required": ["motivo", "prioridad", "resumen"]
-      }
-    },
-    {
-      "name": "obtener_promociones",
-      "description": "Obtiene promociones y descuentos vigentes para una categor�a o segmento.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "categoria": { "type": "string" },
-          "segmento_usuario": { "type": "string", "enum": ["general", "recurrente", "vip", "nuevo"] }
-        }
-      }
-    },
-    {
-      "name": "registrar_interes",
-      "description": "Registra el inter�s del cliente en un producto sin stock para notificarle cuando est� disponible.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "product_id": { "type": "string" },
-          "user_id": { "type": "string" },
-          "canal_notificacion": {
-            "type": "string",
-            "enum": ["whatsapp", "email", "sms"],
-            "default": "whatsapp"
-          }
-        },
-        "required": ["product_id", "user_id"]
-      }
-    },
-    {
-      "name": "obtener_historial_cliente",
-      "description": "Obtiene historial de compras y preferencias del cliente para personalizar la atenci�n.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "user_id": { "type": "string" }
-        },
-        "required": ["user_id"]
+        "required": ["metodo_pago"]
       }
     },
     {
       "name": "rastrear_pedido",
-      "description": "Rastrea el estado de un pedido existente por su n�mero de orden.",
+      "description": "Consulta el estado de los pedidos del cliente actual. Si indica un número de pedido, se busca ese.",
       "parameters": {
         "type": "object",
         "properties": {
-          "order_id": { "type": "string" }
+          "numero_pedido": { "type": "string", "description": "Número de pedido (ej. IV-260514-7KQ2MX), si lo tiene." }
+        }
+      }
+    },
+    {
+      "name": "obtener_historial_cliente",
+      "description": "Obtiene el historial de compras del cliente actual para personalizar la atención. Solo devuelve datos de este cliente.",
+      "parameters": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "obtener_promociones",
+      "description": "Obtiene las promociones vigentes del negocio.",
+      "parameters": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "transferir_a_humano",
+      "description": "Transfiere la conversación a un asesor humano. Úsala cuando el cliente lo pida, esté molesto, se trate de una situación de derivación configurada o la consulta exceda tus capacidades.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "motivo": { "type": "string", "enum": ["solicitud_cliente", "reclamo", "consulta_compleja", "situacion_configurada", "otro"] },
+          "resumen": { "type": "string", "description": "Resumen breve de la conversación y lo que necesita el cliente." },
+          "prioridad": { "type": "string", "enum": ["baja", "media", "alta"] }
         },
-        "required": ["order_id"]
+        "required": ["motivo", "resumen"]
       }
     }
   ]

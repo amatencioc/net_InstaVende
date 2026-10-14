@@ -1,18 +1,15 @@
 namespace InstaVende.Web.Services;
 
 /// <summary>
-/// Configurable behaviour settings for <see cref="BotEngineService"/>.
+/// Configuración del motor del bot.
 /// Bound from the "BotCache" section in appsettings.json.
 /// </summary>
 public sealed class BotCacheOptions
 {
     public const string SectionName = "BotCache";
 
-    /// <summary>Minutes to cache the active BotConfig (intents, knowledge base, vendor config).</summary>
+    /// <summary>Minutos de caché del contexto del bot (configuración, conocimiento, pagos, zonas). Se invalida automáticamente al guardar.</summary>
     public int BotConfigTtlMinutes { get; set; } = 5;
-
-    /// <summary>Minutes to cache the KnowledgeEntries used in AI prompts.</summary>
-    public int KnowledgeEntriesTtlMinutes { get; set; } = 5;
 
     /// <summary>
     /// Maximum number of past messages loaded per conversation to build the AI context window.

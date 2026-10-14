@@ -1,0 +1,137 @@
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+@inject InstaVende.Web.Services.CurrentUserService CurrentUser
+@{ var currencySymbol = await CurrentUser.GetCurrencySymbolAsync(); }
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="request-verification-token" content="@Antiforgery.GetAndStoreTokens(Context).RequestToken" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")InstaVende</title>
+    <link rel="stylesheet" href="~/css/fonts.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/app.css" asp-append-version="true" />
+</head>
+<body data-currency-symbol="@currencySymbol">
+@if (User.Identity?.IsAuthenticated == true)
+{
+<!-- Sidebar overlay (mobile) -->
+<div class="sb-overlay" id="sbOverlay"></div>
+
+<!-- Sidebar -->
+<aside class="app-sidebar" id="appSidebar">
+    <div class="sb-logo">
+        <a asp-controller="Dashboard" asp-action="Index" class="sb-logo-text">Insta<span>Vende</span></a>
+        <button type="button" class="sb-collapse-btn" id="sbCollapseBtn" title="Colapsar menú" aria-label="Colapsar menú" aria-controls="appSidebar">
+            <i class="bi bi-layout-sidebar-reverse" id="sbCollapseIcon"></i>
+        </button>
+    </div>
+    <nav class="sb-nav">
+        <div class="sb-section">Principal</div>
+        <a asp-controller="Dashboard" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i class="bi bi-speedometer2"></i><span class="sb-link-text">Dashboard</span>
+        </a>
+        <a asp-controller="Inbox" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inbox" ? "active" : "")">
+            <i class="bi bi-chat-dots"></i><span class="sb-link-text">Mensajes</span>
+            <span class="sb-badge" id="sbInboxCount" style="display:none">0</span>
+        </a>
+        <a asp-controller="Orders" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Orders" ? "active" : "")">
+            <i class="bi bi-bag-check"></i><span class="sb-link-text">Pedidos</span>
+        </a>
+        <a asp-controller="Products" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Products" ? "active" : "")">
+            <i class="bi bi-box-seam"></i><span class="sb-link-text">Productos</span>
+        </a>
+        <div class="sb-section">Vendedor</div>
+        <a asp-controller="Vendedor" asp-action="Personalidad"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Vendedor" ? "active" : "")">
+            <i class="bi bi-cpu"></i><span class="sb-link-text">Mi Vendedor</span>
+        </a>
+        <a asp-controller="ReminderTemplates" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ReminderTemplates" ? "active" : "")">
+            <i class="bi bi-alarm"></i><span class="sb-link-text">Recordatorios</span>
+        </a>
+        <a asp-controller="Metricas" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Metricas" ? "active" : "")">
+            <i class="bi bi-graph-up-arrow"></i><span class="sb-link-text">Métricas</span>
+        </a>
+        <div class="sb-section">Cuenta</div>
+        <a asp-controller="ChannelConfig" asp-action="WhatsApp"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "ChannelConfig" ? "active" : "")">
+            <i class="bi bi-broadcast"></i><span class="sb-link-text">Canales</span>
+            <span class="sb-badge" id="sbChannelBadge" style="display:none;background:#f59e0b">!</span>
+        </a>
+        <a asp-controller="AccountConfig" asp-action="Index"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "AccountConfig" ? "active" : "")">
+            <i class="bi bi-building-gear"></i><span class="sb-link-text">Configuración</span>
+        </a>
+        <a asp-controller="Settings" asp-action="Business"
+           class="sb-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Settings" ? "active" : "")">
+            <i class="bi bi-person-gear"></i><span class="sb-link-text">Mi perfil</span>
+        </a>
+    </nav>
+    <div class="sb-bottom">
+        <div class="sb-user">
+            <div class="sb-avatar">@(User.Identity?.Name?.Substring(0,1).ToUpper() ?? "U")</div>
+            <div class="sb-user-info">
+                <div class="sb-user-name">@User.Identity?.Name</div>
+                <div class="sb-user-role">InstaVende Pro</div>
+            </div>
+        </div>
+        <form asp-controller="Account" asp-action="Logout" method="post">
+            <button type="submit" class="sb-logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="sb-link-text">Cerrar sesión</span>
+            </button>
+        </form>
+    </div>
+</aside>
+<header class="app-topbar">
+    <div class="topbar-left">
+        <button type="button" class="sb-toggle" id="sbToggle" aria-label="Abrir menú" aria-controls="appSidebar" aria-expanded="false"><i class="bi bi-list"></i></button>
+        <span class="topbar-mobile-title">@ViewData["Title"]</span>
+    </div>
+    <div class="topbar-right">
+        <span class="topbar-badge"><span class="dot"></span> Bot activo</span>
+    </div>
+</header>
+
+<!-- Main content -->
+<main class="app-content">
+    @if (TempData["Success"] != null)
+    {<div class="app-alert app-alert-success"><i class="bi bi-check-circle-fill"></i> @TempData["Success"]</div>}
+    @if (TempData["Error"] != null)
+    {<div class="app-alert app-alert-error"><i class="bi bi-exclamation-circle-fill"></i> @TempData["Error"]</div>}
+    @RenderBody()
+</main>
+
+<!-- ── Global confirm/alert modal ───────────────────────────────────────── -->
+<div class="iv-confirm-backdrop" id="ivConfirmBackdrop" role="dialog" aria-modal="true" aria-labelledby="ivConfirmTitle">
+    <div class="iv-confirm-box">
+        <div class="iv-confirm-icon danger" id="ivConfirmIcon"><i class="bi bi-exclamation-triangle-fill" id="ivConfirmIconI"></i></div>
+        <div class="iv-confirm-title" id="ivConfirmTitle">¿Estás seguro?</div>
+        <div class="iv-confirm-message" id="ivConfirmMessage"></div>
+        <div class="iv-confirm-actions" id="ivConfirmActions">
+            <button type="button" class="btn btn-outline-secondary" id="ivConfirmCancel">Cancelar</button>
+            <button type="button" class="btn btn-danger" id="ivConfirmOk">Confirmar</button>
+        </div>
+    </div>
+</div>
+}
+else
+{
+<main>@RenderBody()</main>
+}
+
+<script src="~/lib/jquery/jquery-3.7.1.min.js" asp-append-version="true"></script>
+<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+<script src="~/js/iv-core.js" asp-append-version="true"></script>
+<script src="~/js/layout.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,31 +1,31 @@
-# Análisis UI de Referencia (ya! / InstaVende)
+# AnÃ¡lisis UI de Referencia (ya! / InstaVende)
 
-> Este archivo documenta el análisis progresivo de imágenes de la app de referencia
-> para guiar la implementación de funcionalidades en InstaVende.
+> Este archivo documenta el anÃ¡lisis progresivo de imÃ¡genes de la app de referencia
+> para guiar la implementaciÃ³n de funcionalidades en InstaVende.
 
 ---
 
-## LOTE 1 – Configuración de la cuenta (`/Configuracion/Cuenta`)
+## LOTE 1 â€“ ConfiguraciÃ³n de la cuenta (`/Configuracion/Cuenta`)
 
 ### Estructura general
-- Breadcrumb: `Configuración > Configuración de la cuenta`
-- Botón superior derecho: `Guardar cambios` (primario, deshabilitado hasta editar)
+- Breadcrumb: `ConfiguraciÃ³n > ConfiguraciÃ³n de la cuenta`
+- BotÃ³n superior derecho: `Guardar cambios` (primario, deshabilitado hasta editar)
 - 4 tabs horizontales:
-  1. Organización
+  1. OrganizaciÃ³n
   2. Usuarios
   3. Notificaciones por email
-  4. Métodos de pago
+  4. MÃ©todos de pago
 
 ---
 
-### Tab 1 – Organización
+### Tab 1 â€“ OrganizaciÃ³n
 | Campo | Tipo | Detalle |
 |---|---|---|
-| Nombre de la organización | Input text | Placeholder: nombre del negocio (ej. "Fresh Boy Store") |
-| País | Select/Dropdown | Ej. "Perú" |
+| Nombre de la organizaciÃ³n | Input text | Placeholder: nombre del negocio (ej. "Fresh Boy Store") |
+| PaÃ­s | Select/Dropdown | Ej. "PerÃº" |
 | Moneda | Select/Dropdown | Ej. "PEN - Sol Peruano" |
 
-- Nota informativa: _"Incluye el país y la moneda para personalizar el vendedor inteligente."_
+- Nota informativa: _"Incluye el paÃ­s y la moneda para personalizar el vendedor inteligente."_
 
 **Entidades/campos a crear o extender:**
 - `Business.Name` (ya existe como `BusinessName`)
@@ -34,46 +34,46 @@
 
 ---
 
-### Tab 2 – Usuarios (Gestión de usuarios)
-- Sección **Invitar a tu equipo**: input email + botón `Invitar`
-- Sección **Invitaciones pendientes**: lista vacía con estado "No hay invitaciones pendientes"
-- Sección **Usuarios**: lista con avatar, email, teléfono, rol (Admin/Member)
+### Tab 2 â€“ Usuarios (GestiÃ³n de usuarios)
+- SecciÃ³n **Invitar a tu equipo**: input email + botÃ³n `Invitar`
+- SecciÃ³n **Invitaciones pendientes**: lista vacÃ­a con estado "No hay invitaciones pendientes"
+- SecciÃ³n **Usuarios**: lista con avatar, email, telÃ©fono, rol (Admin/Member)
   - Ejemplo: `freshboystore@gmail.com | +51992260979 | Admin`
-  - Límite visible: "1 de 1 usuarios disponibles en tu plan"
+  - LÃ­mite visible: "1 de 1 usuarios disponibles en tu plan"
 
 **Funcionalidades a implementar:**
-- Invitación de usuarios por email
+- InvitaciÃ³n de usuarios por email
 - Tabla de invitaciones pendientes (con posibilidad de cancelar)
 - Lista de usuarios del negocio con rol
-- Control de límite según plan
+- Control de lÃ­mite segÃºn plan
 
 ---
 
-### Tab 3 – Notificaciones por email
-- Descripción: _"Recibe avisos cuando tu vendedor IA cierre una venta o cuando sea necesario que un humano tome la conversación."_
-- Lista de emails (input + botón `+ Añadir email`)
-- Permite múltiples emails de notificación
+### Tab 3 â€“ Notificaciones por email
+- DescripciÃ³n: _"Recibe avisos cuando tu vendedor IA cierre una venta o cuando sea necesario que un humano tome la conversaciÃ³n."_
+- Lista de emails (input + botÃ³n `+ AÃ±adir email`)
+- Permite mÃºltiples emails de notificaciÃ³n
 
 **Entidades/campos a crear:**
 - `NotificationEmail` (tabla): `BusinessId`, `Email`, `IsActive`
 
 ---
 
-### Tab 4 – Métodos de pago
-- Tab visible en las imágenes pero contenido no mostrado aún.
-- Pendiente de análisis en próximo lote.
+### Tab 4 â€“ MÃ©todos de pago
+- Tab visible en las imÃ¡genes pero contenido no mostrado aÃºn.
+- Pendiente de anÃ¡lisis en prÃ³ximo lote.
 
 ---
 
-## LOTE 2 – Pedidos, Métricas y Métodos de pago
+## LOTE 2 â€“ Pedidos, MÃ©tricas y MÃ©todos de pago
 
-### Imagen 1 – Gestión de pedidos (`/Pedidos`)
+### Imagen 1 â€“ GestiÃ³n de pedidos (`/Pedidos`)
 
-**Título:** Gestión de pedidos  
-**Botón superior derecho:** `? Exportar pedidos ?` (dropdown)  
-**Barra de búsqueda:** input "Buscar pedidos..." + icono filtro  
+**TÃ­tulo:** GestiÃ³n de pedidos  
+**BotÃ³n superior derecho:** `? Exportar pedidos ?` (dropdown)  
+**Barra de bÃºsqueda:** input "Buscar pedidos..." + icono filtro  
 
-#### Tabs de estado (con contador numérico)
+#### Tabs de estado (con contador numÃ©rico)
 | Tab | Badge |
 |---|---|
 | Nuevos pedidos | 0 |
@@ -81,78 +81,78 @@
 | Completados | 0 |
 | Cancelados | 0 |
 
-#### Sub-sección dentro de "Nuevos pedidos"
-- **En validación** `0` (badge morado) con botón `···` (opciones)
-- Estado vacío: _"Sin pedidos"_
+#### Sub-secciÃ³n dentro de "Nuevos pedidos"
+- **En validaciÃ³n** `0` (badge morado) con botÃ³n `Â·Â·Â·` (opciones)
+- Estado vacÃ­o: _"Sin pedidos"_
 
 **Entidades/campos implicados:**
 - `Order` ? estados: `NuevoPedido`, `EnCurso`, `Completado`, `Cancelado`
 - Sub-estado interno: `EnValidacion` (dentro de Nuevo)
-- Funcionalidad de exportación (CSV/Excel)
-- Búsqueda + filtro avanzado
+- Funcionalidad de exportaciÃ³n (CSV/Excel)
+- BÃºsqueda + filtro avanzado
 
 **Funcionalidades a implementar:**
 - [ ] `PedidosController` con acciones Index, Exportar
 - [ ] Tabs filtrados por estado con contadores
-- [ ] Sub-agrupación "En validación"
+- [ ] Sub-agrupaciÃ³n "En validaciÃ³n"
 - [ ] Exportar pedidos (dropdown: CSV / Excel)
 - [ ] Buscador + filtros
 
 ---
 
-### Imagen 2 – Métricas y resultados (`/Metricas`)
+### Imagen 2 â€“ MÃ©tricas y resultados (`/Metricas`)
 
-**Título:** Métricas y resultados  
+**TÃ­tulo:** MÃ©tricas y resultados  
 **Contenido:** Panel difuminado (bloqueado) con modal de upgrade encima
 
-#### Modal "Métricas Pro" (paywall)
-- Ícono: candado (feature locked)
-- Título: _"¿Sabes dónde pierdes ventas?"_
-- Subtítulo: _"Descúbrelo con Métricas Pro"_
-- Descripción: _"Accede al panel completo de métricas de tu tienda en WhatsApp. Toma decisiones en tiempo real con datos, no con intuición."_
+#### Modal "MÃ©tricas Pro" (paywall)
+- Ãcono: candado (feature locked)
+- TÃ­tulo: _"Â¿Sabes dÃ³nde pierdes ventas?"_
+- SubtÃ­tulo: _"DescÃºbrelo con MÃ©tricas Pro"_
+- DescripciÃ³n: _"Accede al panel completo de mÃ©tricas de tu tienda en WhatsApp. Toma decisiones en tiempo real con datos, no con intuiciÃ³n."_
 - Features listadas:
-  | Feature | Descripción |
+  | Feature | DescripciÃ³n |
   |---|---|
-  | Conversión en tiempo real | Conversaciones, ventas y % de conversión al instante |
-  | Análisis de órdenes | Ranking de productos, ticket promedio y combos ganadores |
-  | Rendimiento de campañas | Mide qué anuncios generan ventas reales, no solo clics |
+  | ConversiÃ³n en tiempo real | Conversaciones, ventas y % de conversiÃ³n al instante |
+  | AnÃ¡lisis de Ã³rdenes | Ranking de productos, ticket promedio y combos ganadores |
+  | Rendimiento de campaÃ±as | Mide quÃ© anuncios generan ventas reales, no solo clics |
   | Base de datos descargable | Exporta tu base de clientes y segmenta como quieras |
-- CTA: botón primario `Ver planes y precios ?`
+- CTA: botÃ³n primario `Ver planes y precios ?`
 - Nota: _"? Disponible desde el Plan Pro"_
 
 **Funcionalidades a implementar:**
 - [ ] `MetricasController` con vista base (difuminada para plan Free)
-- [ ] Modal/overlay de upgrade según plan activo
+- [ ] Modal/overlay de upgrade segÃºn plan activo
 - [ ] Componente reutilizable `_UpgradeModal.cshtml`
-- [ ] Lógica de acceso por plan: `PlanFeatureService.HasAccess(feature)`
-- [ ] KPIs básicos: conversiones, órdenes, campañas
+- [ ] LÃ³gica de acceso por plan: `PlanFeatureService.HasAccess(feature)`
+- [ ] KPIs bÃ¡sicos: conversiones, Ã³rdenes, campaÃ±as
 
 ---
 
-### Imagen 3 – Tab "Métodos de pago" (dentro de Configuración de la cuenta)
+### Imagen 3 â€“ Tab "MÃ©todos de pago" (dentro de ConfiguraciÃ³n de la cuenta)
 
-**Descripción:** _"Gestiona tus métodos de pago a través de nuestro portal de pagos seguro."_  
-**Único elemento:** Botón `?? Gestionar métodos de pago` ? redirige a portal externo (ej. Stripe Customer Portal)
+**DescripciÃ³n:** _"Gestiona tus mÃ©todos de pago a travÃ©s de nuestro portal de pagos seguro."_  
+**Ãšnico elemento:** BotÃ³n `?? Gestionar mÃ©todos de pago` ? redirige a portal externo (ej. Stripe Customer Portal)
 
 **Funcionalidades a implementar:**
-- [ ] Acción `MetodosPago` en `AccountConfigController`
-- [ ] Botón que redirige al portal externo de pagos (Stripe/MercadoPago)
+- [ ] AcciÃ³n `MetodosPago` en `AccountConfigController`
+- [ ] BotÃ³n que redirige al portal externo de pagos (Stripe/MercadoPago)
 - [ ] No requiere formulario propio, solo enlace seguro al portal del proveedor
 
 ---
 
-## LOTE 3 – Sub-estados completos de Gestión de pedidos
+## LOTE 3 â€“ Sub-estados completos de GestiÃ³n de pedidos
 
-Estas imágenes completan el detalle de los sub-estados de cada tab en `/Pedidos`.
-Cada tab tiene columnas Kanban con badge de color y botón `···` (opciones).
+Estas imÃ¡genes completan el detalle de los sub-estados de cada tab en `/Pedidos`.
+Cada tab tiene columnas Kanban con badge de color y botÃ³n `Â·Â·Â·` (opciones).
 
 ### Mapa completo de estados y sub-estados
 
-| Tab principal | Sub-estado | Color badge | Ícono |
+| Tab principal | Sub-estado | Color badge | Ãcono |
 |---|---|---|---|
-| Nuevos pedidos | En validación | Morado | ? |
-| En curso | En preparación | Azul/gris | ? |
-| En curso | Listo para envío | Naranja | ? |
+| Nuevos pedidos | En validaciÃ³n | Morado | ? |
+| En curso | En preparaciÃ³n | Azul/gris | ? |
+| En curso | Listo para envÃ­o | Naranja | ? |
 | En curso | Enviado | Azul claro | ? |
 | Completados | Entregado | Verde | ? |
 | Completados | Finalizado | Verde | ? |
@@ -161,9 +161,9 @@ Cada tab tiene columnas Kanban con badge de color y botón `···` (opciones).
 
 ### Layout de cada tab (vista Kanban)
 - Las columnas se muestran **en paralelo** (lado a lado), no apiladas
-- Cada columna tiene: título + badge contador + botón `···`
-- Estado vacío por columna: _"Sin pedidos"_
-- Máximo 3 columnas visibles simultáneamente (ej. "En curso" tiene 3)
+- Cada columna tiene: tÃ­tulo + badge contador + botÃ³n `Â·Â·Â·`
+- Estado vacÃ­o por columna: _"Sin pedidos"_
+- MÃ¡ximo 3 columnas visibles simultÃ¡neamente (ej. "En curso" tiene 3)
 
 ### Enum `OrderSubStatus` a crear
 ```csharp
@@ -184,7 +184,7 @@ public enum OrderSubStatus
 }
 ```
 
-### Relación con `OrderStatus` (tab padre)
+### RelaciÃ³n con `OrderStatus` (tab padre)
 ```csharp
 public enum OrderStatus
 {
@@ -198,54 +198,54 @@ public enum OrderStatus
 **Funcionalidades adicionales confirmadas:**
 - [ ] Vista Kanban por columnas de sub-estados
 - [ ] Transiciones de estado (mover pedido entre columnas)
-- [ ] Badge con color semántico por sub-estado (rojo/verde/azul/naranja)
-- [ ] Botón `···` por columna (opciones de columna: ocultar, ordenar, etc.)
+- [ ] Badge con color semÃ¡ntico por sub-estado (rojo/verde/azul/naranja)
+- [ ] BotÃ³n `Â·Â·Â·` por columna (opciones de columna: ocultar, ordenar, etc.)
 
 ---
 
-## LOTE 4 – Módulo de Mensajes / Conversaciones (`/Mensajes`)
+## LOTE 4 â€“ MÃ³dulo de Mensajes / Conversaciones (`/Mensajes`)
 
-> Imágenes 2 y 3 de este lote son duplicados del Lote 3 (ya documentados).
+> ImÃ¡genes 2 y 3 de este lote son duplicados del Lote 3 (ya documentados).
 > Solo se analiza la imagen nueva.
 
-### Imagen 1 – Vista principal de Mensajes
+### Imagen 1 â€“ Vista principal de Mensajes
 
 **Layout de 3 paneles:**
 
 ```
 [ Panel izquierdo ]  [ Panel centro ]  [ Panel derecho ]
-   Navegación          Lista conv.        Chat abierto
+   NavegaciÃ³n          Lista conv.        Chat abierto
 ```
 
 ---
 
-#### Panel izquierdo – Menú de Mensajes
-| Sección | Subsección | Contador |
+#### Panel izquierdo â€“ MenÃº de Mensajes
+| SecciÃ³n | SubsecciÃ³n | Contador |
 |---|---|---|
 | Mensajes | Todas | 4540 |
 | Mensajes | Ventas | 33 |
 | Mensajes | No atendidas | 10 |
-| Recordatorios | — | — |
+| Recordatorios | â€” | â€” |
 
-- "Mensajes" es la sección activa con indicador visual izquierdo
-- "Recordatorios" es una sección colapsable separada
+- "Mensajes" es la secciÃ³n activa con indicador visual izquierdo
+- "Recordatorios" es una secciÃ³n colapsable separada
 
-#### Panel central – Lista de Conversaciones
-- **Título:** "Conversaciones" + badge `10` (no atendidas)
+#### Panel central â€“ Lista de Conversaciones
+- **TÃ­tulo:** "Conversaciones" + badge `10` (no atendidas)
 - **Filtros superiores (3 dropdowns):**
   - `??? Etiquetas ?`
   - `?? Calendario ?`
   - `?? Filtros ?`
 - **Buscador:** input "Buscar conversaciones..."
 - **Lista de conversaciones:**
-  - Avatar con iniciales + badge número (mensajes no leídos) + punto verde WhatsApp
+  - Avatar con iniciales + badge nÃºmero (mensajes no leÃ­dos) + punto verde WhatsApp
   - Nombre del contacto
-  - Preview del último mensaje (truncado)
+  - Preview del Ãºltimo mensaje (truncado)
   - Fecha/hora relativa (ej. "Jueves", "26/03/2026")
-  - Botón `···` (opciones por conversación)
+  - BotÃ³n `Â·Â·Â·` (opciones por conversaciÃ³n)
 
 **Ejemplos de conversaciones visibles:**
-| Contacto | Último mensaje | Fecha |
+| Contacto | Ãšltimo mensaje | Fecha |
 |---|---|---|
 | Jordan Matencio | ??? (imagen) | Jueves |
 | Valeris Chincha Alta (43) | "Muchas gracias amigo" | 26/03/2026 |
@@ -255,14 +255,14 @@ public enum OrderStatus
 | Dios Y Mi Familia (30) | "Donde se encuentra usted amigo" | 17/12/2025 |
 | JHONATAN (19) | "Brindame un momento para po..." | 04/11/2025 |
 | Jorge luis | "Hola muchas gracias" | 19/10/2025 |
-| (sin nombre) | "Hola buen día ??. Hoy por la tar..." | 04/10/2025 |
+| (sin nombre) | "Hola buen dÃ­a ??. Hoy por la tar..." | 04/10/2025 |
 | Jair Kaled | ?? (emoji) | 29/09/2025 |
 
-#### Panel derecho – Estado vacío
-- Ilustración decorativa (IA/chat)
-- Título: _"Selecciona una conversación"_
-- Subtítulo: _"Selecciona una conversación desde la barra lateral para gestionar las interacciones con los clientes"_
-- Nota: _"Las conversaciones aparecerán aquí"_
+#### Panel derecho â€“ Estado vacÃ­o
+- IlustraciÃ³n decorativa (IA/chat)
+- TÃ­tulo: _"Selecciona una conversaciÃ³n"_
+- SubtÃ­tulo: _"Selecciona una conversaciÃ³n desde la barra lateral para gestionar las interacciones con los clientes"_
+- Nota: _"Las conversaciones aparecerÃ¡n aquÃ­"_
 
 ---
 
@@ -271,63 +271,63 @@ public enum OrderStatus
 - `Contact` ? `Name`, `Phone`, `AvatarInitials`
 - `Message` ? `ConversationId`, `Body`, `MediaUrl`, `SentAt`, `Direction` (Inbound/Outbound)
 - `ConversationLabel` ? para filtro por etiquetas
-- `Reminder` ? para sección "Recordatorios"
+- `Reminder` ? para secciÃ³n "Recordatorios"
 
 ### Funcionalidades a implementar
 - [ ] `MensajesController` ? Index, GetConversaciones (con filtros), GetMensajes
 - [ ] Panel 3 columnas (sidebar + lista + chat) con layout responsive
 - [ ] Filtros: por etiqueta, por rango de fecha, filtros avanzados
-- [ ] Buscador de conversaciones (por nombre/teléfono/mensaje)
-- [ ] Badge de mensajes no leídos por conversación
-- [ ] Categorías: Todas / Ventas / No atendidas (con contadores)
+- [ ] Buscador de conversaciones (por nombre/telÃ©fono/mensaje)
+- [ ] Badge de mensajes no leÃ­dos por conversaciÃ³n
+- [ ] CategorÃ­as: Todas / Ventas / No atendidas (con contadores)
 - [ ] Indicador de canal (punto verde = WhatsApp)
-- [ ] Preview del último mensaje (texto o ícono si es media)
-- [ ] Estado vacío animado cuando no hay conversación seleccionada
-- [ ] Sección "Recordatorios" (ver Lote 5)
+- [ ] Preview del Ãºltimo mensaje (texto o Ã­cono si es media)
+- [ ] Estado vacÃ­o animado cuando no hay conversaciÃ³n seleccionada
+- [ ] SecciÃ³n "Recordatorios" (ver Lote 5)
 
 ---
 
-## LOTE 5 – Recordatorios automáticos por segmento (`/Mensajes/Recordatorios`)
+## LOTE 5 â€“ Recordatorios automÃ¡ticos por segmento (`/Mensajes/Recordatorios`)
 
 ### Estructura general
-- Ruta: sub-sección dentro de **Mensajes ? Recordatorios**
-- Título de página: **"Recordatorios"**
-- Subtítulo de sección: **"Segmento del cliente"**
-- Descripción: _"Usamos modelos por segmento (Frío, Tibio, Caliente) con ventanas de 2-3h y una segunda de 22-23h cuando aplica."_
-- Layout: panel principal (editor) + panel lateral derecho (Previsualización)
+- Ruta: sub-secciÃ³n dentro de **Mensajes ? Recordatorios**
+- TÃ­tulo de pÃ¡gina: **"Recordatorios"**
+- SubtÃ­tulo de secciÃ³n: **"Segmento del cliente"**
+- DescripciÃ³n: _"Usamos modelos por segmento (FrÃ­o, Tibio, Caliente) con ventanas de 2-3h y una segunda de 22-23h cuando aplica."_
+- Layout: panel principal (editor) + panel lateral derecho (PrevisualizaciÃ³n)
 
 ### Tabs de segmento
 | Tab | Recordatorios | Nota |
 |---|---|---|
-| **Frío** | Solo 1 | _"Para contactos fríos es mejor no insistir demasiado."_ |
-| **Tibio** | 2 (2do opcional) | _"Sin segundo recordatorio - Un único recordatorio estratégico..."_ |
-| **Caliente** | 2 activos | — |
+| **FrÃ­o** | Solo 1 | _"Para contactos frÃ­os es mejor no insistir demasiado."_ |
+| **Tibio** | 2 (2do opcional) | _"Sin segundo recordatorio - Un Ãºnico recordatorio estratÃ©gico..."_ |
+| **Caliente** | 2 activos | â€” |
 
 ### Estructura de cada tarjeta de Recordatorio
 | Elemento | Detalle |
 |---|---|
-| Número de orden | `1`, `2` |
-| Título | "Primer recordatorio" / "Segundo recordatorio" |
-| Ventana de envío | `2-3h` / `22-23h` (badge gris) |
+| NÃºmero de orden | `1`, `2` |
+| TÃ­tulo | "Primer recordatorio" / "Segundo recordatorio" |
+| Ventana de envÃ­o | `2-3h` / `22-23h` (badge gris) |
 | Toggle | Switch on/off (morado) |
-| Textarea | Editable, máx 200 chars, contador visible |
-| Botón Plantillas | `?? Plantillas` ? sugerencias IA |
-| Banner multimedia | `?? Adjuntar imagen, video o PDF — Disponible desde el plan Gold` + botón `Actualizar plan` |
+| Textarea | Editable, mÃ¡x 200 chars, contador visible |
+| BotÃ³n Plantillas | `?? Plantillas` ? sugerencias IA |
+| Banner multimedia | `?? Adjuntar imagen, video o PDF â€” Disponible desde el plan Gold` + botÃ³n `Actualizar plan` |
 
 ### Mensajes de ejemplo por segmento
 
-#### Frío (1 recordatorio)
-- **1er (2-3h):** _"Hola ??, gracias por contactarnos. ¿En qué puedo ayudarte hoy?..."_
+#### FrÃ­o (1 recordatorio)
+- **1er (2-3h):** _"Hola ??, gracias por contactarnos. Â¿En quÃ© puedo ayudarte hoy?..."_
 
 #### Tibio (2 recordatorios)
-- **1er (2-3h):** _"Gracias por escribirnos ?? ¿Tienes alguna duda sobre nuestros productos?..."_
-- **2do (22-23h):** _"¡Hola! Ayer hablamos un poquito. ¿Te animas a revisar de nuevo?..."_
+- **1er (2-3h):** _"Gracias por escribirnos ?? Â¿Tienes alguna duda sobre nuestros productos?..."_
+- **2do (22-23h):** _"Â¡Hola! Ayer hablamos un poquito. Â¿Te animas a revisar de nuevo?..."_
 
 #### Caliente (2 recordatorios)
-- **1er (2-3h):** _"Gracias por tu interés ?? Estás a un paso de tener tu pedido listo..."_
-- **2do (22-23h):** _"¡Hola! Solo queríamos recordarte que tu pedido sigue apartado ??..."_
+- **1er (2-3h):** _"Gracias por tu interÃ©s ?? EstÃ¡s a un paso de tener tu pedido listo..."_
+- **2do (22-23h):** _"Â¡Hola! Solo querÃ­amos recordarte que tu pedido sigue apartado ??..."_
 
-### Panel Previsualización (lateral derecho)
+### Panel PrevisualizaciÃ³n (lateral derecho)
 - Burbujas estilo WhatsApp (fondo azul claro)
 - Etiquetas: "Primer recordatorio (2-3h)", "Segundo recordatorio (22-23h)"
 - Hora simulada: `18:20 ??`
@@ -342,7 +342,7 @@ public class ReminderTemplate
     public int BusinessId { get; set; }
     public CustomerSegment Segment { get; set; }
     public int Order { get; set; }          // 1 o 2
-    public string Message { get; set; }     // máx 200 chars
+    public string Message { get; set; }     // mÃ¡x 200 chars
     public string TimeWindow { get; set; }  // "2-3h", "22-23h"
     public bool IsActive { get; set; }
     public string? MediaUrl { get; set; }   // plan Gold+
@@ -351,29 +351,29 @@ public class ReminderTemplate
 
 ### Funcionalidades a implementar
 - [ ] `RecordatoriosController` ? Index (GET/POST por segmento)
-- [ ] 3 tabs: Frío / Tibio / Caliente con mensajes diferenciados
-- [ ] Editor textarea con contador en tiempo real (máx 200 chars)
+- [ ] 3 tabs: FrÃ­o / Tibio / Caliente con mensajes diferenciados
+- [ ] Editor textarea con contador en tiempo real (mÃ¡x 200 chars)
 - [ ] Toggle activo/inactivo por recordatorio
 - [ ] Modal "Plantillas" con sugerencias IA por segmento
-- [ ] Panel previsualización lateral con burbujas WhatsApp reactivas
-- [ ] Banner paywall multimedia (plan Gold+) ? botón Actualizar plan
-- [ ] Frío: ocultar 2do recordatorio; Tibio/Caliente: mostrar ambos
-- [ ] Guardado por segmento (botón Guardar o auto-save)
+- [ ] Panel previsualizaciÃ³n lateral con burbujas WhatsApp reactivas
+- [ ] Banner paywall multimedia (plan Gold+) ? botÃ³n Actualizar plan
+- [ ] FrÃ­o: ocultar 2do recordatorio; Tibio/Caliente: mostrar ambos
+- [ ] Guardado por segmento (botÃ³n Guardar o auto-save)
 
 ---
 
-## Plan de implementación (se actualiza con cada lote)
+## Plan de implementaciÃ³n (se actualiza con cada lote)
 
 ### Modelos / Entidades
 - [ ] `Business` ? agregar `Country`, `Currency`
-- [ ] `BusinessUser` ? gestión de miembros del equipo con rol
+- [ ] `BusinessUser` ? gestiÃ³n de miembros del equipo con rol
 - [ ] `UserInvitation` ? email, token, estado, fechaExpiracion
 - [ ] `NotificationEmail` ? `BusinessId`, `Email`, `IsActive`
 - [ ] `Conversation` ? `ContactId`, `BusinessId`, `UnreadCount`, `Label`, `LastMessageAt`
 - [ ] `Contact` ? `Name`, `Phone`, `AvatarInitials`
 - [ ] `Message` ? `ConversationId`, `Body`, `MediaUrl`, `SentAt`, `Direction`
 - [ ] `ConversationLabel` ? etiquetas para filtro
-- [ ] `ReminderTemplate` ? `BusinessId`, `Segment` (Frío/Tibio/Caliente), `Order`, `Message`, `TimeWindow`, `IsActive`, `MediaUrl`
+- [ ] `ReminderTemplate` ? `BusinessId`, `Segment` (FrÃ­o/Tibio/Caliente), `Order`, `Message`, `TimeWindow`, `IsActive`, `MediaUrl`
 - [ ] `Order` ? `OrderStatus` (tab) + `OrderSubStatus` (columna Kanban)
 - [ ] Colores de badge: Morado=EnValidacion, Azul=EnPreparacion/Enviado, Naranja=ListoParaEnvio, Verde=Entregado/Finalizado, Rojo=Rechazado/Cancelado
 
@@ -388,7 +388,7 @@ public class ReminderTemplate
 - [ ] `Views/AccountConfig/Index.cshtml` ? tabs Bootstrap (Org/Usuarios/Notif/Pago)
 - [ ] `Views/Pedidos/Index.cshtml` ? Kanban por sub-estado
 - [ ] `Views/Mensajes/Index.cshtml` ? layout 3 paneles
-- [ ] `Views/Mensajes/Recordatorios.cshtml` ? editor + previsualización
+- [ ] `Views/Mensajes/Recordatorios.cshtml` ? editor + previsualizaciÃ³n
 - [ ] `Views/Metricas/Index.cshtml` ? panel + paywall modal
 - [ ] `Views/Shared/_UpgradeModal.cshtml` ? componente reutilizable paywall
 
@@ -406,54 +406,54 @@ public class ReminderTemplate
 
 ---
 
-## LOTE 6 – Vendedor (Pagos) y Canales (WhatsApp conectado)
+## LOTE 6 â€“ Vendedor (Pagos) y Canales (WhatsApp conectado)
 
-### Imagen 1 – Configuración del Vendedor > Tab "Pagos"
+### Imagen 1 â€“ ConfiguraciÃ³n del Vendedor > Tab "Pagos"
 
-**Título:** Configuración de tu vendedor  
-**Botón superior derecho:** `?? Guardar Cambios`
+**TÃ­tulo:** ConfiguraciÃ³n de tu vendedor  
+**BotÃ³n superior derecho:** `?? Guardar Cambios`
 
-#### Banner superior – Importar desde redes sociales
-- Tabs: `@ Instagram` · `f Facebook` · `?? Web`
+#### Banner superior â€“ Importar desde redes sociales
+- Tabs: `@ Instagram` Â· `f Facebook` Â· `?? Web`
 - Input URL: `https://instagram.com/tu-negocio`
-- Botón: `?? Importar`
-- Descripción: _"Pega el enlace de tu negocio para extraer información automáticamente"_
-- Hint: _"Presiona Enter o Espacio para agregar múltiples enlaces"_
+- BotÃ³n: `?? Importar`
+- DescripciÃ³n: _"Pega el enlace de tu negocio para extraer informaciÃ³n automÃ¡ticamente"_
+- Hint: _"Presiona Enter o Espacio para agregar mÃºltiples enlaces"_
 
 #### Tabs del vendedor
 | Tab | Estado |
 |---|---|
-| Personalidad | — |
-| Base de conocimiento | — |
-| Entrega | — |
+| Personalidad | â€” |
+| Base de conocimiento | â€” |
+| Entrega | â€” |
 | **Pagos** | **Activo** |
 
-#### Sección "Métodos de pago"
-- Ícono: ? checkmark (morado)
-- Descripción: _"Selecciona si aceptas pago adelantado, contraentrega o ambos"_
+#### SecciÃ³n "MÃ©todos de pago"
+- Ãcono: ? checkmark (morado)
+- DescripciÃ³n: _"Selecciona si aceptas pago adelantado, contraentrega o ambos"_
 
-**Tarjeta de método de pago:**
+**Tarjeta de mÃ©todo de pago:**
 | Campo | Tipo | Ejemplo |
 |---|---|---|
 | Toggle activo | Switch (on) | activado |
 | Nombre visual | Badge | "Billeteras virtuales" |
-| Botón eliminar | `?` | eliminar tarjeta |
-| Nombre del método | Input text | "YAPE, PLIN" |
-| Tipo de método | Select/Dropdown | "Billeteras virtuales" (sub: _"Billeteras digitales como Yape, Plin, etc."_) |
-| Instrucciones de pago | Textarea | "Enviar al número: 994 832 877 / Titular: Jordan Matencio / Enviar captura del pago" |
+| BotÃ³n eliminar | `?` | eliminar tarjeta |
+| Nombre del mÃ©todo | Input text | "YAPE, PLIN" |
+| Tipo de mÃ©todo | Select/Dropdown | "Billeteras virtuales" (sub: _"Billeteras digitales como Yape, Plin, etc."_) |
+| Instrucciones de pago | Textarea | "Enviar al nÃºmero: 994 832 877 / Titular: Jordan Matencio / Enviar captura del pago" |
 | Hint | Texto | _"Proporciona todos los datos necesarios para que el cliente pueda realizar el pago correctamente"_ |
-| Vista previa | Texto renderizado | muestra las instrucciones tal como las verá el cliente |
+| Vista previa | Texto renderizado | muestra las instrucciones tal como las verÃ¡ el cliente |
 
-**Botón:** `+ Agregar método de pago` (permite múltiples métodos)
+**BotÃ³n:** `+ Agregar mÃ©todo de pago` (permite mÃºltiples mÃ©todos)
 
-#### Sección "Imágenes de pago (opcional)"
-- Descripción: _"Sube imágenes como códigos QR, capturas de cuenta o referencias visuales para facilitar el pago"_
-- Dropzone: `? Haz clic para subir imágenes`
-- Restricciones: PNG, JPG o JPEG · Máx. 5 imágenes · 5MB por imagen
+#### SecciÃ³n "ImÃ¡genes de pago (opcional)"
+- DescripciÃ³n: _"Sube imÃ¡genes como cÃ³digos QR, capturas de cuenta o referencias visuales para facilitar el pago"_
+- Dropzone: `? Haz clic para subir imÃ¡genes`
+- Restricciones: PNG, JPG o JPEG Â· MÃ¡x. 5 imÃ¡genes Â· 5MB por imagen
 
-#### Tipos de método de pago (dropdown)
+#### Tipos de mÃ©todo de pago (dropdown)
 - Billeteras virtuales (Yape, Plin, etc.)
-- (pendiente ver más opciones)
+- (pendiente ver mÃ¡s opciones)
 
 **Entidades a crear:**
 ```csharp
@@ -477,145 +477,145 @@ public class PaymentImage
 
 **Funcionalidades a implementar:**
 - [ ] Tab "Pagos" dentro de `VendedorController`
-- [ ] CRUD de métodos de pago (agregar/editar/eliminar/reordenar)
-- [ ] Tipos de método: dropdown con categorías predefinidas
-- [ ] Toggle activo/inactivo por método
+- [ ] CRUD de mÃ©todos de pago (agregar/editar/eliminar/reordenar)
+- [ ] Tipos de mÃ©todo: dropdown con categorÃ­as predefinidas
+- [ ] Toggle activo/inactivo por mÃ©todo
 - [ ] Vista previa en tiempo real de las instrucciones
-- [ ] Upload de imágenes de pago (QR, capturas) — máx 5, 5MB c/u
+- [ ] Upload de imÃ¡genes de pago (QR, capturas) â€” mÃ¡x 5, 5MB c/u
 - [ ] Banner "Importar desde redes sociales" (Instagram/Facebook/Web) compartido entre todos los tabs del vendedor
 
 ---
 
-### Imágenes 2 y 3 – Canales > WhatsApp conectado (`/Canales/WhatsApp`)
+### ImÃ¡genes 2 y 3 â€“ Canales > WhatsApp conectado (`/Canales/WhatsApp`)
 
-> Estas imágenes muestran el estado **post-conexión** del canal WhatsApp.
+> Estas imÃ¡genes muestran el estado **post-conexiÃ³n** del canal WhatsApp.
 > Complementan lo ya implementado en `ChannelConfigController.WhatsApp()`.
 
-#### Banner de éxito (estado conectado)
-- Título: **"¡Perfecto! Tu canal está listo"**
-- Subtítulo: _"Ahora puedes empezar a recibir y gestionar conversaciones de tus clientes"_
-- Botón CTA: `Ir a Conversaciones` (primario teal)
-- Ilustración decorativa (lado derecho)
+#### Banner de Ã©xito (estado conectado)
+- TÃ­tulo: **"Â¡Perfecto! Tu canal estÃ¡ listo"**
+- SubtÃ­tulo: _"Ahora puedes empezar a recibir y gestionar conversaciones de tus clientes"_
+- BotÃ³n CTA: `Ir a Conversaciones` (primario teal)
+- IlustraciÃ³n decorativa (lado derecho)
 
 #### Tarjeta del canal activo
 | Campo | Valor ejemplo |
 |---|---|
-| Ícono | WhatsApp verde |
+| Ãcono | WhatsApp verde |
 | Nombre | "WhatsApp Business API" |
 | Badge estado | `Activo` (verde) |
-| Número | `51994832877` |
-| Fecha conexión | "18 de septiembre de 2025" |
-| Botón | `Probar vendedor` |
+| NÃºmero | `51994832877` |
+| Fecha conexiÃ³n | "18 de septiembre de 2025" |
+| BotÃ³n | `Probar vendedor` |
 
-#### Sección "Dudas frecuentes" (accordion) + link "Explorar la guía detallada ?"
+#### SecciÃ³n "Dudas frecuentes" (accordion) + link "Explorar la guÃ­a detallada ?"
 | # | Pregunta |
 |---|---|
-| 1 | ¿Qué tipo de conexión elijo? |
-| 2 | ¿Necesito tener una cuenta en Meta Business? |
-| 3 | ¿Qué es el Portfolio Meta y cómo dejarlo listo? |
-| 4 | ¿Qué pasa si no conecto mi WhatsApp? |
-| 5 | ¿Debo seleccionar 'Compartir chats'? |
-| 6 | ¿Cuánto cuesta usar la API de WhatsApp Business? |
-| 7 | ¿Puedo usar un WhatsApp normal? |
-| 8 | ¿Qué pasa si cometo un error al conectar? |
+| 1 | Â¿QuÃ© tipo de conexiÃ³n elijo? |
+| 2 | Â¿Necesito tener una cuenta en Meta Business? |
+| 3 | Â¿QuÃ© es el Portfolio Meta y cÃ³mo dejarlo listo? |
+| 4 | Â¿QuÃ© pasa si no conecto mi WhatsApp? |
+| 5 | Â¿Debo seleccionar 'Compartir chats'? |
+| 6 | Â¿CuÃ¡nto cuesta usar la API de WhatsApp Business? |
+| 7 | Â¿Puedo usar un WhatsApp normal? |
+| 8 | Â¿QuÃ© pasa si cometo un error al conectar? |
 
-**Respuesta expandida de "¿Qué tipo de conexión elijo?"** incluye:
-- Opción 1: Crear nueva cuenta WhatsApp Business (nombre de presentación vía Facebook/SMS)
-- Opción 2: ? Vincular cuenta existente con QR ("Conexión Coexistencia") — **RECOMENDADA**
-- Notas importantes: verificación azul, tiempo de espera 24-72h para Portfolio nuevo, límites
+**Respuesta expandida de "Â¿QuÃ© tipo de conexiÃ³n elijo?"** incluye:
+- OpciÃ³n 1: Crear nueva cuenta WhatsApp Business (nombre de presentaciÃ³n vÃ­a Facebook/SMS)
+- OpciÃ³n 2: ? Vincular cuenta existente con QR ("ConexiÃ³n Coexistencia") â€” **RECOMENDADA**
+- Notas importantes: verificaciÃ³n azul, tiempo de espera 24-72h para Portfolio nuevo, lÃ­mites
 
 **Funcionalidades a agregar en `ChannelConfig/WhatsApp.cshtml`:**
-- [ ] Banner de éxito con botón "Ir a Conversaciones" (cuando `IsActive == true`)
-- [ ] Tarjeta del canal con número, fecha y botón "Probar vendedor"
-- [ ] Sección FAQ accordion con las 8 preguntas documentadas
-- [ ] Link "Explorar la guía detallada" (URL externa o página interna)
-- [ ] Ilustración decorativa en el banner de éxito (ya existe parcialmente)
+- [ ] Banner de Ã©xito con botÃ³n "Ir a Conversaciones" (cuando `IsActive == true`)
+- [ ] Tarjeta del canal con nÃºmero, fecha y botÃ³n "Probar vendedor"
+- [ ] SecciÃ³n FAQ accordion con las 8 preguntas documentadas
+- [ ] Link "Explorar la guÃ­a detallada" (URL externa o pÃ¡gina interna)
+- [ ] IlustraciÃ³n decorativa en el banner de Ã©xito (ya existe parcialmente)
 
 ---
 
-## LOTE 7 – Vendedor: Personalidad, Base de conocimiento y Entrega
+## LOTE 7 â€“ Vendedor: Personalidad, Base de conocimiento y Entrega
 
-### Imagen 1 – Tab "Personalidad" (`/Vendedor/Configuracion`)
+### Imagen 1 â€“ Tab "Personalidad" (`/Vendedor/Configuracion`)
 
-**Sección 1 – Información básica**
+**SecciÃ³n 1 â€“ InformaciÃ³n bÃ¡sica**
 
 | Campo | Tipo | Ejemplo |
 |---|---|---|
 | Nombre del vendedor* | Input | "Favio" |
-| Género del vendedor* | Radio | Masculino / Femenino / No especificado / Otro |
+| GÃ©nero del vendedor* | Radio | Masculino / Femenino / No especificado / Otro |
 | Nombre de la empresa* | Input | "Fresh Boy Store" |
-| País de operación* | Select | Perú |
-| Descripción de la empresa* | Textarea | texto largo del negocio |
+| PaÃ­s de operaciÃ³n* | Select | PerÃº |
+| DescripciÃ³n de la empresa* | Textarea | texto largo del negocio |
 
-**Sección 2 – Audiencia e instrucciones**
-- ¿A quién le vendes?*: Input — "broad consumer audience"
-- Reglas para mi vendedor*: Textarea — "general product support"
-- Hint: _"Siempre agrega las reglas usando términos absolutos como SIEMPRE y NUNCA."_
+**SecciÃ³n 2 â€“ Audiencia e instrucciones**
+- Â¿A quiÃ©n le vendes?*: Input â€” "broad consumer audience"
+- Reglas para mi vendedor*: Textarea â€” "general product support"
+- Hint: _"Siempre agrega las reglas usando tÃ©rminos absolutos como SIEMPRE y NUNCA."_
 
-**Sección 3 – Personalidad** (botón `Plantillas`)
-| Campo | Tipo | Límite |
+**SecciÃ³n 3 â€“ Personalidad** (botÃ³n `Plantillas`)
+| Campo | Tipo | LÃ­mite |
 |---|---|---|
-| Estilo de comunicación | Textarea | 200 chars |
+| Estilo de comunicaciÃ³n | Textarea | 200 chars |
 | Estilo de ventas | Textarea | 210 chars |
 | Longitud de respuesta | Slider 5 posiciones | Muy conciso / Conciso / Equilibrado / Detallado / Muy detallado |
-| ¿Usar emojis? | Toggle | default: on |
-| ¿Usar signos de apertura ¿¡? | Toggle | default: off |
+| Â¿Usar emojis? | Toggle | default: on |
+| Â¿Usar signos de apertura Â¿Â¡? | Toggle | default: off |
 | Palabras a evitar | Input tags | separadas por comas |
-| Paleta de emojis permitidos | Emoji picker | selección visual + añadir |
+| Paleta de emojis permitidos | Emoji picker | selecciÃ³n visual + aÃ±adir |
 
-**Sección 4 – Inicio de conversación**
-- Mensaje inicial*: "¡Hola! Soy Favio. ¿En qué puedo ayudarte hoy?"
+**SecciÃ³n 4 â€“ Inicio de conversaciÃ³n**
+- Mensaje inicial*: "Â¡Hola! Soy Favio. Â¿En quÃ© puedo ayudarte hoy?"
 - Archivos adjuntos al bienvenida: Dropzone (img 5MB / video 16MB / audio 16MB / doc 100MB)
 - Instrucciones avanzadas: colapsable
 
-**Sección 5 – Mensajes**
-- Mensaje de confirmación de compra*: "¡Gracias por tu compra! Estamos procesando tu pedido..."
+**SecciÃ³n 5 â€“ Mensajes**
+- Mensaje de confirmaciÃ³n de compra*: "Â¡Gracias por tu compra! Estamos procesando tu pedido..."
 
-**Sección 6 – Derivación humana**
+**SecciÃ³n 6 â€“ DerivaciÃ³n humana**
 - Situaciones que requieren un humano: Textarea tags
-- Pausar al vendedor de IA automáticamente: Toggle on
-- Ejemplo de mensaje de derivación (opcional): "Brindame un momento para poder ayudarte."
-- Botón al pie: `?? Configuración avanzada`
+- Pausar al vendedor de IA automÃ¡ticamente: Toggle on
+- Ejemplo de mensaje de derivaciÃ³n (opcional): "Brindame un momento para poder ayudarte."
+- BotÃ³n al pie: `?? ConfiguraciÃ³n avanzada`
 
 **Entidad `VendorConfig`:**
 Campos: `BusinessId, VendorName, VendorGender, Country, BusinessDescription, TargetAudience, Rules, CommunicationStyle, SalesStyle, ResponseLength(1-5), UseEmojis, UseOpeningPunctuation, WordsToAvoid, EmojiPalette(JSON), WelcomeMessage, PurchaseConfirmationMessage, HumanHandoffSituations, AutoPauseOnHandoff, HandoffExampleMessage`
 
 **Funcionalidades:**
-- [ ] Form con 6 secciones + botón `Guardar` en topbar
+- [ ] Form con 6 secciones + botÃ³n `Guardar` en topbar
 - [ ] Slider longitud de respuesta con 5 posiciones y labels
 - [ ] Emoji picker interactivo (paleta de emojis permitidos)
 - [ ] Dropzone para archivos adjuntos al bienvenida
-- [ ] Botón `Plantillas` con sugerencias IA por campo
-- [ ] Sección `Configuración avanzada` colapsable
+- [ ] BotÃ³n `Plantillas` con sugerencias IA por campo
+- [ ] SecciÃ³n `ConfiguraciÃ³n avanzada` colapsable
 
 ---
 
-### Imagen 2 – Tab "Base de conocimiento"
+### Imagen 2 â€“ Tab "Base de conocimiento"
 
-**Sub-filtros de categoría (tabs):**
-Todas | ?? Productos | ?? Horarios | ?? Envíos | ?? Pagos | ?? Devoluciones | ? Otros
+**Sub-filtros de categorÃ­a (tabs):**
+Todas | ?? Productos | ?? Horarios | ?? EnvÃ­os | ?? Pagos | ?? Devoluciones | ? Otros
 
-- Botón: `+ Agregar tema`
+- BotÃ³n: `+ Agregar tema`
 - Layout: Grid 2 columnas de tarjetas
 
 **Tarjeta de conocimiento:**
-- Título de la pregunta/tema
-- Badge con categoría
-- Descripción/respuesta (preview truncada)
-- Acciones: ? favorito · ?? editar · ??? eliminar
+- TÃ­tulo de la pregunta/tema
+- Badge con categorÃ­a
+- DescripciÃ³n/respuesta (preview truncada)
+- Acciones: ? favorito Â· ?? editar Â· ??? eliminar
 
 **Ejemplos de entradas reales observadas:**
 
-| Título | Categoría |
+| TÃ­tulo | CategorÃ­a |
 |---|---|
-| Aceptas pago con tarjeta de crédito | Pagos |
-| ¿Realizan envíos a provincia? | Envíos |
-| ¿Realizas pago contraentrega? | Envíos |
-| No se realiza contraentrega en: (lista de distritos) | Envíos |
-| ¿Donde estan ubicados? | Envíos |
-| ¿Tienen tienda física? | Otros |
-| ¿A qué hora llegaría el motorizado? | Envíos |
-| ¿Puede venir el motorizado por la mañana? | Envíos |
+| Aceptas pago con tarjeta de crÃ©dito | Pagos |
+| Â¿Realizan envÃ­os a provincia? | EnvÃ­os |
+| Â¿Realizas pago contraentrega? | EnvÃ­os |
+| No se realiza contraentrega en: (lista de distritos) | EnvÃ­os |
+| Â¿Donde estan ubicados? | EnvÃ­os |
+| Â¿Tienen tienda fÃ­sica? | Otros |
+| Â¿A quÃ© hora llegarÃ­a el motorizado? | EnvÃ­os |
+| Â¿Puede venir el motorizado por la maÃ±ana? | EnvÃ­os |
 
 **Entidad `KnowledgeEntry`:**
 ```csharp
@@ -633,19 +633,19 @@ public class KnowledgeEntry
 ```
 
 **Funcionalidades:**
-- [ ] Grid 2 columnas con filtrado por categoría (tabs)
-- [ ] CRUD completo: modal agregar/editar (título, contenido, categoría)
+- [ ] Grid 2 columnas con filtrado por categorÃ­a (tabs)
+- [ ] CRUD completo: modal agregar/editar (tÃ­tulo, contenido, categorÃ­a)
 - [ ] Toggle favorito ? por tarjeta
-- [ ] Eliminación con confirmación
+- [ ] EliminaciÃ³n con confirmaciÃ³n
 
 ---
 
-### Imagen 3 – Tab "Entrega"
+### Imagen 3 â€“ Tab "Entrega"
 
-- Ícono: ? morado
-- Título: **"Configuración de entrega"**
-- Descripción: _"Define las zonas de entrega, opciones de envío y métodos de pago disponibles"_
-- Estado vacío: solo botón `+ Agregar zona de entrega`
+- Ãcono: ? morado
+- TÃ­tulo: **"ConfiguraciÃ³n de entrega"**
+- DescripciÃ³n: _"Define las zonas de entrega, opciones de envÃ­o y mÃ©todos de pago disponibles"_
+- Estado vacÃ­o: solo botÃ³n `+ Agregar zona de entrega`
 
 **Entidad `DeliveryZone`:**
 ```csharp
@@ -661,13 +661,13 @@ public class DeliveryZone
 ```
 
 **Funcionalidades:**
-- [ ] Lista de zonas + botón agregar ? modal/form inline
+- [ ] Lista de zonas + botÃ³n agregar ? modal/form inline
 - [ ] Toggle activo/inactivo por zona
-- [ ] Estado vacío con CTA hasta primera zona creada
+- [ ] Estado vacÃ­o con CTA hasta primera zona creada
 
 ---
 
-### Actualización Plan de implementación (Lote 7)
+### ActualizaciÃ³n Plan de implementaciÃ³n (Lote 7)
 
 **Modelos nuevos:** `VendorConfig`, `KnowledgeEntry`, `DeliveryZone`
 
@@ -686,344 +686,344 @@ public class DeliveryZone
 
 ---
 
-## LOTE 7 – Módulo de Productos (`/Productos`)
+## LOTE 7 â€“ MÃ³dulo de Productos (`/Productos`)
 
-### Imagen 1 – Lista de productos registrados
+### Imagen 1 â€“ Lista de productos registrados
 
 **Ruta:** `/Productos`  
-**Título:** Productos registrados  
-**Subtítulo:** _"Visualiza, edita y gestiona todos los productos de tu tienda."_  
-**Botones superiores derechos:** `??` (refresh) · `? Carga masiva` · `+ Nuevo producto` (primario morado)
+**TÃ­tulo:** Productos registrados  
+**SubtÃ­tulo:** _"Visualiza, edita y gestiona todos los productos de tu tienda."_  
+**Botones superiores derechos:** `??` (refresh) Â· `? Carga masiva` Â· `+ Nuevo producto` (primario morado)
 
-#### Barra de búsqueda y filtro de categorías
-- Input: "Buscar producto..." (con ícono lupa)
-- Dropdown: "Todas las categorías" ? abre panel con:
-  - Input interno: "Buscar categorías..."
-  - Opción: `Seleccionar todo` · contador `0 / 10` · enlace `Limpiar`
-  - Lista de categorías con radio button: Limpieza, zapatillas, Pack, kit, sneakers
+#### Barra de bÃºsqueda y filtro de categorÃ­as
+- Input: "Buscar producto..." (con Ã­cono lupa)
+- Dropdown: "Todas las categorÃ­as" ? abre panel con:
+  - Input interno: "Buscar categorÃ­as..."
+  - OpciÃ³n: `Seleccionar todo` Â· contador `0 / 10` Â· enlace `Limpiar`
+  - Lista de categorÃ­as con radio button: Limpieza, zapatillas, Pack, kit, sneakers
 
 #### Tabla de productos
 | Columna | Detalle |
 |---|---|
 | Producto | Thumbnail + Nombre + "Creado el DD-MM-YYYY" |
-| Categorías | Badges de tags (ej. "Pack", "kit limpieza") |
+| CategorÃ­as | Badges de tags (ej. "Pack", "kit limpieza") |
 | Disponibilidad | Badge verde "Disponible" |
 | Precio | Formato "S/. 100.00" |
-| Acciones | Ícono ?? editar · ??? eliminar por fila |
+| Acciones | Ãcono ?? editar Â· ??? eliminar por fila |
 
-#### Footer / Paginación
+#### Footer / PaginaciÃ³n
 - Texto: "Total de 9 productos"
-- Selector: "Filas por página: 10 ?"
-- Paginación numérica
+- Selector: "Filas por pÃ¡gina: 10 ?"
+- PaginaciÃ³n numÃ©rica
 
 #### Toast flotante (inferior derecho)
-- Muestra nombre del negocio: `"Yago"` · Botón `Probar vendedor`
+- Muestra nombre del negocio: `"Yago"` Â· BotÃ³n `Probar vendedor`
 
 ---
 
-### Imagen 2 – Formulario de edición de producto
+### Imagen 2 â€“ Formulario de ediciÃ³n de producto
 
 **Ruta:** `/Productos/Editar`  
 **Breadcrumb:** `Productos > Editar producto`  
-**Botones superiores derechos:** `Cancelar` · `Guardar` (primario morado)
+**Botones superiores derechos:** `Cancelar` Â· `Guardar` (primario morado)
 
-#### Sección 1 – Información básica
+#### SecciÃ³n 1 â€“ InformaciÃ³n bÃ¡sica
 | Campo | Tipo | Detalle |
 |---|---|---|
-| Nombre del producto * | Input text | Máx. 99 chars, contador visible (ej. `99/99`) |
+| Nombre del producto * | Input text | MÃ¡x. 99 chars, contador visible (ej. `99/99`) |
 | Disponible | Toggle switch | Activado/desactivado |
-| Descripción del producto | Textarea | Con contador de chars; texto que usa el vendedor IA |
-| Características del producto | Textarea (columna derecha) | Palabras clave y contexto para respuestas del vendedor |
-| Categorías | Tag input | Separadas por coma; hint: _"También puedes pegar tu lista separado por comas. Ej: Ropa, Calzado, Accesorios."_ |
+| DescripciÃ³n del producto | Textarea | Con contador de chars; texto que usa el vendedor IA |
+| CaracterÃ­sticas del producto | Textarea (columna derecha) | Palabras clave y contexto para respuestas del vendedor |
+| CategorÃ­as | Tag input | Separadas por coma; hint: _"TambiÃ©n puedes pegar tu lista separado por comas. Ej: Ropa, Calzado, Accesorios."_ |
 
-#### Sección 2 – Imágenes y videos
+#### SecciÃ³n 2 â€“ ImÃ¡genes y videos
 - Drag & drop zone: _"Arrastre y suelte los archivos o haga clic para enviar"_
-- Límites: Máximo 3 archivos · Fotos: 2MB · Videos: 5MB (PNG, JPG, PNG, 3GPP, MP4)
-- Botón: `Importar`
-- Sub-sección **"Imágenes actuales"** con badge contador (ej. `4 imágenes`)
+- LÃ­mites: MÃ¡ximo 3 archivos Â· Fotos: 2MB Â· Videos: 5MB (PNG, JPG, PNG, 3GPP, MP4)
+- BotÃ³n: `Importar`
+- Sub-secciÃ³n **"ImÃ¡genes actuales"** con badge contador (ej. `4 imÃ¡genes`)
   - Thumbnails clickeables para eliminar o reemplazar
-  - Hint: _"Click en las imágenes actuales del producto para eliminarlas o agregar nuevas."_
+  - Hint: _"Click en las imÃ¡genes actuales del producto para eliminarlas o agregar nuevas."_
 
-#### Sección 3 – Precio general
-- Descripción: _"Este precio será usado para la variante principal del producto"_
-- Campo: `Precio base` · prefijo `PEN` · valor numérico · sufijo `PEN`
-- Hint: _"Este será el precio de tu producto. Se guardará internamente como una variante principal."_
+#### SecciÃ³n 3 â€“ Precio general
+- DescripciÃ³n: _"Este precio serÃ¡ usado para la variante principal del producto"_
+- Campo: `Precio base` Â· prefijo `PEN` Â· valor numÃ©rico Â· sufijo `PEN`
+- Hint: _"Este serÃ¡ el precio de tu producto. Se guardarÃ¡ internamente como una variante principal."_
 
-#### Sección 4 – Agregar variaciones
-- Descripción: _"Ofrece diferentes opciones de tu producto, como color, talla o material."_
-- Indicador de almacenamiento: `0.0MB / 20MB` · `20/de respuestas`
-- Botón: `+ Agregar opción`
+#### SecciÃ³n 4 â€“ Agregar variaciones
+- DescripciÃ³n: _"Ofrece diferentes opciones de tu producto, como color, talla o material."_
+- Indicador de almacenamiento: `0.0MB / 20MB` Â· `20/de respuestas`
+- BotÃ³n: `+ Agregar opciÃ³n`
 
 ---
 
-### Imagen adicional – Formulario de creación de nuevo producto
+### Imagen adicional â€“ Formulario de creaciÃ³n de nuevo producto
 
 **Ruta:** `/Productos/Nuevo`  
 **Breadcrumb:** `Productos > Nuevo producto`  
-**Título de página:** "Agregar nuevo producto"  
-**Botones superiores derechos:** `?? Cambios sin guardar` (badge advertencia, aparece al detectar cambios) · `Cancelar` · `Guardar` (primario morado)
+**TÃ­tulo de pÃ¡gina:** "Agregar nuevo producto"  
+**Botones superiores derechos:** `?? Cambios sin guardar` (badge advertencia, aparece al detectar cambios) Â· `Cancelar` Â· `Guardar` (primario morado)
 
-> Este formulario es la variante de **creación** vs. la de edición (misma estructura, diferencias documentadas a continuación).
+> Este formulario es la variante de **creaciÃ³n** vs. la de ediciÃ³n (misma estructura, diferencias documentadas a continuaciÃ³n).
 
-#### Diferencias clave respecto al formulario de edición
+#### Diferencias clave respecto al formulario de ediciÃ³n
 
 | Campo | Editar | Crear |
 |---|---|---|
-| Título de página | "Editar producto" | "Agregar nuevo producto" |
-| Nombre del producto (máx) | 99 chars (`99/99`) | 150 chars (`0/150`) |
-| Descripción del producto (máx) | sin detalle visible | 500 chars (`0/500`) |
-| Características del producto (máx) | sin detalle visible | 1000 chars (`0/1000`) |
-| Categorías placeholder | — | _"Escribe tus categorías y presiona 'Enter' o 'coma(,)' para agregarlas."_ |
+| TÃ­tulo de pÃ¡gina | "Editar producto" | "Agregar nuevo producto" |
+| Nombre del producto (mÃ¡x) | 99 chars (`99/99`) | 150 chars (`0/150`) |
+| DescripciÃ³n del producto (mÃ¡x) | sin detalle visible | 500 chars (`0/500`) |
+| CaracterÃ­sticas del producto (mÃ¡x) | sin detalle visible | 1000 chars (`0/1000`) |
+| CategorÃ­as placeholder | â€” | _"Escribe tus categorÃ­as y presiona 'Enter' o 'coma(,)' para agregarlas."_ |
 | Precio base valor inicial | valor existente | `0,00` |
-| Indicador de cambios | — | Badge `?? Cambios sin guardar` (aparece automáticamente al editar) |
-| Imágenes actuales | Sección presente con thumbnails | No aplica (sin imágenes previas) |
+| Indicador de cambios | â€” | Badge `?? Cambios sin guardar` (aparece automÃ¡ticamente al editar) |
+| ImÃ¡genes actuales | SecciÃ³n presente con thumbnails | No aplica (sin imÃ¡genes previas) |
 
-#### Sección Agregar variaciones (detalle extendido)
-- Fila de opción visible por defecto:
-  - Input "Ej. Color" ? nombre de la opción
+#### SecciÃ³n Agregar variaciones (detalle extendido)
+- Fila de opciÃ³n visible por defecto:
+  - Input "Ej. Color" ? nombre de la opciÃ³n
   - Input "Agregar valores..." ? valores separados por coma (ej. "Blanco, Negro, Gris")
-  - Ícono ??? para eliminar la fila de opción
-  - Hint debajo: _"Añade valores separados por coma"_
-- Indicador: `0.0MB / 20MB` · `20/MB disponible`
-- Botón: `+ Agregar opción` (permite múltiples opciones: Color, Talla, Material, etc.)
+  - Ãcono ??? para eliminar la fila de opciÃ³n
+  - Hint debajo: _"AÃ±ade valores separados por coma"_
+- Indicador: `0.0MB / 20MB` Â· `20/MB disponible`
+- BotÃ³n: `+ Agregar opciÃ³n` (permite mÃºltiples opciones: Color, Talla, Material, etc.)
 
-#### Placeholders de ejemplo en Información básica
+#### Placeholders de ejemplo en InformaciÃ³n bÃ¡sica
 | Campo | Placeholder / Ejemplo visible |
 |---|---|
-| Nombre del producto | _"Ej. Camiseta de algodón"_ |
-| Descripción del producto | _"?? Nuestra camiseta de algodón es suave, fresca y perfecta para el día a día. Disponible en varios colores para combinar con todo."_ |
-| Características del producto | _"Camiseta básica de algodón 100% peinado, suave al tacto y transpirable. Ideal para uso casual o deportivo en climas cálidos. Su corte recto favorece todo tipo de cuerpo. Tallas: XS, S, M, L, XL. Colores: Blanco, Negro, Gris, Azul marino."_ |
+| Nombre del producto | _"Ej. Camiseta de algodÃ³n"_ |
+| DescripciÃ³n del producto | _"?? Nuestra camiseta de algodÃ³n es suave, fresca y perfecta para el dÃ­a a dÃ­a. Disponible en varios colores para combinar con todo."_ |
+| CaracterÃ­sticas del producto | _"Camiseta bÃ¡sica de algodÃ³n 100% peinado, suave al tacto y transpirable. Ideal para uso casual o deportivo en climas cÃ¡lidos. Su corte recto favorece todo tipo de cuerpo. Tallas: XS, S, M, L, XL. Colores: Blanco, Negro, Gris, Azul marino."_ |
 
 **Funcionalidades adicionales confirmadas:**
-- [ ] Badge `?? Cambios sin guardar` que aparece dinámicamente al detectar cambios en el formulario
-- [ ] Contadores de caracteres actualizados: Nombre 150, Descripción 500, Características 1000
+- [ ] Badge `?? Cambios sin guardar` que aparece dinÃ¡micamente al detectar cambios en el formulario
+- [ ] Contadores de caracteres actualizados: Nombre 150, DescripciÃ³n 500, CaracterÃ­sticas 1000
 - [ ] Placeholder descriptivo con ejemplo de producto en cada campo de texto
-- [ ] Fila de variación pre-renderizada con inputs de nombre + valores + botón eliminar
-- [ ] Hint "Añade valores separados por coma" bajo el input de valores de variación
+- [ ] Fila de variaciÃ³n pre-renderizada con inputs de nombre + valores + botÃ³n eliminar
+- [ ] Hint "AÃ±ade valores separados por coma" bajo el input de valores de variaciÃ³n
 
 ---
 
-### Imagen 3 – Modal de confirmación de eliminación
+### Imagen 3 â€“ Modal de confirmaciÃ³n de eliminaciÃ³n
 
-**Trigger:** Clic en ícono ??? de la fila de producto  
+**Trigger:** Clic en Ã­cono ??? de la fila de producto  
 **Overlay:** Fondo oscuro semi-transparente sobre la lista
 
 | Elemento | Detalle |
 |---|---|
-| Título | `¿Estás seguro?` |
-| Cuerpo | _"Estás a punto de eliminar el producto '[Nombre del producto]'. Esta acción no se puede deshacer y eliminará permanentemente el producto de tu catálogo."_ |
-| Botón cancelar | `Cancelar` (secundario, borde gris) |
-| Botón confirmar | `Eliminar producto` (destructivo, rojo) |
+| TÃ­tulo | `Â¿EstÃ¡s seguro?` |
+| Cuerpo | _"EstÃ¡s a punto de eliminar el producto '[Nombre del producto]'. Esta acciÃ³n no se puede deshacer y eliminarÃ¡ permanentemente el producto de tu catÃ¡logo."_ |
+| BotÃ³n cancelar | `Cancelar` (secundario, borde gris) |
+| BotÃ³n confirmar | `Eliminar producto` (destructivo, rojo) |
 
 ---
 
 ### Entidades/campos implicados
 - `Product` ? `Name`, `Description`, `Characteristics`, `BasePrice`, `IsAvailable`, `CreatedAt`, `BusinessId`
-- `ProductCategory` ? relación muchos-a-muchos con tags de texto libre
-- `ProductImage` ? `ProductId`, `ImageUrl`, `Order` (máx 3 por producto)
+- `ProductCategory` ? relaciÃ³n muchos-a-muchos con tags de texto libre
+- `ProductImage` ? `ProductId`, `ImageUrl`, `Order` (mÃ¡x 3 por producto)
 - `ProductVariant` ? `ProductId`, `OptionName`, `Price`, `Stock` (para variaciones)
 
 ### ViewModels a crear
-- `ProductListViewModel` ? lista paginada + filtro por categoría + buscador
-- `ProductEditViewModel` ? formulario completo (info + imágenes + precio + variantes)
+- `ProductListViewModel` ? lista paginada + filtro por categorÃ­a + buscador
+- `ProductEditViewModel` ? formulario completo (info + imÃ¡genes + precio + variantes)
 
 ### Funcionalidades a implementar
 - [ ] `ProductosController` ? Index (lista paginada), Create, Edit, Delete
-- [ ] Tabla con columnas: Producto, Categorías, Disponibilidad, Precio, Acciones
-- [ ] Búsqueda por nombre de producto (input live search o submit)
-- [ ] Filtro por categoría con dropdown multi-select (radio/checkbox) + "Seleccionar todo" + "Limpiar"
-- [ ] Paginación con selector "Filas por página"
-- [ ] Botón `+ Nuevo producto` ? formulario de creación
-- [ ] Botón `? Carga masiva` ? importación CSV/Excel (pendiente detalle)
-- [ ] Formulario de edición con 4 secciones: Información básica, Imágenes, Precio, Variaciones
+- [ ] Tabla con columnas: Producto, CategorÃ­as, Disponibilidad, Precio, Acciones
+- [ ] BÃºsqueda por nombre de producto (input live search o submit)
+- [ ] Filtro por categorÃ­a con dropdown multi-select (radio/checkbox) + "Seleccionar todo" + "Limpiar"
+- [ ] PaginaciÃ³n con selector "Filas por pÃ¡gina"
+- [ ] BotÃ³n `+ Nuevo producto` ? formulario de creaciÃ³n
+- [ ] BotÃ³n `? Carga masiva` ? importaciÃ³n CSV/Excel (pendiente detalle)
+- [ ] Formulario de ediciÃ³n con 4 secciones: InformaciÃ³n bÃ¡sica, ImÃ¡genes, Precio, Variaciones
 - [ ] Toggle "Disponible" en el formulario (actualiza `IsAvailable`)
-- [ ] Contador de caracteres en tiempo real: Nombre (150 max), Descripción (500 max), Características (1000 max)
-- [ ] Tag input de categorías (separadas por coma, con chips eliminables)
-- [ ] Drag & drop de imágenes (máx 3, validación de tipo y tamaño)
-- [ ] Gestión de imágenes actuales (eliminar/reordenar con click)
-- [ ] Sección de variaciones (`+ Agregar opción`) con indicador de almacenamiento
-- [ ] Modal de confirmación de eliminación con mensaje dinámico con nombre del producto
-- [ ] Toast flotante inferior: nombre del negocio + botón "Probar vendedor"
+- [ ] Contador de caracteres en tiempo real: Nombre (150 max), DescripciÃ³n (500 max), CaracterÃ­sticas (1000 max)
+- [ ] Tag input de categorÃ­as (separadas por coma, con chips eliminables)
+- [ ] Drag & drop de imÃ¡genes (mÃ¡x 3, validaciÃ³n de tipo y tamaÃ±o)
+- [ ] GestiÃ³n de imÃ¡genes actuales (eliminar/reordenar con click)
+- [ ] SecciÃ³n de variaciones (`+ Agregar opciÃ³n`) con indicador de almacenamiento
+- [ ] Modal de confirmaciÃ³n de eliminaciÃ³n con mensaje dinÃ¡mico con nombre del producto
+- [ ] Toast flotante inferior: nombre del negocio + botÃ³n "Probar vendedor"
 
 ---
 
-## LOTE 8 – Flujo de conexión WhatsApp (`/Canales`) – Estado pre-conexión y OAuth Meta
+## LOTE 8 â€“ Flujo de conexiÃ³n WhatsApp (`/Canales`) â€“ Estado pre-conexiÃ³n y OAuth Meta
 
-> Estas imágenes documentan la pantalla de inicio de conexión del canal WhatsApp
+> Estas imÃ¡genes documentan la pantalla de inicio de conexiÃ³n del canal WhatsApp
 > y los dos primeros pasos del popup OAuth de Facebook/Meta que se abre al pulsar "Conectar WhatsApp".
 
 ---
 
-### Imagen 1 – Página principal de Canales (estado pre-conexión)
+### Imagen 1 â€“ PÃ¡gina principal de Canales (estado pre-conexiÃ³n)
 
 **Ruta:** `/Configuraciones/Canales`  
-**Breadcrumb:** `Configuración > Canales` · botón `? Volver`  
-**App visible:** yavendió! (referencia de marca equivalente a InstaVende/ya!)
+**Breadcrumb:** `ConfiguraciÃ³n > Canales` Â· botÃ³n `? Volver`  
+**App visible:** yavendiÃ³! (referencia de marca equivalente a InstaVende/ya!)
 
-#### Sidebar izquierdo (estructura de navegación completa visible)
-| Sección | Ítem | Detalle |
+#### Sidebar izquierdo (estructura de navegaciÃ³n completa visible)
+| SecciÃ³n | Ãtem | Detalle |
 |---|---|---|
-| Principal | Productos | — |
-| Principal | Métricas | ?? (bloqueado, plan superior) |
-| Principal | Mi vendedor | — |
-| Cuenta | Planes | — |
-| Cuenta | Programa de referidos | — |
+| Principal | Productos | â€” |
+| Principal | MÃ©tricas | ?? (bloqueado, plan superior) |
+| Principal | Mi vendedor | â€” |
+| Cuenta | Planes | â€” |
+| Cuenta | Programa de referidos | â€” |
 | Cuenta | Configuraciones ? | Expandido |
-| Cuenta ? Config | Canales | Badge naranja "Conectar What..." (acción pendiente) |
-| Cuenta ? Config | Idioma | ???? Español |
-| — | Soporte | — |
+| Cuenta ? Config | Canales | Badge naranja "Conectar What..." (acciÃ³n pendiente) |
+| Cuenta ? Config | Idioma | ???? EspaÃ±ol |
+| â€” | Soporte | â€” |
 
 **Banner inferior del sidebar:**
-- Avatar/ilustración: "Yago — socio de tu negocio"
-- Subtítulo: _"Te conecta con lo que genera resultados"_
-- Botón: `Activar sociedad` (primario oscuro, ancho completo)
+- Avatar/ilustraciÃ³n: "Yago â€” socio de tu negocio"
+- SubtÃ­tulo: _"Te conecta con lo que genera resultados"_
+- BotÃ³n: `Activar sociedad` (primario oscuro, ancho completo)
 
-#### Panel principal – Conecta tu WhatsApp Business
-- **Título:** "Conecta tu WhatsApp Business"
-- **Subtítulo:** _"Es el primer paso para empezar a vender con tu vendedor inteligente."_
-- **Botones:** `Conectar WhatsApp` (primario oscuro) · `Contactar soporte` (secundario sin fondo)
-- **Ilustración:** personaje decorativo robot/mago (esquina superior derecha)
+#### Panel principal â€“ Conecta tu WhatsApp Business
+- **TÃ­tulo:** "Conecta tu WhatsApp Business"
+- **SubtÃ­tulo:** _"Es el primer paso para empezar a vender con tu vendedor inteligente."_
+- **Botones:** `Conectar WhatsApp` (primario oscuro) Â· `Contactar soporte` (secundario sin fondo)
+- **IlustraciÃ³n:** personaje decorativo robot/mago (esquina superior derecha)
 
-#### Sección "Pasos para conectar" (3 pasos numerados)
-| # | Título | Descripción |
+#### SecciÃ³n "Pasos para conectar" (3 pasos numerados)
+| # | TÃ­tulo | DescripciÃ³n |
 |---|---|---|
-| 1 | Inicia sesión en Meta | Conéctate con tu cuenta de Facebook Business. |
-| 2 | Completa la información | Nombre, sitio web y categoría del negocio. |
-| 3 | Activa tu número de WhatsApp | Selecciona "Usar solo un nombre visible" y confirma. |
+| 1 | Inicia sesiÃ³n en Meta | ConÃ©ctate con tu cuenta de Facebook Business. |
+| 2 | Completa la informaciÃ³n | Nombre, sitio web y categorÃ­a del negocio. |
+| 3 | Activa tu nÃºmero de WhatsApp | Selecciona "Usar solo un nombre visible" y confirma. |
 
-- Layout: 3 tarjetas en fila horizontal con número de paso en badge circular
-- Texto completo paso 3: _"Activa tu número de WhatsApp: Selecciona 'Usar solo un nombre visible' y confirma."_
+- Layout: 3 tarjetas en fila horizontal con nÃºmero de paso en badge circular
+- Texto completo paso 3: _"Activa tu nÃºmero de WhatsApp: Selecciona 'Usar solo un nombre visible' y confirma."_
 
-#### Sección "Dudas frecuentes"
-- Link superior derecho: `Explorar la guía detallada ?`
-- Primera pregunta visible (accordion): "¿Necesito tener una cuenta en Meta Business?" (colapsada)
-- (Mismas preguntas documentadas en Lote 6 para el estado post-conexión)
+#### SecciÃ³n "Dudas frecuentes"
+- Link superior derecho: `Explorar la guÃ­a detallada ?`
+- Primera pregunta visible (accordion): "Â¿Necesito tener una cuenta en Meta Business?" (colapsada)
+- (Mismas preguntas documentadas en Lote 6 para el estado post-conexiÃ³n)
 
 ---
 
-### Imagen 2 – Popup OAuth Meta: Pantalla de bienvenida (paso 1)
+### Imagen 2 â€“ Popup OAuth Meta: Pantalla de bienvenida (paso 1)
 
 **Contexto:** Ventana emergente nativa de Facebook que se abre al pulsar "Conectar WhatsApp"  
 **URL:** `facebook.com/v23.0/dialog/oauth?app_id=1593662348031270&...`  
-**Título de ventana:** "Inicio de sesión con Facebook para empresas"  
-**Header del popup:** Logo Meta (`?`) · flecha ? · logo ya! · ícono de cuenta
+**TÃ­tulo de ventana:** "Inicio de sesiÃ³n con Facebook para empresas"  
+**Header del popup:** Logo Meta (`?`) Â· flecha ? Â· logo ya! Â· Ã­cono de cuenta
 
 #### Contenido
-- **Ilustración:** banner superior con gráfico colorido (apretón de manos, personas, iconos de negocio)
-- **Título:** _"Conecta tu cuenta fácilmente con YaVendió"_
-- **Subtítulo:** _"En este proceso de registro, se te guiará para que registres tu cuenta de empresa y la conectes con tu socio."_
+- **IlustraciÃ³n:** banner superior con grÃ¡fico colorido (apretÃ³n de manos, personas, iconos de negocio)
+- **TÃ­tulo:** _"Conecta tu cuenta fÃ¡cilmente con YaVendiÃ³"_
+- **SubtÃ­tulo:** _"En este proceso de registro, se te guiarÃ¡ para que registres tu cuenta de empresa y la conectes con tu socio."_
 
-**Sección "Podrás hacer lo siguiente:"**
-- Ícono ?? + título: **"Comunícate con tus clientes a gran escala"**
-- Descripción: _"La API de la nube te permite enviar y recibir mensajes de forma segura y administrar las conversaciones de manera automática."_
-- Bullet 1: _"Manejar grandes volúmenes de mensajes con facilidad"_
+**SecciÃ³n "PodrÃ¡s hacer lo siguiente:"**
+- Ãcono ?? + tÃ­tulo: **"ComunÃ­cate con tus clientes a gran escala"**
+- DescripciÃ³n: _"La API de la nube te permite enviar y recibir mensajes de forma segura y administrar las conversaciones de manera automÃ¡tica."_
+- Bullet 1: _"Manejar grandes volÃºmenes de mensajes con facilidad"_
 - Bullet 2: _"Reducir los costos asociados a los SMS o llamadas de voz tradicionales"_
 
 **Footer legal:**
 - _"Al continuar, aceptas las Condiciones de hospedaje de Meta para la API de la nube y las Condiciones de Meta para WhatsApp Business."_ (ambos como enlaces)
-- Link: `Política de privacidad de YaVendio`
-- Botones: `Cancelar` (secundario) · `Continuar` (primario azul)
+- Link: `PolÃ­tica de privacidad de YaVendio`
+- Botones: `Cancelar` (secundario) Â· `Continuar` (primario azul)
 
 ---
 
-### Imagen 3 – Popup OAuth Meta: Selección de activos comerciales (paso 2)
+### Imagen 3 â€“ Popup OAuth Meta: SelecciÃ³n de activos comerciales (paso 2)
 
 **Contexto:** Segundo paso dentro del mismo popup OAuth de Facebook  
 **URL:** `facebook.com/v23.0/dialog/oauth?app_id=1593662348031270&cbt=...`
 
 #### Contenido
-- **Título:** _"Selecciona los activos comerciales que quieres compartir con YaVendio"_
-- **Subtítulo:** _"Puedes usar activos existentes o crear nuevos."_
+- **TÃ­tulo:** _"Selecciona los activos comerciales que quieres compartir con YaVendio"_
+- **SubtÃ­tulo:** _"Puedes usar activos existentes o crear nuevos."_
 
 **Campos:**
 | Campo | Tipo | Estado ejemplo |
 |---|---|---|
-| Portfolio comercial ?? | Dropdown | "Cecile Mellet - Joyas" (con ícono "C" rojo) |
-| Cuenta de WhatsApp Business ?? | Dropdown | "Selecciona una cuenta de WhatsApp Business" (vacío) |
+| Portfolio comercial ?? | Dropdown | "Cecile Mellet - Joyas" (con Ã­cono "C" rojo) |
+| Cuenta de WhatsApp Business ?? | Dropdown | "Selecciona una cuenta de WhatsApp Business" (vacÃ­o) |
 
-- Los íconos ?? indican tooltips de ayuda contextual
+- Los Ã­conos ?? indican tooltips de ayuda contextual
 - El Portfolio comercial se pre-selecciona con el negocio de Facebook del usuario
 - La Cuenta de WhatsApp Business se vincula al portfolio seleccionado
 
 **Footer:**
-- Link: `Política de privacidad de YaVendio`
-- Botones: `Volver` (secundario) · `Siguiente` (primario azul)
+- Link: `PolÃ­tica de privacidad de YaVendio`
+- Botones: `Volver` (secundario) Â· `Siguiente` (primario azul)
 
 ---
 
-### Imagen adicional A – Popup OAuth Meta: Dropdown "Portfolio comercial" expandido
+### Imagen adicional A â€“ Popup OAuth Meta: Dropdown "Portfolio comercial" expandido
 
 **Contexto:** Paso 2 del popup, con el dropdown de Portfolio comercial abierto mostrando todas las opciones del usuario  
 
 #### Opciones del dropdown Portfolio comercial
-| Opción | Tipo | Identificador | Nota |
+| OpciÃ³n | Tipo | Identificador | Nota |
 |---|---|---|---|
-| Crea un portfolio comercial | Acción | — | Aparece en gris con advertencia: _"Alcanzaste el límite de portfolios comerciales."_ |
-| Cecile Mellet - Joyas | Portfolio (seleccionado) | `359994644525367` | Ícono "C" rojo · resaltado en azul |
-| Harmonia Do Sol | Portfolio | `655891477379543` | Ícono "H" gris |
-| Patio Digital | Portfolio | — | Advertencia naranja: _"Business is not eligible for advertising based on Facebook Advertising P..."_ |
-| solarixshop | Portfolio | `1418789775705678` | Ícono "S" azul |
+| Crea un portfolio comercial | AcciÃ³n | â€” | Aparece en gris con advertencia: _"Alcanzaste el lÃ­mite de portfolios comerciales."_ |
+| Cecile Mellet - Joyas | Portfolio (seleccionado) | `359994644525367` | Ãcono "C" rojo Â· resaltado en azul |
+| Harmonia Do Sol | Portfolio | `655891477379543` | Ãcono "H" gris |
+| Patio Digital | Portfolio | â€” | Advertencia naranja: _"Business is not eligible for advertising based on Facebook Advertising P..."_ |
+| solarixshop | Portfolio | `1418789775705678` | Ãcono "S" azul |
 
-**Detalles técnicos:**
-- Cada portfolio muestra su **Identificador numérico** (ID de Business Manager de Meta) bajo el nombre
+**Detalles tÃ©cnicos:**
+- Cada portfolio muestra su **Identificador numÃ©rico** (ID de Business Manager de Meta) bajo el nombre
 - El portfolio seleccionado queda resaltado en azul con bullet azul relleno
-- Se puede buscar portfolio por nombre (input con ícono lupa)
-- El aviso _"Alcanzaste el límite"_ bloquea la creación de portfolios adicionales
+- Se puede buscar portfolio por nombre (input con Ã­cono lupa)
+- El aviso _"Alcanzaste el lÃ­mite"_ bloquea la creaciÃ³n de portfolios adicionales
 
 ---
 
-### Imagen adicional B – Popup OAuth Meta: Dropdown "Cuenta de WhatsApp Business" expandido
+### Imagen adicional B â€“ Popup OAuth Meta: Dropdown "Cuenta de WhatsApp Business" expandido
 
 **Contexto:** Paso 2 del popup, con Portfolio "Harmonia Do Sol" seleccionado y dropdown de Cuenta WA abierto  
 
 #### Opciones del dropdown Cuenta de WhatsApp Business
-| Opción | Ícono | Descripción |
+| OpciÃ³n | Ãcono | DescripciÃ³n |
 |---|---|---|
-| Crear una cuenta de WhatsApp Business | ? (checkbox vacío) | Crea una WABA nueva vinculada al portfolio |
-| Conecta una app de WhatsApp Business | ?? ícono WhatsApp verde | Vincula una app WA Business existente (Coexistencia) |
+| Crear una cuenta de WhatsApp Business | ? (checkbox vacÃ­o) | Crea una WABA nueva vinculada al portfolio |
+| Conecta una app de WhatsApp Business | ?? Ã­cono WhatsApp verde | Vincula una app WA Business existente (Coexistencia) |
 
-- Input de búsqueda disponible (lupa) dentro del dropdown
-- La opción **"Conecta una app de WhatsApp Business"** corresponde a la conexión Coexistencia (recomendada, QR)
-- Botón `Siguiente` permanece deshabilitado hasta seleccionar una opción
+- Input de bÃºsqueda disponible (lupa) dentro del dropdown
+- La opciÃ³n **"Conecta una app de WhatsApp Business"** corresponde a la conexiÃ³n Coexistencia (recomendada, QR)
+- BotÃ³n `Siguiente` permanece deshabilitado hasta seleccionar una opciÃ³n
 
 ---
 
-### Imagen adicional C – Popup OAuth Meta: Ingreso de número de teléfono (paso 3)
+### Imagen adicional C â€“ Popup OAuth Meta: Ingreso de nÃºmero de telÃ©fono (paso 3)
 
-**Contexto:** Tercer paso del popup; aparece después de seleccionar el portfolio y la cuenta WA  
-**Indicador de pasos:** 3 radio buttons (paso 3 activo = último)
+**Contexto:** Tercer paso del popup; aparece despuÃ©s de seleccionar el portfolio y la cuenta WA  
+**Indicador de pasos:** 3 radio buttons (paso 3 activo = Ãºltimo)
 
 #### Contenido
-- **Título:** "Ingresa tu número de teléfono de WhatsApp Business"
-- **Subtítulo (en inglés):** _"Select a country and enter your phone number."_
+- **TÃ­tulo:** "Ingresa tu nÃºmero de telÃ©fono de WhatsApp Business"
+- **SubtÃ­tulo (en inglÃ©s):** _"Select a country and enter your phone number."_
 
-**Campo número de teléfono:**
-- Selector de país: `PE +51` (dropdown con bandera de Perú, prefijo internacional)
-- Input: campo vacío para el número local
+**Campo nÃºmero de telÃ©fono:**
+- Selector de paÃ­s: `PE +51` (dropdown con bandera de PerÃº, prefijo internacional)
+- Input: campo vacÃ­o para el nÃºmero local
 
-**Sección informativa "?? Conecta tu app de WhatsApp Business existente":**
-- Texto principal (en inglés): _"Share your WhatsApp Business account with YaVendió. You'll still have full access to your WhatsApp Business app and can continue using it."_
-- **"Compartir acceso"**: _"Es posible que se comparta información de la cuenta, como tu número de teléfono, contactos, chats e historial de chat."_
-- **"Protección de tus datos"**: _"Los chats individuales ahora se administrarán con un servicio seguro de Meta. Enviaremos una notificación a tus clientes sobre este cambio de privacidad."_
+**SecciÃ³n informativa "?? Conecta tu app de WhatsApp Business existente":**
+- Texto principal (en inglÃ©s): _"Share your WhatsApp Business account with YaVendiÃ³. You'll still have full access to your WhatsApp Business app and can continue using it."_
+- **"Compartir acceso"**: _"Es posible que se comparta informaciÃ³n de la cuenta, como tu nÃºmero de telÃ©fono, contactos, chats e historial de chat."_
+- **"ProtecciÃ³n de tus datos"**: _"Los chats individuales ahora se administrarÃ¡n con un servicio seguro de Meta. Enviaremos una notificaciÃ³n a tus clientes sobre este cambio de privacidad."_
 
 **Footer:**
-- Link: `Política de privacidad de YaVendio`
-- Botones: `Volver` (secundario) · `Siguiente` (primario azul, deshabilitado hasta ingresar número)
+- Link: `PolÃ­tica de privacidad de YaVendio`
+- Botones: `Volver` (secundario) Â· `Siguiente` (primario azul, deshabilitado hasta ingresar nÃºmero)
 
 ---
 
-### Flujo completo de conexión WhatsApp (actualizado con pasos confirmados)
+### Flujo completo de conexiÃ³n WhatsApp (actualizado con pasos confirmados)
 
 ```
-[Canales pre-conexión]
+[Canales pre-conexiÃ³n]
   ? Clic "Conectar WhatsApp"
-    ? [Popup OAuth Meta – Paso 1: Bienvenida + descripción API / Continuar]
-      ? [Popup OAuth Meta – Paso 2: Selección Portfolio comercial + Cuenta WA Business]
-           ? Portfolio: lista con ID, búsqueda, opción crear (si no hay límite)
+    ? [Popup OAuth Meta â€“ Paso 1: Bienvenida + descripciÃ³n API / Continuar]
+      ? [Popup OAuth Meta â€“ Paso 2: SelecciÃ³n Portfolio comercial + Cuenta WA Business]
+           ? Portfolio: lista con ID, bÃºsqueda, opciÃ³n crear (si no hay lÃ­mite)
            ? Cuenta WA: "Crear nueva WABA" o "Conectar app existente (Coexistencia)"
-        ? [Popup OAuth Meta – Paso 3: Ingreso número de teléfono con selector de país]
-             ? Aviso: compartir acceso + protección de datos
-          ? [Canales post-conexión: banner éxito + tarjeta activa] (documentado en Lote 6)
+        ? [Popup OAuth Meta â€“ Paso 3: Ingreso nÃºmero de telÃ©fono con selector de paÃ­s]
+             ? Aviso: compartir acceso + protecciÃ³n de datos
+          ? [Canales post-conexiÃ³n: banner Ã©xito + tarjeta activa] (documentado en Lote 6)
 ```
 
 > **Nota:** El popup es 100% gestionado por Meta (Facebook OAuth). InstaVende solo controla:
@@ -1033,16 +1033,16 @@ public class DeliveryZone
 
 ### Funcionalidades a implementar / completar en `ChannelConfig`
 
-- [ ] Vista pre-conexión (`IsActive == false`): título + subtítulo + botón "Conectar WhatsApp" + pasos + FAQ
-- [ ] Botón `Contactar soporte` (secundario) ? enlace a WhatsApp/email de soporte
-- [ ] Pasos de conexión (3 tarjetas numeradas) con descripciones completas
-- [ ] Banner inferior sidebar: "Yago — socio de tu negocio" + botón "Activar sociedad"
-- [ ] Badge de alerta en ítem "Canales" del sidebar cuando canal no conectado
-- [ ] Acción `ConectarWhatsApp` ? redirige al OAuth URL de Meta con `app_id`, `redirect_uri`, `scopes` correctos
+- [ ] Vista pre-conexiÃ³n (`IsActive == false`): tÃ­tulo + subtÃ­tulo + botÃ³n "Conectar WhatsApp" + pasos + FAQ
+- [ ] BotÃ³n `Contactar soporte` (secundario) ? enlace a WhatsApp/email de soporte
+- [ ] Pasos de conexiÃ³n (3 tarjetas numeradas) con descripciones completas
+- [ ] Banner inferior sidebar: "Yago â€” socio de tu negocio" + botÃ³n "Activar sociedad"
+- [ ] Badge de alerta en Ã­tem "Canales" del sidebar cuando canal no conectado
+- [ ] AcciÃ³n `ConectarWhatsApp` ? redirige al OAuth URL de Meta con `app_id`, `redirect_uri`, `scopes` correctos
 - [ ] Callback OAuth de Meta: recibir `code`, intercambiar por `access_token`, extraer `WabaId` y `PhoneNumberId`
 - [ ] Guardar en BD: `PhoneNumber`, `WabaId`, `PhoneNumberId`, `AccessToken`, `ConnectedAt`
-- [ ] Redirigir a vista post-conexión al completar el flujo exitosamente
-- [ ] Manejo de errores OAuth (usuario cancela, permisos insuficientes, portfolio sin número WA)
+- [ ] Redirigir a vista post-conexiÃ³n al completar el flujo exitosamente
+- [ ] Manejo de errores OAuth (usuario cancela, permisos insuficientes, portfolio sin nÃºmero WA)
 
 ### Entidades/campos a agregar
 - `WhatsAppChannel` ? `BusinessId`, `PhoneNumber`, `WabaId`, `PhoneNumberId`, `AccessToken`, `ConnectedAt`, `IsActive`

@@ -29,7 +29,7 @@ public class DataProtectionService
         try { return _protector.Unprotect(cipherText); }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "TryDecrypt failed — cipher may be from a different key ring");
+            _logger.LogWarning(ex, "TryDecrypt failed â€” cipher may be from a different key ring");
             return null;
         }
     }
@@ -40,7 +40,7 @@ public class DataProtectionService
         try   { return _protector.Unprotect(cipherText); }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Decrypt failed — cipher may be from a different key ring or corrupt");
+            _logger.LogError(ex, "Decrypt failed â€” cipher may be from a different key ring or corrupt");
             throw;
         }
     }

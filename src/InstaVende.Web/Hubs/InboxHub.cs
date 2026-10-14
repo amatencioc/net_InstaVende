@@ -4,28 +4,25 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace InstaVende.Web.Hubs;
 
+/// <summary>
+/// Canal en tiempo real del panel. Cada conexión se une automáticamente (y solo) al grupo
+/// de su propio negocio; el cliente no puede elegir el grupo.
+/// Eventos emitidos: messageReceived, messageStatus, conversationUpdated (ver InboxNotifier).
+/// </summary>
 [Authorize]
-public class InboxHub : Hub
+public sealed class InboxHub(CurrentUserService currentUser) : Hub
 {
-    private readonly CurrentUserService _cu;
+    public static string GroupName(int businessId) => $"business_{businessId}";
 
-    public InboxHub(CurrentUserService cu) => _cu = cu;
-
-    /// <summary>
-    /// Joins the SignalR group for the caller's own business only.
-    /// The businessId parameter is ignored — always uses the authenticated user's business.
-    /// </summary>
-    public async Task JoinBusinessGroup(string businessId)
+    public override async Task OnConnectedAsync()
     {
-        var ownId = await _cu.GetBusinessIdAsync();
-        if (ownId == null) return;
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"business_{ownId}");
-    }
-
-    public async Task LeaveBusinessGroup(string businessId)
-    {
-        var ownId = await _cu.GetBusinessIdAsync();
-        if (ownId == null) return;
-        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"business_{ownId}");
+        var businessId = await currentUser.GetBusinessIdAsync();
+        if (businessId is null)
+        {
+            Context.Abort();
+            return;
+        }
+        await Groups.AddToGroupAsync(Context.ConnectionId, GroupName(businessId.Value));
+        await base.OnConnectedAsync();
     }
 }

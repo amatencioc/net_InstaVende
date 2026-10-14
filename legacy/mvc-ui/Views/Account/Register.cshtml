@@ -1,0 +1,60 @@
+@model InstaVende.Web.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+    ViewData["Tagline"] = "Empieza a vender en automático hoy";
+    Layout = "_AuthLayout";
+}
+@section Features {
+    <div class="auth-feat">
+        <i class="bi bi-rocket-takeoff-fill" aria-hidden="true"></i>
+        <div><strong>Listo en menos de 1 día</strong><span>Configura tu vendedor y empieza a vender</span></div>
+    </div>
+    <div class="auth-feat">
+        <i class="bi bi-gift" aria-hidden="true"></i>
+        <div><strong>14 días gratis</strong><span>Sin tarjeta de crédito</span></div>
+    </div>
+    <div class="auth-feat">
+        <i class="bi bi-headset" aria-hidden="true"></i>
+        <div><strong>Soporte dedicado</strong><span>Te acompañamos en la configuración</span></div>
+    </div>
+}
+<a asp-controller="Home" asp-action="Index" class="auth-back"><i class="bi bi-arrow-left" aria-hidden="true"></i> Volver al inicio</a>
+<h1 class="auth-box-title">Crea tu cuenta</h1>
+<p class="auth-box-sub">Configura tu vendedor IA en minutos</p>
+<form asp-action="Register" method="post" novalidate>
+    <div asp-validation-summary="ModelOnly" class="f-val-box"></div>
+    <div class="f-row">
+        <div class="f-group">
+            <label asp-for="FirstName" class="f-label">Nombre</label>
+            <input asp-for="FirstName" class="f-input" placeholder="Juan" autocomplete="given-name" autofocus />
+            <span asp-validation-for="FirstName" class="f-val-msg"></span>
+        </div>
+        <div class="f-group">
+            <label asp-for="LastName" class="f-label">Apellido</label>
+            <input asp-for="LastName" class="f-input" placeholder="García" autocomplete="family-name" />
+            <span asp-validation-for="LastName" class="f-val-msg"></span>
+        </div>
+    </div>
+    <div class="f-group">
+        <label asp-for="BusinessName" class="f-label">Nombre del negocio</label>
+        <input asp-for="BusinessName" class="f-input" placeholder="Mi Tienda" autocomplete="organization" />
+        <span asp-validation-for="BusinessName" class="f-val-msg"></span>
+    </div>
+    <div class="f-group">
+        <label asp-for="Email" class="f-label">Email</label>
+        <input asp-for="Email" class="f-input" placeholder="tu@negocio.com" autocomplete="email" />
+        <span asp-validation-for="Email" class="f-val-msg"></span>
+    </div>
+    <div class="f-group">
+        <label asp-for="Password" class="f-label">Contraseña</label>
+        <input asp-for="Password" class="f-input" placeholder="Mínimo 8 caracteres" autocomplete="new-password" />
+        <span asp-validation-for="Password" class="f-val-msg"></span>
+    </div>
+    <div class="f-group">
+        <label asp-for="ConfirmPassword" class="f-label">Confirmar contraseña</label>
+        <input asp-for="ConfirmPassword" class="f-input" placeholder="Repite tu contraseña" autocomplete="new-password" />
+        <span asp-validation-for="ConfirmPassword" class="f-val-msg"></span>
+    </div>
+    <button type="submit" class="btn-auth">Crear cuenta gratis</button>
+</form>
+<p class="auth-footer">¿Ya tienes cuenta? <a asp-action="Login">Iniciar sesión</a></p>

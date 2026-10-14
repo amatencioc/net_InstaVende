@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "WhatsApp Web QR client for InstaVende",
   "main": "index.js",
+  "engines": {
+    "node": ">=20.12"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "node index.js"

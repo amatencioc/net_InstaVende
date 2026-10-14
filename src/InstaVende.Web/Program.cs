@@ -1,104 +1,101 @@
-using InstaVende.Core.Entities;
-using InstaVende.Core.Interfaces;
 using InstaVende.Infrastructure.Data;
-using InstaVende.Infrastructure.Repositories;
-using InstaVende.Infrastructure.Services;
 using InstaVende.Web.Hubs;
+using InstaVende.Web.Infrastructure;
 using InstaVende.Web.Services;
+using InstaVende.Web.Services.Bot;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console()
-    .WriteTo.File("logs/instavende-.log", rollingInterval: RollingInterval.Day)
-    .CreateLogger();
-builder.Host.UseSerilog();
+// Durante la generación del documento OpenAPI en compilación no hay BD ni servicios en segundo plano
+var isGeneratingOpenApi = System.Reflection.Assembly.GetEntryAssembly()?.GetName().Name == "GetDocument.Insider";
 
-builder.Services.AddDbContext<AppDbContext>(o =>
-    o.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Host.UseSerilog((ctx, services, lc) => lc
+    .ReadFrom.Configuration(ctx.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext());
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(o =>
-{
-    o.Password.RequireDigit = true;
-    o.Password.RequiredLength = 6;
-    o.Password.RequireNonAlphanumeric = false;
-    o.Password.RequireUppercase = false;
-    o.Lockout.MaxFailedAccessAttempts = 5;
-    o.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(10);
-})
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders()
-.AddErrorDescriber<SpanishIdentityErrorDescriber>();
+builder.Services
+    .AddInstaVendeOptions(builder.Configuration, validateOnStart: !isGeneratingOpenApi)
+    .AddInstaVendeData(builder.Configuration, persistKeys: !isGeneratingOpenApi)
+    .AddInstaVendeIdentity(builder.Environment)
+    .AddInstaVendeApi(builder.Configuration)
+    .AddInstaVendeBot();
 
-builder.Services.ConfigureApplicationCookie(o =>
-{
-    o.LoginPath = "/Account/Login";
-    o.LogoutPath = "/Account/Logout";
-    o.AccessDeniedPath = "/Account/AccessDenied";
-    o.ExpireTimeSpan = TimeSpan.FromDays(7);
-    o.SlidingExpiration = true;
-});
-
-builder.Services.AddDataProtection();
-builder.Services.AddMemoryCache();
-builder.Services.AddSignalR();
-builder.Services.AddHttpClients(builder.Configuration);
-
-builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
-builder.Services.AddScoped<DataProtectionService>();
-builder.Services.AddScoped<CurrentUserService>();
-builder.Services.AddScoped<ImageService>();
-builder.Services.AddSingleton<MasterPromptBuilder>();
-builder.Services.AddValidatedOptions(builder.Configuration);
-builder.Services.AddScoped<IBotEngineService, BotEngineService>();
-builder.Services.AddScoped<IChannelMessageSender, WhatsAppService>();
-builder.Services.AddScoped<IChannelMessageSender, MetaMessengerService>();
-builder.Services.AddScoped<IChannelMessageSender, InstagramService>();
-
-builder.Services.AddControllersWithViews(o =>
-    o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()));
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddSingleton<InstaVende.Web.Services.WaClientHostedService>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<InstaVende.Web.Services.WaClientHostedService>());
+if (!isGeneratingOpenApi)
+    builder.Services.AddInstaVendeMessaging();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+if (!isGeneratingOpenApi)
+    await InitializeDatabaseAsync(app);
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
+if (!app.Environment.IsDevelopment()) app.UseHsts();
+
+app.UseMiddleware<SecurityHeadersMiddleware>();
+app.UseHttpsRedirection();
+app.UseSerilogRequestLogging();
+
+// Imágenes subidas por los comercios (wwwroot/uploads)
+app.UseStaticFiles();
+
+// SPA opcional servido por la propia API (despliegue en un solo servidor)
+var spaRoot = app.Configuration["Spa:RootPath"];
+var serveSpa = !string.IsNullOrWhiteSpace(spaRoot) && Directory.Exists(Path.Combine(app.Environment.ContentRootPath, spaRoot));
+if (serveSpa)
 {
+    var spaFiles = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, spaRoot!));
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = spaFiles });
+}
+
+app.UseRouting();
+app.UseCors();
+app.UseRateLimiter();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+app.MapHub<InboxHub>("/hubs/inbox");
+app.MapOpenApi();
+if (app.Environment.IsDevelopment())
+    app.MapScalarApiReference("/api/docs", o => o.WithTitle("InstaVende API"));
+
+if (serveSpa)
+    app.MapFallbackToFile("index.html", new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(Path.Combine(app.Environment.ContentRootPath, spaRoot!))
+    });
+
+if (!isGeneratingOpenApi)
+    app.Services.GetRequiredService<BotPromptBuilder>().ValidateTools(
+        app.Services.CreateScope().ServiceProvider.GetRequiredService<BotToolExecutor>().ToolNames);
+
+app.Run();
+
+static async Task InitializeDatabaseAsync(WebApplication app)
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        // MigrateAsync ya consulta __EFMigrationsHistory internamente;
-        // GetPendingMigrationsAsync() es redundante y añade un roundtrip extra.
         await db.Database.MigrateAsync();
 
-        var rm = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-        // Carga todos los roles en 1 query en lugar de N × RoleExistsAsync
-        var requiredRoles  = new[] { "Admin", "Merchant", "Member" };
-        var existingRoles  = rm.Roles.Select(r => r.Name).ToHashSet();
-        foreach (var role in requiredRoles.Where(r => !existingRoles.Contains(r)))
-            await rm.CreateAsync(new IdentityRole(role));
+        var roles = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var existing = roles.Roles.Select(r => r.Name).ToHashSet();
+        foreach (var role in AppRoles.All.Where(r => !existing.Contains(r)))
+            await roles.CreateAsync(new IdentityRole(role));
     }
     catch (Exception ex)
     {
-        var startupLog = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        startupLog.LogError(ex, "Startup seeding failed  the application may not function correctly");
+        logger.LogCritical(ex, "No se pudo inicializar la base de datos (migraciones/roles). La aplicación no arrancará.");
+        throw;
     }
 }
 
-if (!app.Environment.IsDevelopment()) { app.UseExceptionHandler("/Home/Error"); app.UseHsts(); }
-
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseSerilogRequestLogging();
-app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
-app.MapHub<InboxHub>("/inboxHub");
-app.Run();
+public partial class Program;
