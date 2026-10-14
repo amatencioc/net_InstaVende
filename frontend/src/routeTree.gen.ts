@@ -24,6 +24,13 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
+import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
+import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
+import { Route as AppSellerPaymentsRouteImport } from './routes/_app/seller/payments'
+import { Route as AppSellerPersonalityRouteImport } from './routes/_app/seller/personality'
+import { Route as AppSellerRulesRouteImport } from './routes/_app/seller/rules'
+import { Route as AppSellerTestRouteImport } from './routes/_app/seller/test'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -98,6 +105,41 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerDeliveryRoute = AppSellerDeliveryRouteImport.update({
+  id: '/delivery',
+  path: '/delivery',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerKnowledgeRoute = AppSellerKnowledgeRouteImport.update({
+  id: '/knowledge',
+  path: '/knowledge',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerPaymentsRoute = AppSellerPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerPersonalityRoute = AppSellerPersonalityRouteImport.update({
+  id: '/personality',
+  path: '/personality',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerRulesRoute = AppSellerRulesRouteImport.update({
+  id: '/rules',
+  path: '/rules',
+  getParentRoute: () => AppSellerRoute,
+} as any)
+const AppSellerTestRoute = AppSellerTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => AppSellerRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,11 +150,18 @@ export interface FileRoutesByFullPath {
   '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
-  '/seller': typeof AppSellerRoute
+  '/seller': typeof AppSellerRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/seller/delivery': typeof AppSellerDeliveryRoute
+  '/seller/knowledge': typeof AppSellerKnowledgeRoute
+  '/seller/payments': typeof AppSellerPaymentsRoute
+  '/seller/personality': typeof AppSellerPersonalityRoute
+  '/seller/rules': typeof AppSellerRulesRoute
+  '/seller/test': typeof AppSellerTestRoute
+  '/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,11 +172,17 @@ export interface FileRoutesByTo {
   '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
-  '/seller': typeof AppSellerRoute
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/seller/delivery': typeof AppSellerDeliveryRoute
+  '/seller/knowledge': typeof AppSellerKnowledgeRoute
+  '/seller/payments': typeof AppSellerPaymentsRoute
+  '/seller/personality': typeof AppSellerPersonalityRoute
+  '/seller/rules': typeof AppSellerRulesRoute
+  '/seller/test': typeof AppSellerTestRoute
+  '/seller': typeof AppSellerIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,11 +196,18 @@ export interface FileRoutesById {
   '/_app/orders': typeof AppOrdersRoute
   '/_app/products': typeof AppProductsRoute
   '/_app/reminders': typeof AppRemindersRoute
-  '/_app/seller': typeof AppSellerRoute
+  '/_app/seller': typeof AppSellerRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/seller/delivery': typeof AppSellerDeliveryRoute
+  '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
+  '/_app/seller/payments': typeof AppSellerPaymentsRoute
+  '/_app/seller/personality': typeof AppSellerPersonalityRoute
+  '/_app/seller/rules': typeof AppSellerRulesRoute
+  '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -163,6 +225,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/seller/delivery'
+    | '/seller/knowledge'
+    | '/seller/payments'
+    | '/seller/personality'
+    | '/seller/rules'
+    | '/seller/test'
+    | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -173,11 +242,17 @@ export interface FileRouteTypes {
     | '/orders'
     | '/products'
     | '/reminders'
-    | '/seller'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/seller/delivery'
+    | '/seller/knowledge'
+    | '/seller/payments'
+    | '/seller/personality'
+    | '/seller/rules'
+    | '/seller/test'
+    | '/seller'
   id:
     | '__root__'
     | '/'
@@ -195,6 +270,13 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/seller/delivery'
+    | '/_app/seller/knowledge'
+    | '/_app/seller/payments'
+    | '/_app/seller/personality'
+    | '/_app/seller/rules'
+    | '/_app/seller/test'
+    | '/_app/seller/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -310,8 +392,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/seller/': {
+      id: '/_app/seller/'
+      path: '/'
+      fullPath: '/seller/'
+      preLoaderRoute: typeof AppSellerIndexRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/delivery': {
+      id: '/_app/seller/delivery'
+      path: '/delivery'
+      fullPath: '/seller/delivery'
+      preLoaderRoute: typeof AppSellerDeliveryRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/knowledge': {
+      id: '/_app/seller/knowledge'
+      path: '/knowledge'
+      fullPath: '/seller/knowledge'
+      preLoaderRoute: typeof AppSellerKnowledgeRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/payments': {
+      id: '/_app/seller/payments'
+      path: '/payments'
+      fullPath: '/seller/payments'
+      preLoaderRoute: typeof AppSellerPaymentsRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/personality': {
+      id: '/_app/seller/personality'
+      path: '/personality'
+      fullPath: '/seller/personality'
+      preLoaderRoute: typeof AppSellerPersonalityRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/rules': {
+      id: '/_app/seller/rules'
+      path: '/rules'
+      fullPath: '/seller/rules'
+      preLoaderRoute: typeof AppSellerRulesRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
+    '/_app/seller/test': {
+      id: '/_app/seller/test'
+      path: '/test'
+      fullPath: '/seller/test'
+      preLoaderRoute: typeof AppSellerTestRouteImport
+      parentRoute: typeof AppSellerRoute
+    }
   }
 }
+
+interface AppSellerRouteChildren {
+  AppSellerDeliveryRoute: typeof AppSellerDeliveryRoute
+  AppSellerKnowledgeRoute: typeof AppSellerKnowledgeRoute
+  AppSellerPaymentsRoute: typeof AppSellerPaymentsRoute
+  AppSellerPersonalityRoute: typeof AppSellerPersonalityRoute
+  AppSellerRulesRoute: typeof AppSellerRulesRoute
+  AppSellerTestRoute: typeof AppSellerTestRoute
+  AppSellerIndexRoute: typeof AppSellerIndexRoute
+}
+
+const AppSellerRouteChildren: AppSellerRouteChildren = {
+  AppSellerDeliveryRoute: AppSellerDeliveryRoute,
+  AppSellerKnowledgeRoute: AppSellerKnowledgeRoute,
+  AppSellerPaymentsRoute: AppSellerPaymentsRoute,
+  AppSellerPersonalityRoute: AppSellerPersonalityRoute,
+  AppSellerRulesRoute: AppSellerRulesRoute,
+  AppSellerTestRoute: AppSellerTestRoute,
+  AppSellerIndexRoute: AppSellerIndexRoute,
+}
+
+const AppSellerRouteWithChildren = AppSellerRoute._addFileChildren(
+  AppSellerRouteChildren,
+)
 
 interface AppRouteChildren {
   AppChannelsRoute: typeof AppChannelsRoute
@@ -321,7 +476,7 @@ interface AppRouteChildren {
   AppOrdersRoute: typeof AppOrdersRoute
   AppProductsRoute: typeof AppProductsRoute
   AppRemindersRoute: typeof AppRemindersRoute
-  AppSellerRoute: typeof AppSellerRoute
+  AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
 }
 
@@ -333,7 +488,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppOrdersRoute: AppOrdersRoute,
   AppProductsRoute: AppProductsRoute,
   AppRemindersRoute: AppRemindersRoute,
-  AppSellerRoute: AppSellerRoute,
+  AppSellerRoute: AppSellerRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
 }
 
