@@ -6,6 +6,327 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/channels": {
+      "get": {
+        "tags": [
+          "Channels"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelsOverviewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelType}/meta-config": {
+      "put": {
+        "tags": [
+          "Channels"
+        ],
+        "parameters": [
+          {
+            "name": "channelType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ChannelType"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelMetaConfigRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelMetaConfigRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelMetaConfigRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelSummaryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelType}/regenerate-verify-token": {
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "parameters": [
+          {
+            "name": "channelType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ChannelType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelSummaryDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelType}": {
+      "delete": {
+        "tags": [
+          "Channels"
+        ],
+        "parameters": [
+          {
+            "name": "channelType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ChannelType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelActionResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/{channelType}/test": {
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "parameters": [
+          {
+            "name": "channelType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ChannelType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelTestResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/whatsapp/session": {
+      "get": {
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "parameters": [
+          {
+            "name": "qrHash",
+            "in": "query",
+            "schema": {
+              "pattern": "^[a-fA-F0-9]{1,64}$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhatsAppSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/whatsapp/disconnect": {
+      "post": {
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelActionResultDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/whatsapp/reset": {
+      "post": {
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelActionResultDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/channels/service/restart": {
+      "post": {
+        "tags": [
+          "WhatsAppSession"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelActionResultDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/csrf": {
       "get": {
         "tags": [
@@ -225,6 +546,305 @@
   },
   "components": {
     "schemas": {
+      "ChannelActionResultDto": {
+        "required": [
+          "ok",
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ChannelConnectionStatus": {
+        "enum": [
+          "Connected",
+          "Disconnected",
+          "NeedsAttention"
+        ]
+      },
+      "ChannelMetaConfigRequest": {
+        "required": [
+          "phoneNumberId",
+          "wabaId",
+          "pageId",
+          "instagramAccountId",
+          "accessToken",
+          "appSecret",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "phoneNumberId": {
+            "maxLength": 32,
+            "minLength": 0,
+            "pattern": "^\\d+$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "wabaId": {
+            "maxLength": 32,
+            "minLength": 0,
+            "pattern": "^\\d+$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pageId": {
+            "maxLength": 32,
+            "minLength": 0,
+            "pattern": "^\\d+$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instagramAccountId": {
+            "maxLength": 32,
+            "minLength": 0,
+            "pattern": "^\\d+$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accessToken": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "pattern": "^\\S*$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "appSecret": {
+            "maxLength": 256,
+            "minLength": 0,
+            "pattern": "^\\S*$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChannelSecretHintDto": {
+        "required": [
+          "configured",
+          "last4"
+        ],
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean"
+          },
+          "last4": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ChannelServiceStatusDto": {
+        "required": [
+          "managed",
+          "healthy",
+          "restarting",
+          "consecutiveFailures"
+        ],
+        "type": "object",
+        "properties": {
+          "managed": {
+            "type": "boolean"
+          },
+          "healthy": {
+            "type": "boolean"
+          },
+          "restarting": {
+            "type": "boolean"
+          },
+          "consecutiveFailures": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ChannelsOverviewDto": {
+        "required": [
+          "channels",
+          "service"
+        ],
+        "type": "object",
+        "properties": {
+          "channels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChannelSummaryDto"
+            }
+          },
+          "service": {
+            "$ref": "#/components/schemas/ChannelServiceStatusDto"
+          }
+        }
+      },
+      "ChannelSummaryDto": {
+        "required": [
+          "channel",
+          "configured",
+          "isActive",
+          "status",
+          "statusDetail",
+          "whatsAppMode",
+          "sessionState",
+          "phoneNumber",
+          "phoneNumberId",
+          "wabaId",
+          "pageId",
+          "instagramAccountId",
+          "connectedAt",
+          "accessToken",
+          "appSecret",
+          "webhookUrl",
+          "webhookVerifyToken"
+        ],
+        "type": "object",
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ChannelConnectionStatus"
+          },
+          "statusDetail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "whatsAppMode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ChannelWhatsAppMode"
+              }
+            ]
+          },
+          "sessionState": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phoneNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "phoneNumberId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "wabaId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pageId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instagramAccountId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "connectedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "accessToken": {
+            "$ref": "#/components/schemas/ChannelSecretHintDto"
+          },
+          "appSecret": {
+            "$ref": "#/components/schemas/ChannelSecretHintDto"
+          },
+          "webhookUrl": {
+            "type": "string"
+          },
+          "webhookVerifyToken": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ChannelTestResultDto": {
+        "required": [
+          "ok",
+          "message",
+          "accountName"
+        ],
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "accountName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ChannelType": {
+        "enum": [
+          "WhatsApp",
+          "FacebookMessenger",
+          "Instagram"
+        ]
+      },
+      "ChannelWhatsAppMode": {
+        "enum": [
+          "Qr",
+          "CloudApi",
+          null
+        ]
+      },
       "LoginRequest": {
         "required": [
           "email",
@@ -472,10 +1092,91 @@
             }
           }
         }
+      },
+      "WhatsAppSessionDto": {
+        "required": [
+          "state",
+          "connected",
+          "qrDataUrl",
+          "qrExpiresAt",
+          "qrSecondsLeft",
+          "qrHash",
+          "unchanged",
+          "phoneNumber",
+          "pushName",
+          "connectedAt",
+          "service"
+        ],
+        "type": "object",
+        "properties": {
+          "state": {
+            "type": "string"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "qrDataUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "qrExpiresAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "qrSecondsLeft": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "qrHash": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "unchanged": {
+            "type": "boolean"
+          },
+          "phoneNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "pushName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "connectedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "service": {
+            "$ref": "#/components/schemas/ChannelServiceStatusDto"
+          }
+        }
       }
     }
   },
   "tags": [
+    {
+      "name": "Channels"
+    },
+    {
+      "name": "WhatsAppSession"
+    },
     {
       "name": "Auth"
     }

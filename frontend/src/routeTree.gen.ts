@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as AppChannelsRouteImport } from './routes/_app/channels'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
 import { Route as AppMetricsRouteImport } from './routes/_app/metrics'
@@ -24,6 +23,9 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppChannelsIndexRouteImport } from './routes/_app/channels/index'
+import { Route as AppChannelsMetaRouteImport } from './routes/_app/channels/meta'
+import { Route as AppChannelsWhatsappRouteImport } from './routes/_app/channels/whatsapp'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
 import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
 import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
@@ -44,11 +46,6 @@ const AppRoute = AppRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AppChannelsRoute = AppChannelsRouteImport.update({
-  id: '/channels',
-  path: '/channels',
-  getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
@@ -105,6 +102,21 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppChannelsIndexRoute = AppChannelsIndexRouteImport.update({
+  id: '/channels/',
+  path: '/channels/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChannelsMetaRoute = AppChannelsMetaRouteImport.update({
+  id: '/channels/meta',
+  path: '/channels/meta',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChannelsWhatsappRoute = AppChannelsWhatsappRouteImport.update({
+  id: '/channels/whatsapp',
+  path: '/channels/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -143,7 +155,6 @@ const AppSellerTestRoute = AppSellerTestRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/channels': typeof AppChannelsRoute
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
@@ -155,17 +166,19 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/channels/meta': typeof AppChannelsMetaRoute
+  '/channels/whatsapp': typeof AppChannelsWhatsappRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/channels/': typeof AppChannelsIndexRoute
   '/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/channels': typeof AppChannelsRoute
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
@@ -176,12 +189,15 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/channels/meta': typeof AppChannelsMetaRoute
+  '/channels/whatsapp': typeof AppChannelsWhatsappRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/channels': typeof AppChannelsIndexRoute
   '/seller': typeof AppSellerIndexRoute
 }
 export interface FileRoutesById {
@@ -189,7 +205,6 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
-  '/_app/channels': typeof AppChannelsRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/inbox': typeof AppInboxRoute
   '/_app/metrics': typeof AppMetricsRoute
@@ -201,19 +216,21 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/channels/meta': typeof AppChannelsMetaRoute
+  '/_app/channels/whatsapp': typeof AppChannelsWhatsappRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/_app/seller/payments': typeof AppSellerPaymentsRoute
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/channels/': typeof AppChannelsIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/channels'
     | '/dashboard'
     | '/inbox'
     | '/metrics'
@@ -225,17 +242,19 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/channels/meta'
+    | '/channels/whatsapp'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/channels/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/channels'
     | '/dashboard'
     | '/inbox'
     | '/metrics'
@@ -246,19 +265,21 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/channels/meta'
+    | '/channels/whatsapp'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/channels'
     | '/seller'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_auth'
-    | '/_app/channels'
     | '/_app/dashboard'
     | '/_app/inbox'
     | '/_app/metrics'
@@ -270,12 +291,15 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/channels/meta'
+    | '/_app/channels/whatsapp'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
     | '/_app/seller/payments'
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/channels/'
     | '/_app/seller/'
   fileRoutesById: FileRoutesById
 }
@@ -307,13 +331,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_app/channels': {
-      id: '/_app/channels'
-      path: '/channels'
-      fullPath: '/channels'
-      preLoaderRoute: typeof AppChannelsRouteImport
-      parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
       id: '/_app/dashboard'
@@ -392,6 +409,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/channels/': {
+      id: '/_app/channels/'
+      path: '/channels'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof AppChannelsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/channels/meta': {
+      id: '/_app/channels/meta'
+      path: '/channels/meta'
+      fullPath: '/channels/meta'
+      preLoaderRoute: typeof AppChannelsMetaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/channels/whatsapp': {
+      id: '/_app/channels/whatsapp'
+      path: '/channels/whatsapp'
+      fullPath: '/channels/whatsapp'
+      preLoaderRoute: typeof AppChannelsWhatsappRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/seller/': {
       id: '/_app/seller/'
       path: '/'
@@ -469,7 +507,6 @@ const AppSellerRouteWithChildren = AppSellerRoute._addFileChildren(
 )
 
 interface AppRouteChildren {
-  AppChannelsRoute: typeof AppChannelsRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppInboxRoute: typeof AppInboxRoute
   AppMetricsRoute: typeof AppMetricsRoute
@@ -478,10 +515,12 @@ interface AppRouteChildren {
   AppRemindersRoute: typeof AppRemindersRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
+  AppChannelsMetaRoute: typeof AppChannelsMetaRoute
+  AppChannelsWhatsappRoute: typeof AppChannelsWhatsappRoute
+  AppChannelsIndexRoute: typeof AppChannelsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppChannelsRoute: AppChannelsRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppInboxRoute: AppInboxRoute,
   AppMetricsRoute: AppMetricsRoute,
@@ -490,6 +529,9 @@ const AppRouteChildren: AppRouteChildren = {
   AppRemindersRoute: AppRemindersRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
+  AppChannelsMetaRoute: AppChannelsMetaRoute,
+  AppChannelsWhatsappRoute: AppChannelsWhatsappRoute,
+  AppChannelsIndexRoute: AppChannelsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
