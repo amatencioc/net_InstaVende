@@ -50,7 +50,6 @@ En PowerShell, ve a la carpeta donde quieras guardar el proyecto y clónalo:
 cd D:\Proyectos            # o la carpeta que prefieras
 git clone <URL-del-repositorio> net_InstaVende
 cd net_InstaVende
-git checkout refactor/api-spa     # rama con la versión nueva (omítelo si ya se fusionó en main)
 ```
 
 ---
