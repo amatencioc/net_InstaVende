@@ -54,6 +54,7 @@ docker compose -f deploy/docker-compose.yml --env-file deploy/.env up --build
 |---|---|
 | Compilar todo (genera el contrato OpenAPI) | `dotnet build InstaVende.slnx` |
 | Pruebas del backend | `dotnet test --solution InstaVende.slnx` |
+| Prueba de humo E2E (API en marcha con BD) | `python tests/e2e/smoke_test.py http://localhost:5221` |
 | Regenerar tipos del cliente desde la API | `cd frontend && npm run gen:api` |
 | Verificar el frontend | `cd frontend && npx tsc -b && npm run lint && npm test && npm run build` |
 | Nueva migración | `dotnet ef migrations add <Nombre> --project src/InstaVende.Infrastructure --startup-project src/InstaVende.Web --output-dir Data/Migrations` |

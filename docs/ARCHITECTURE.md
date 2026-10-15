@@ -23,9 +23,26 @@ El sistema está dividido en piezas desacopladas que se comunican por contratos 
 | `src/InstaVende.Web` | API REST, autenticación, SignalR, motor del bot, canales y procesos en segundo plano. |
 | `frontend/` | SPA (React 19 + TypeScript + Vite). Solo depende del contrato OpenAPI. |
 | `wa-client/` | Proceso Node que gestiona las sesiones de WhatsApp Web (QR) por negocio. |
-| `legacy/` | UI MVC anterior, solo como referencia funcional. No se compila. |
+| `tests/` | Pruebas unitarias (xUnit v3) y prueba de humo E2E contra la API real. |
+| `deploy/` | Docker Compose: SQL Server + API + wa-client + SPA (nginx). |
 
 ## Backend (`src/InstaVende.Web`)
+
+### Módulos funcionales
+
+| Módulo (`Features/…`) | API | Pantallas del SPA |
+|---|---|---|
+| `Inbox` | `/api/conversations`, `/api/conversation-labels` | `/inbox`, `/inbox/$conversationId` |
+| `Orders` | `/api/orders` (tablero, detalle, mover, exportar CSV) | `/orders`, `/orders/$orderId` |
+| `Products` | `/api/products`, `/api/product-categories` | `/products`, `/products/new`, `/products/$productId` |
+| `Seller` | `/api/seller/profile`, `/api/seller/rules`, `/api/seller/quick-replies`, `/api/seller/test` | `/seller/personality`, `/seller/rules`, `/seller/test` |
+| `SellerData` | `/api/knowledge`, `/api/delivery-zones`, `/api/payment-methods`, `/api/payment-images` | `/seller/knowledge`, `/seller/delivery`, `/seller/payments` |
+| `Reminders` | `/api/reminders`, `/api/reminder-templates` | `/reminders`, `/reminders/templates` |
+| `Analytics` | `/api/dashboard`, `/api/metrics` | `/dashboard`, `/metrics` |
+| `Channels` | `/api/channels/**` (QR, Meta, pruebas) | `/channels`, `/channels/whatsapp`, `/channels/meta` |
+| `Settings` | `/api/settings/**`, `/api/team/**`, `/api/invitations/**` | `/settings/*`, `/invite/$token` |
+
+Páginas públicas del SPA: `/` (landing), `/login`, `/register`, `/setup-business`, `/privacy`, `/terms`.
 
 ### Organización
 - `Controllers/` — infraestructura de la API: `TenantController` (base), `AuthController`, `WebhooksController`.
@@ -34,6 +51,7 @@ El sistema está dividido en piezas desacopladas que se comunican por contratos 
 - `Services/Bot/` — motor del vendedor IA (contexto cacheado, comandos, carrito, herramientas, prompts).
 - `Services/Messaging/` — pipeline de mensajes: cola de entrada, manejador idempotente, despachador de salida, recordatorios, notificaciones SignalR.
 - `Services/Channels/` — emisores por canal (WhatsApp Cloud/QR, Messenger, Instagram), cliente de wa-client y su supervisor.
+- `Services/Notifications/` — eventos de negocio (pedido nuevo, derivación) por SignalR y email (MailKit).
 - `Infrastructure/` — CSRF, rate limiting, roles, cabeceras de seguridad.
 
 ### Convenciones de la API
@@ -94,6 +112,14 @@ El sistema está dividido en piezas desacopladas que se comunican por contratos 
 - Dinero: `useMoney()` (usa el símbolo de moneda del negocio). Fechas: helpers de `lib/format.ts`.
 - Accesibilidad: labels asociados (`FormField`), `aria-label` en botones de solo icono, foco visible, teclado.
 - Textos de la interfaz en español neutro con tuteo.
+
+## Pruebas
+
+| Nivel | Dónde | Qué cubre |
+|---|---|---|
+| Unitarias (xUnit v3) | `tests/InstaVende.UnitTests` | Flujo de pedidos, localización, router de comandos, horarios, firmas y parseo de webhooks, cola, carrito (SQLite) y reglas de contrato de la API |
+| Unitarias (Vitest) | `frontend/src/**/__tests__`, `*.test.ts` | Cliente HTTP, formato, esquemas |
+| Humo E2E | `tests/e2e/smoke_test.py` | Registro, catálogo, vendedor, canal, webhook firmado → bot → carrito → pedido, bandeja, métricas, recordatorios, equipo (contra una API con base de datos real) |
 
 ## Puesta en marcha (desarrollo)
 
