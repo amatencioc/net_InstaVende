@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Hammer } from 'lucide-react'
-import { EmptyState } from '@/components/shared/empty-state'
+import { knowledgeListQuery } from '@/features/seller-data/api'
+import { KnowledgePage } from '@/features/seller-data/components/knowledge/knowledge-page'
 
 export const Route = createFileRoute('/_app/seller/knowledge')({
-  component: () => <EmptyState icon={Hammer} title="Base de conocimiento" description="Sección en construcción." />,
+  head: () => ({ meta: [{ title: 'Base de conocimiento — InstaVende' }] }),
+  // Precarga sin bloquear la navegación: la página muestra su propio esqueleto y errores
+  loader: ({ context }) => void context.queryClient.prefetchQuery(knowledgeListQuery({})),
+  component: KnowledgePage,
 })
