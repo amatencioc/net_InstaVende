@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/api/settings/profile": {
+    "/api/channels": {
         parameters: {
             query?: never;
             header?: never;
@@ -26,46 +26,12 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SettingsProfileDto"];
+                        "application/json": components["schemas"]["ChannelsOverviewDto"];
                     };
                 };
             };
         };
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsProfileUpdateRequest"];
-                    "text/json": components["schemas"]["SettingsProfileUpdateRequest"];
-                    "application/*+json": components["schemas"]["SettingsProfileUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsProfileDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -73,7 +39,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/profile/avatar": {
+    "/api/channels/{channelType}/meta-config": {
         parameters: {
             query?: never;
             header?: never;
@@ -81,19 +47,20 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
-        post: {
+        put: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    channelType: components["schemas"]["ChannelType"];
+                };
                 cookie?: never;
             };
             requestBody: {
                 content: {
-                    "multipart/form-data": {
-                        file?: components["schemas"]["IFormFile"];
-                    };
+                    "application/json": components["schemas"]["ChannelMetaConfigRequest"];
+                    "text/json": components["schemas"]["ChannelMetaConfigRequest"];
+                    "application/*+json": components["schemas"]["ChannelMetaConfigRequest"];
                 };
             };
             responses: {
@@ -103,126 +70,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SettingsImageDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/password": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsChangePasswordRequest"];
-                    "text/json": components["schemas"]["SettingsChangePasswordRequest"];
-                    "application/*+json": components["schemas"]["SettingsChangePasswordRequest"];
-                };
-            };
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsChangeEmailRequest"];
-                    "text/json": components["schemas"]["SettingsChangeEmailRequest"];
-                    "application/*+json": components["schemas"]["SettingsChangeEmailRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsProfileDto"];
+                        "application/json": components["schemas"]["ChannelSummaryDto"];
                     };
                 };
                 /** @description Bad Request */
@@ -245,109 +93,6 @@ export interface paths {
                 };
             };
         };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/sessions/revoke": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/business": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsBusinessDto"];
-                    };
-                };
-            };
-        };
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsBusinessUpdateRequest"];
-                    "text/json": components["schemas"]["SettingsBusinessUpdateRequest"];
-                    "application/*+json": components["schemas"]["SettingsBusinessUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsBusinessDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
         post?: never;
         delete?: never;
         options?: never;
@@ -355,122 +100,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/business/logo": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "multipart/form-data": {
-                        file?: components["schemas"]["IFormFile"];
-                    };
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsImageDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/invitations/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    token: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["InvitationDetailsDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/invitations/{token}/accept": {
+    "/api/channels/{channelType}/regenerate-verify-token": {
         parameters: {
             query?: never;
             header?: never;
@@ -484,83 +114,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    token: string;
+                    channelType: components["schemas"]["ChannelType"];
                 };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["InvitationAcceptRequest"];
-                    "text/json": components["schemas"]["InvitationAcceptRequest"];
-                    "application/*+json": components["schemas"]["InvitationAcceptRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SessionDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Forbidden */
-                403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/notification-emails": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
                 cookie?: never;
             };
             requestBody?: never;
@@ -571,43 +126,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["SettingsNotificationEmailsDto"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsNotificationEmailCreateRequest"];
-                    "text/json": components["schemas"]["SettingsNotificationEmailCreateRequest"];
-                    "application/*+json": components["schemas"]["SettingsNotificationEmailCreateRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsNotificationEmailDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                        "application/json": components["schemas"]["ChannelSummaryDto"];
                     };
                 };
                 /** @description Conflict */
@@ -627,7 +146,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/settings/notification-emails/{id}": {
+    "/api/channels/{channelType}": {
         parameters: {
             query?: never;
             header?: never;
@@ -642,85 +161,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    channelType: components["schemas"]["ChannelType"];
                 };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SettingsNotificationEmailUpdateRequest"];
-                    "text/json": components["schemas"]["SettingsNotificationEmailUpdateRequest"];
-                    "application/*+json": components["schemas"]["SettingsNotificationEmailUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SettingsNotificationEmailDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        trace?: never;
-    };
-    "/api/team": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
                 cookie?: never;
             };
             requestBody?: never;
@@ -731,79 +173,17 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["TeamDto"];
+                        "application/json": components["schemas"]["ChannelActionResultDto"];
                     };
                 };
             };
         };
-        put?: never;
-        post?: never;
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/team/invitations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["TeamInviteRequest"];
-                    "text/json": components["schemas"]["TeamInviteRequest"];
-                    "application/*+json": components["schemas"]["TeamInviteRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["TeamInvitationCreatedDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/team/invitations/{id}/regenerate": {
+    "/api/channels/{channelType}/test": {
         parameters: {
             query?: never;
             header?: never;
@@ -817,7 +197,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: number;
+                    channelType: components["schemas"]["ChannelType"];
                 };
                 cookie?: never;
             };
@@ -829,25 +209,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["TeamInvitationCreatedDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ChannelTestResultDto"];
                     };
                 };
             };
@@ -858,824 +220,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/team/invitations/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/team/members/{userId}/role": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    userId: string;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["TeamRoleUpdateRequest"];
-                    "text/json": components["schemas"]["TeamRoleUpdateRequest"];
-                    "application/*+json": components["schemas"]["TeamRoleUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/team/members/{userId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    userId: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/seller/profile": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerProfileResponse"];
-                    };
-                };
-            };
-        };
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SellerProfileUpdateRequest"];
-                    "text/json": components["schemas"]["SellerProfileUpdateRequest"];
-                    "application/*+json": components["schemas"]["SellerProfileUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerProfileResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/seller/rules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerRulesDto"];
-                    };
-                };
-            };
-        };
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SellerRulesUpdateRequest"];
-                    "text/json": components["schemas"]["SellerRulesUpdateRequest"];
-                    "application/*+json": components["schemas"]["SellerRulesUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerRulesDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/seller/quick-replies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                    "text/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                    "application/*+json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/seller/quick-replies/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                    "text/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                    "application/*+json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/seller/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["SellerTestRequest"];
-                    "text/json": components["schemas"]["SellerTestRequest"];
-                    "application/*+json": components["schemas"]["SellerTestRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["SellerTestResponse"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Too Many Requests */
-                429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/delivery-zones": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["DeliveryZoneDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                    "text/json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                    "application/*+json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["DeliveryZoneDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/delivery-zones/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                    "text/json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                    "application/*+json": components["schemas"]["DeliveryZoneUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["DeliveryZoneDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/delivery-zones/{id}/toggle": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["DeliveryZoneToggleRequest"];
-                    "text/json": components["schemas"]["DeliveryZoneToggleRequest"];
-                    "application/*+json": components["schemas"]["DeliveryZoneToggleRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["DeliveryZoneDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/delivery-zones/order": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["DeliveryZoneOrderRequest"];
-                    "text/json": components["schemas"]["DeliveryZoneOrderRequest"];
-                    "application/*+json": components["schemas"]["DeliveryZoneOrderRequest"];
-                };
-            };
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/knowledge": {
+    "/api/channels/whatsapp/session": {
         parameters: {
             query?: never;
             header?: never;
@@ -1685,8 +230,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    category?: components["schemas"]["KnowledgeCategory"];
-                    search?: string;
+                    qrHash?: string;
                 };
                 header?: never;
                 path?: never;
@@ -1700,34 +244,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["KnowledgeListDto"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["KnowledgeUpsertRequest"];
-                    "text/json": components["schemas"]["KnowledgeUpsertRequest"];
-                    "application/*+json": components["schemas"]["KnowledgeUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["KnowledgeEntryDto"];
+                        "application/json": components["schemas"]["WhatsAppSessionDto"];
                     };
                 };
                 /** @description Bad Request */
@@ -1737,268 +254,6 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/knowledge/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["KnowledgeUpsertRequest"];
-                    "text/json": components["schemas"]["KnowledgeUpsertRequest"];
-                    "application/*+json": components["schemas"]["KnowledgeUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["KnowledgeEntryDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/knowledge/{id}/favorite": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["KnowledgeFavoriteRequest"];
-                    "text/json": components["schemas"]["KnowledgeFavoriteRequest"];
-                    "application/*+json": components["schemas"]["KnowledgeFavoriteRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["KnowledgeEntryDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/knowledge/import": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "multipart/form-data": {
-                        file?: components["schemas"]["IFormFile"];
-                    };
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["KnowledgeImportResultDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payment-images": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentImageDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "multipart/form-data": {
-                        file?: components["schemas"]["IFormFile"];
-                    };
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentImageDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
                     };
                 };
                 /** @description Conflict */
@@ -2012,219 +267,15 @@ export interface paths {
                 };
             };
         };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/payment-images/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payment-methods": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentMethodDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["PaymentMethodUpsertRequest"];
-                    "text/json": components["schemas"]["PaymentMethodUpsertRequest"];
-                    "application/*+json": components["schemas"]["PaymentMethodUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description Created */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentMethodDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payment-methods/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["PaymentMethodUpsertRequest"];
-                    "text/json": components["schemas"]["PaymentMethodUpsertRequest"];
-                    "application/*+json": components["schemas"]["PaymentMethodUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentMethodDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payment-methods/{id}/toggle": {
+    "/api/channels/whatsapp/disconnect": {
         parameters: {
             query?: never;
             header?: never;
@@ -2237,113 +288,6 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["PaymentMethodToggleRequest"];
-                    "text/json": components["schemas"]["PaymentMethodToggleRequest"];
-                    "application/*+json": components["schemas"]["PaymentMethodToggleRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["PaymentMethodDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/payment-methods/order": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["PaymentMethodOrderRequest"];
-                    "text/json": components["schemas"]["PaymentMethodOrderRequest"];
-                    "application/*+json": components["schemas"]["PaymentMethodOrderRequest"];
-                };
-            };
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminders": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    status?: components["schemas"]["ReminderStatus"];
-                    from?: string;
-                    to?: string;
-                    search?: string;
-                    page?: number;
-                    pageSize?: number;
-                };
-                header?: never;
                 path?: never;
                 cookie?: never;
             };
@@ -2355,11 +299,25 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["PagedResultOfReminderDto"];
+                        "application/json": components["schemas"]["ChannelActionResultDto"];
                     };
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/channels/whatsapp/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
         put?: never;
         post: {
             parameters: {
@@ -2368,30 +326,33 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ReminderUpsertRequest"];
-                    "text/json": components["schemas"]["ReminderUpsertRequest"];
-                    "application/*+json": components["schemas"]["ReminderUpsertRequest"];
-                };
-            };
+            requestBody?: never;
             responses: {
-                /** @description Created */
-                201: {
+                /** @description OK */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ReminderDto"];
+                        "application/json": components["schemas"]["ChannelActionResultDto"];
                     };
                 };
-                /** @description Bad Request */
-                400: {
+                /** @description Conflict */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Service Unavailable */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
                     };
                 };
             };
@@ -2402,20 +363,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/reminders/counts": {
+    "/api/channels/service/restart": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: {
+        get?: never;
+        put?: never;
+        post: {
             parameters: {
-                query?: {
-                    from?: string;
-                    to?: string;
-                    search?: string;
-                };
+                query?: never;
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2428,99 +387,7 @@ export interface paths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["ReminderCountsDto"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminders/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ReminderUpsertRequest"];
-                    "text/json": components["schemas"]["ReminderUpsertRequest"];
-                    "application/*+json": components["schemas"]["ReminderUpsertRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
+                        "application/json": components["schemas"]["ChannelActionResultDto"];
                     };
                 };
                 /** @description Conflict */
@@ -2534,566 +401,6 @@ export interface paths {
                 };
             };
         };
-        post?: never;
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminders/{id}/cancel": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description No Content */
-                204: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminders/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    search?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderContactOptionDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminder-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderTemplateSegmentDto"][];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminder-templates/{segment}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    segment: components["schemas"]["CustomerSegment"];
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["ReminderTemplateSegmentUpdateRequest"];
-                    "text/json": components["schemas"]["ReminderTemplateSegmentUpdateRequest"];
-                    "application/*+json": components["schemas"]["ReminderTemplateSegmentUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderTemplateSegmentDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/reminder-templates/suggestions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    segment?: components["schemas"]["CustomerSegment"];
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ReminderTemplateSuggestionDto"][];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/orders/workflow": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["OrderWorkflowDto"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/orders/board": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    tab?: components["schemas"]["OrderBoardTab"];
-                    search?: string;
-                    from?: string;
-                    to?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["OrderBoardDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/orders/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["OrderDetailDto"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["OrderUpdateRequest"];
-                    "text/json": components["schemas"]["OrderUpdateRequest"];
-                    "application/*+json": components["schemas"]["OrderUpdateRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["OrderDetailDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        trace?: never;
-    };
-    "/api/orders/{id}/move": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    id: number;
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    "application/json": components["schemas"]["OrderMoveRequest"];
-                    "text/json": components["schemas"]["OrderMoveRequest"];
-                    "application/*+json": components["schemas"]["OrderMoveRequest"];
-                };
-            };
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["OrderMoveResultDto"];
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-                /** @description Not Found */
-                404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ProblemDetails"];
-                    };
-                };
-            };
-        };
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/orders/export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: {
-                    tab?: components["schemas"]["OrderBoardTab"];
-                    search?: string;
-                    from?: string;
-                    to?: string;
-                };
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description OK */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "text/csv": components["schemas"]["Stream"];
-                        "application/json": unknown;
-                    };
-                };
-                /** @description Bad Request */
-                400: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["ValidationProblemDetails"];
-                    };
-                };
-            };
-        };
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3377,296 +684,70 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ChannelActionResultDto: {
+            ok: boolean;
+            message: string;
+        };
+        /** @enum {unknown} */
+        ChannelConnectionStatus: "Connected" | "Disconnected" | "NeedsAttention";
+        ChannelMetaConfigRequest: {
+            phoneNumberId: null | string;
+            wabaId: null | string;
+            pageId: null | string;
+            instagramAccountId: null | string;
+            accessToken: null | string;
+            appSecret: null | string;
+            isActive: boolean;
+        };
+        ChannelSecretHintDto: {
+            configured: boolean;
+            last4: null | string;
+        };
+        ChannelServiceStatusDto: {
+            managed: boolean;
+            healthy: boolean;
+            restarting: boolean;
+            /** Format: int32 */
+            consecutiveFailures: number;
+        };
+        ChannelsOverviewDto: {
+            channels: components["schemas"]["ChannelSummaryDto"][];
+            service: components["schemas"]["ChannelServiceStatusDto"];
+        };
+        ChannelSummaryDto: {
+            channel: components["schemas"]["ChannelType"];
+            configured: boolean;
+            isActive: boolean;
+            status: components["schemas"]["ChannelConnectionStatus"];
+            statusDetail: null | string;
+            whatsAppMode: null | components["schemas"]["ChannelWhatsAppMode"];
+            sessionState: null | string;
+            phoneNumber: null | string;
+            phoneNumberId: null | string;
+            wabaId: null | string;
+            pageId: null | string;
+            instagramAccountId: null | string;
+            /** Format: date-time */
+            connectedAt: null | string;
+            accessToken: components["schemas"]["ChannelSecretHintDto"];
+            appSecret: components["schemas"]["ChannelSecretHintDto"];
+            webhookUrl: string;
+            webhookVerifyToken: null | string;
+        };
+        ChannelTestResultDto: {
+            ok: boolean;
+            message: string;
+            accountName: null | string;
+        };
         /** @enum {unknown} */
         ChannelType: "WhatsApp" | "FacebookMessenger" | "Instagram";
         /** @enum {unknown} */
-        CustomerSegment: "Frio" | "Tibio" | "Caliente";
-        DeliveryZoneDto: {
-            /** Format: int32 */
-            id: number;
-            name: string;
-            /** Format: double */
-            cost: null | number;
-            description: null | string;
-            isActive: boolean;
-            /** Format: int32 */
-            sortOrder: number;
-        };
-        DeliveryZoneOrderRequest: {
-            ids: number[];
-        };
-        DeliveryZoneToggleRequest: {
-            isActive: boolean;
-        };
-        DeliveryZoneUpsertRequest: {
-            name: string;
-            /** Format: double */
-            cost: null | number;
-            description: null | string;
-            /** @default true */
-            isActive: boolean;
-        };
-        /** Format: binary */
-        IFormFile: string;
-        InvitationAcceptRequest: {
-            firstName: null | string;
-            lastName: null | string;
-            password: null | string;
-        };
-        InvitationDetailsDto: {
-            status: components["schemas"]["InvitationLinkStatus"];
-            businessName: string;
-            businessLogoUrl: null | string;
-            email: null | string;
-            role: components["schemas"]["UserRole"];
-            /** Format: date-time */
-            expiresAt: string;
-            hasAccount: boolean;
-        };
-        /** @enum {unknown} */
-        InvitationLinkStatus: "Valid" | "Expired" | "Accepted" | "Cancelled";
-        /** @enum {unknown} */
-        KnowledgeCategory: "Productos" | "Horarios" | "Envios" | "Pagos" | "Devoluciones" | "Otros";
-        KnowledgeCategoryCountDto: {
-            category: components["schemas"]["KnowledgeCategory"];
-            /** Format: int32 */
-            count: number;
-        };
-        KnowledgeEntryDto: {
-            /** Format: int32 */
-            id: number;
-            title: string;
-            content: string;
-            category: components["schemas"]["KnowledgeCategory"];
-            isFavorite: boolean;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-        };
-        KnowledgeFavoriteRequest: {
-            isFavorite: boolean;
-        };
-        KnowledgeImportResultDto: {
-            /** Format: int32 */
-            totalRows: number;
-            /** Format: int32 */
-            created: number;
-            errors: components["schemas"]["KnowledgeImportRowErrorDto"][];
-        };
-        KnowledgeImportRowErrorDto: {
-            /** Format: int32 */
-            row: number;
-            title: null | string;
-            message: string;
-        };
-        KnowledgeListDto: {
-            items: components["schemas"]["KnowledgeEntryDto"][];
-            counts: components["schemas"]["KnowledgeCategoryCountDto"][];
-            /** Format: int32 */
-            total: number;
-        };
-        KnowledgeUpsertRequest: {
-            title: string;
-            content: string;
-            category: components["schemas"]["KnowledgeCategory"];
-        };
+        ChannelWhatsAppMode: "Qr" | "CloudApi" | null;
         LoginRequest: {
             email: string;
             password: string;
             /** @default false */
             rememberMe: boolean;
-        };
-        OrderBoardColumnDto: {
-            subStatus: components["schemas"]["OrderSubStatus"];
-            label: string;
-            css: string;
-            /** Format: int32 */
-            count: number;
-            /** Format: double */
-            totalAmount: number;
-            orders: components["schemas"]["OrderCardDto"][];
-        };
-        OrderBoardDto: {
-            tab: components["schemas"]["OrderBoardTab"];
-            columns: components["schemas"]["OrderBoardColumnDto"][];
-            tabCounts: components["schemas"]["OrderBoardTabCountDto"][];
-        };
-        /** @enum {unknown} */
-        OrderBoardTab: "Nuevos" | "EnCurso" | "Completados" | "Cancelados";
-        OrderBoardTabCountDto: {
-            tab: components["schemas"]["OrderBoardTab"];
-            label: string;
-            /** Format: int32 */
-            count: number;
-        };
-        OrderCardDto: {
-            /** Format: int32 */
-            id: number;
-            orderNumber: string;
-            /** Format: int32 */
-            contactId: number;
-            contactName: string;
-            channel: components["schemas"]["ChannelType"];
-            /** Format: double */
-            total: number;
-            /** Format: int32 */
-            itemCount: number;
-            /** Format: date-time */
-            createdAt: string;
-            subStatus: components["schemas"]["OrderSubStatus"];
-            subStatusLabel: string;
-            subStatusCss: string;
-            /** Format: int32 */
-            conversationId: null | number;
-        };
-        OrderContactDto: {
-            /** Format: int32 */
-            id: number;
-            name: string;
-            phone: null | string;
-            channel: components["schemas"]["ChannelType"];
-            avatarUrl: null | string;
-        };
-        OrderDetailDto: {
-            /** Format: int32 */
-            id: number;
-            orderNumber: string;
-            status: components["schemas"]["OrderStatus"];
-            statusLabel: string;
-            subStatus: components["schemas"]["OrderSubStatus"];
-            subStatusLabel: string;
-            subStatusCss: string;
-            tab: components["schemas"]["OrderBoardTab"];
-            channel: components["schemas"]["ChannelType"];
-            /** Format: double */
-            subtotal: number;
-            /** Format: double */
-            discount: number;
-            /** Format: double */
-            shippingCost: number;
-            /** Format: double */
-            total: number;
-            paymentMethodName: null | string;
-            shippingAddress: null | string;
-            notes: null | string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            updatedAt: string;
-            /** Format: int32 */
-            conversationId: null | number;
-            contact: components["schemas"]["OrderContactDto"];
-            items: components["schemas"]["OrderLineDto"][];
-        };
-        OrderLineDto: {
-            /** Format: int32 */
-            id: number;
-            /** Format: int32 */
-            productId: number;
-            productName: string;
-            variantDescription: null | string;
-            imageUrl: null | string;
-            /** Format: int32 */
-            quantity: number;
-            /** Format: double */
-            unitPrice: number;
-            /** Format: double */
-            subtotal: number;
-        };
-        OrderMoveRequest: {
-            subStatus: components["schemas"]["OrderSubStatus"];
-            /** @default false */
-            notifyCustomer: boolean;
-        };
-        OrderMoveResultDto: {
-            /** Format: int32 */
-            id: number;
-            status: components["schemas"]["OrderStatus"];
-            subStatus: components["schemas"]["OrderSubStatus"];
-            subStatusLabel: string;
-            subStatusCss: string;
-            tab: components["schemas"]["OrderBoardTab"];
-            /** Format: date-time */
-            updatedAt: string;
-            customerNotified: boolean;
-            notificationError: null | string;
-        };
-        /** @enum {unknown} */
-        OrderStatus: "Pending" | "Confirmed" | "Preparing" | "Shipped" | "Delivered" | "Cancelled" | "Refunded" | "Cart";
-        /** @enum {unknown} */
-        OrderSubStatus: "EnValidacion" | "EnPreparacion" | "ListoParaEnvio" | "Enviado" | "Entregado" | "Finalizado" | "Rechazado" | "Cancelado";
-        OrderSubStatusInfoDto: {
-            subStatus: components["schemas"]["OrderSubStatus"];
-            label: string;
-            css: string;
-            tab: components["schemas"]["OrderBoardTab"];
-            status: components["schemas"]["OrderStatus"];
-            countsAsRevenue: boolean;
-        };
-        OrderUpdateRequest: {
-            notes: null | string;
-            shippingAddress: null | string;
-            paymentMethodName: null | string;
-        };
-        OrderWorkflowDto: {
-            tabs: components["schemas"]["OrderWorkflowTabDto"][];
-        };
-        OrderWorkflowTabDto: {
-            tab: components["schemas"]["OrderBoardTab"];
-            label: string;
-            columns: components["schemas"]["OrderSubStatusInfoDto"][];
-        };
-        PagedResultOfReminderDto: {
-            items: components["schemas"]["ReminderDto"][];
-            /** Format: int32 */
-            page: number;
-            /** Format: int32 */
-            pageSize: number;
-            /** Format: int32 */
-            totalCount: number;
-            /** Format: int32 */
-            totalPages?: number;
-        };
-        PaymentImageDto: {
-            /** Format: int32 */
-            id: number;
-            url: string;
-            /** Format: int32 */
-            sortOrder: number;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        PaymentMethodDto: {
-            /** Format: int32 */
-            id: number;
-            type: components["schemas"]["PaymentMethodType"];
-            name: string;
-            instructions: null | string;
-            accountNumber: null | string;
-            accountAlias: null | string;
-            paymentLink: null | string;
-            isActive: boolean;
-            /** Format: int32 */
-            sortOrder: number;
-        };
-        PaymentMethodOrderRequest: {
-            ids: number[];
-        };
-        PaymentMethodToggleRequest: {
-            isActive: boolean;
-        };
-        /** @enum {unknown} */
-        PaymentMethodType: "BankTransfer" | "CreditCard" | "Cash" | "MercadoPago" | "PayPal" | "Stripe" | "Other";
-        PaymentMethodUpsertRequest: {
-            type: components["schemas"]["PaymentMethodType"];
-            name: string;
-            instructions: null | string;
-            accountNumber: null | string;
-            accountAlias: null | string;
-            paymentLink: null | string;
-            /** @default true */
-            isActive: boolean;
         };
         ProblemDetails: {
             type?: null | string;
@@ -3682,241 +763,6 @@ export interface components {
             email: string;
             password: string;
             businessName: string;
-        };
-        ReminderContactOptionDto: {
-            /** Format: int32 */
-            id: number;
-            name: null | string;
-            phone: null | string;
-            avatarUrl: null | string;
-            channel: components["schemas"]["ChannelType"];
-            /** Format: date-time */
-            lastSeenAt: string;
-        };
-        ReminderCountsDto: {
-            /** Format: int32 */
-            pending: number;
-            /** Format: int32 */
-            sent: number;
-            /** Format: int32 */
-            failed: number;
-            /** Format: int32 */
-            cancelled: number;
-        };
-        ReminderDto: {
-            /** Format: int32 */
-            id: number;
-            /** Format: int32 */
-            contactId: number;
-            contactName: null | string;
-            contactPhone: null | string;
-            contactAvatarUrl: null | string;
-            channel: components["schemas"]["ChannelType"];
-            /** Format: int32 */
-            conversationId: null | number;
-            message: string;
-            /** Format: date-time */
-            scheduledAt: string;
-            status: components["schemas"]["ReminderStatus"];
-            /** Format: date-time */
-            sentAt: null | string;
-            templateKey: null | string;
-            createdByName: null | string;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        /** @enum {unknown} */
-        ReminderStatus: "Pending" | "Sent" | "Failed" | "Cancelled";
-        ReminderTemplateItemDto: {
-            /** Format: int32 */
-            order: number;
-            timeWindow: string;
-            message: string;
-            isActive: boolean;
-        };
-        ReminderTemplateItemUpdate: {
-            /** Format: int32 */
-            order: number;
-            message: string;
-            isActive: boolean;
-        };
-        ReminderTemplateSegmentDto: {
-            segment: components["schemas"]["CustomerSegment"];
-            /** Format: int32 */
-            maxReminders: number;
-            isDefault: boolean;
-            reminders: components["schemas"]["ReminderTemplateItemDto"][];
-            /** Format: date-time */
-            updatedAt: null | string;
-        };
-        ReminderTemplateSegmentUpdateRequest: {
-            reminders: components["schemas"]["ReminderTemplateItemUpdate"][];
-        };
-        ReminderTemplateSuggestionDto: {
-            id: string;
-            title: string;
-            message: string;
-            /** Format: int32 */
-            order: number;
-        };
-        ReminderUpsertRequest: {
-            /** Format: int32 */
-            contactId: number;
-            /** Format: int32 */
-            conversationId: null | number;
-            message: string;
-            /** Format: date-time */
-            scheduledAt: string;
-            templateKey?: null | string;
-        };
-        SellerProfileDto: {
-            vendorName: string;
-            vendorGender: null | string;
-            country: string;
-            businessDescription: null | string;
-            targetAudience: null | string;
-            rules: null | string;
-            communicationStyle: null | string;
-            salesStyle: null | string;
-            /** Format: int32 */
-            responseLength: number;
-            useEmojis: boolean;
-            emojiPalette: string[];
-            useOpeningPunctuation: boolean;
-            wordsToAvoid: string[];
-            welcomeMessage: string;
-            purchaseConfirmationMessage: null | string;
-            humanHandoffSituations: string[];
-            autoPauseOnHandoff: boolean;
-            handoffMessage: null | string;
-            /** Format: date-time */
-            updatedAt: null | string;
-        };
-        SellerProfileResponse: {
-            profile: components["schemas"]["SellerProfileDto"];
-            countries: string[];
-            genders: string[];
-            templates: components["schemas"]["SellerProfileTemplateDto"][];
-        };
-        SellerProfileTemplateDto: {
-            id: string;
-            name: string;
-            description: string;
-            communicationStyle: string;
-            salesStyle: string;
-            /** Format: int32 */
-            responseLength: number;
-            useEmojis: boolean;
-            emojiPalette: string[];
-            useOpeningPunctuation: boolean;
-        };
-        SellerProfileUpdateRequest: {
-            vendorName: string;
-            vendorGender: null | string;
-            country: string;
-            businessDescription: null | string;
-            targetAudience: null | string;
-            rules: null | string;
-            communicationStyle: null | string;
-            salesStyle: null | string;
-            /** Format: int32 */
-            responseLength: number;
-            useEmojis: boolean;
-            emojiPalette: null | string[];
-            useOpeningPunctuation: boolean;
-            wordsToAvoid: null | string[];
-            welcomeMessage: string;
-            purchaseConfirmationMessage: null | string;
-            humanHandoffSituations: null | string[];
-            autoPauseOnHandoff: boolean;
-            handoffMessage: null | string;
-        };
-        SellerRulesDto: {
-            isActive: boolean;
-            botName: string;
-            fallbackMessage: string;
-            enableHandoff: boolean;
-            handoffTriggerPhrase: null | string;
-            businessHours: null | string;
-            returnPolicy: null | string;
-            warrantyPolicy: null | string;
-            shippingTimes: null | string;
-            activePromotions: null | string;
-            /** Format: double */
-            discountLevel1: number;
-            /** Format: double */
-            discountLevel2: number;
-            /** Format: double */
-            discountLevel3: number;
-            /** Format: double */
-            maxDiscountPercent: number;
-            /** Format: double */
-            loyaltyDiscount: number;
-            /** Format: double */
-            bundleDiscount: number;
-            /** Format: double */
-            freeShippingThreshold: number;
-            currencySymbol: string;
-            hoursStatus: components["schemas"]["SellerRulesHoursStatus"];
-            /** Format: date-time */
-            updatedAt: null | string;
-        };
-        /** @enum {unknown} */
-        SellerRulesHoursStatus: "Unknown" | "Open" | "Closed";
-        SellerRulesQuickReplyDto: {
-            /** Format: int32 */
-            id: number;
-            name: string;
-            triggerPhrases: string[];
-            response: string;
-            /** Format: int32 */
-            priority: number;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        SellerRulesQuickReplyUpsertRequest: {
-            name: string;
-            triggerPhrases: string[];
-            response: string;
-            /** Format: int32 */
-            priority: number;
-            /** @default true */
-            isActive: boolean;
-        };
-        SellerRulesUpdateRequest: {
-            isActive: boolean;
-            botName: string;
-            fallbackMessage: string;
-            enableHandoff: boolean;
-            handoffTriggerPhrase: null | string;
-            businessHours: null | string;
-            returnPolicy: null | string;
-            warrantyPolicy: null | string;
-            shippingTimes: null | string;
-            activePromotions: null | string;
-            /** Format: double */
-            discountLevel1: number;
-            /** Format: double */
-            discountLevel2: number;
-            /** Format: double */
-            discountLevel3: number;
-            /** Format: double */
-            maxDiscountPercent: number;
-            /** Format: double */
-            loyaltyDiscount: number;
-            /** Format: double */
-            bundleDiscount: number;
-            /** Format: double */
-            freeShippingThreshold: number;
-        };
-        SellerTestRequest: {
-            message: string;
-        };
-        SellerTestResponse: {
-            reply: null | string;
-            handoffTriggered: boolean;
-            botActive: boolean;
         };
         SessionBusinessDto: {
             /** Format: int32 */
@@ -3939,127 +785,8 @@ export interface components {
             lastName: string;
             avatarUrl: null | string;
         };
-        SettingsBusinessDto: {
-            name: string;
-            description: null | string;
-            sector: null | string;
-            country: null | string;
-            currency: null | string;
-            phone: null | string;
-            email: null | string;
-            websiteUrl: null | string;
-            socialMedia: null | string;
-            whatsAppNumber: null | string;
-            logoUrl: null | string;
-            countryOptions: string[];
-            currencyOptions: string[];
-            sectorOptions: string[];
-        };
-        SettingsBusinessUpdateRequest: {
-            name: string;
-            description: null | string;
-            sector: null | string;
-            country: string;
-            currency: string;
-            phone: null | string;
-            email: null | string;
-            websiteUrl: null | string;
-            socialMedia: null | string;
-            whatsAppNumber: null | string;
-        };
-        SettingsChangeEmailRequest: {
-            newEmail: string;
-            currentPassword: string;
-        };
-        SettingsChangePasswordRequest: {
-            currentPassword: string;
-            newPassword: string;
-        };
-        SettingsImageDto: {
-            url: null | string;
-        };
-        SettingsNotificationEmailCreateRequest: {
-            email: string;
-        };
-        SettingsNotificationEmailDto: {
-            /** Format: int32 */
-            id: number;
-            email: string;
-            isActive: boolean;
-            /** Format: date-time */
-            createdAt: string;
-        };
-        SettingsNotificationEmailsDto: {
-            items: components["schemas"]["SettingsNotificationEmailDto"][];
-            /** Format: int32 */
-            maxEmails: number;
-        };
-        SettingsNotificationEmailUpdateRequest: {
-            isActive: boolean;
-        };
-        SettingsProfileDto: {
-            email: string;
-            firstName: string;
-            lastName: string;
-            phoneNumber: null | string;
-            avatarUrl: null | string;
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            lastLoginAt: null | string;
-        };
-        SettingsProfileUpdateRequest: {
-            firstName: string;
-            lastName: string;
-            phoneNumber: null | string;
-        };
         SetupBusinessRequest: {
             businessName: string;
-        };
-        /** Format: binary */
-        Stream: string;
-        TeamDto: {
-            members: components["schemas"]["TeamMemberDto"][];
-            invitations: components["schemas"]["TeamInvitationDto"][];
-            /** Format: int32 */
-            maxUsers: number;
-            /** Format: int32 */
-            usedSeats: number;
-            canManage: boolean;
-        };
-        TeamInvitationCreatedDto: {
-            invitation: components["schemas"]["TeamInvitationDto"];
-            inviteUrl: string;
-        };
-        TeamInvitationDto: {
-            /** Format: int32 */
-            id: number;
-            email: string;
-            role: components["schemas"]["UserRole"];
-            /** Format: date-time */
-            createdAt: string;
-            /** Format: date-time */
-            expiresAt: string;
-        };
-        TeamInviteRequest: {
-            email: string;
-            role?: components["schemas"]["UserRole"];
-        };
-        TeamMemberDto: {
-            userId: string;
-            email: string;
-            firstName: string;
-            lastName: string;
-            avatarUrl: null | string;
-            phoneNumber: null | string;
-            role: components["schemas"]["UserRole"];
-            isOwner: boolean;
-            isCurrentUser: boolean;
-            /** Format: date-time */
-            joinedAt: string;
-        };
-        TeamRoleUpdateRequest: {
-            role: components["schemas"]["UserRole"];
         };
         /** @enum {unknown} */
         UserRole: "Admin" | "Member";
@@ -4073,6 +800,22 @@ export interface components {
             errors?: {
                 [key: string]: string[];
             };
+        };
+        WhatsAppSessionDto: {
+            state: string;
+            connected: boolean;
+            qrDataUrl: null | string;
+            /** Format: date-time */
+            qrExpiresAt: null | string;
+            /** Format: int32 */
+            qrSecondsLeft: null | number;
+            qrHash: null | string;
+            unchanged: boolean;
+            phoneNumber: null | string;
+            pushName: null | string;
+            /** Format: date-time */
+            connectedAt: null | string;
+            service: components["schemas"]["ChannelServiceStatusDto"];
         };
     };
     responses: never;
