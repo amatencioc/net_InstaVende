@@ -43,7 +43,7 @@ def call(method, path, body=None, expect=(200, 201, 204), raw=None, headers=None
 import urllib.parse
 
 # ── 1. Autenticación ─────────────────────────────────────────────────────────
-call("GET", "/api/auth/session", expect=401)
+call("GET", "/api/auth/session", expect=204)
 call("GET", "/api/auth/csrf", expect=204)
 email = f"e2e-{uuid.uuid4().hex[:8]}@test.pe"
 call("POST", "/api/auth/register", {"firstName": "Ana", "lastName": "Pérez", "email": email, "password": "corta"}, expect=400)
@@ -107,10 +107,11 @@ def wa_inbound(text, msg_id):
 
 
 call("POST", f"/api/webhooks/whatsapp/{bid}", raw=b'{"entry":[]}', headers={"X-Hub-Signature-256": "sha256=00"}, expect=401)
+run_id = uuid.uuid4().hex[:8]
 for i, text in enumerate(["#catalogo", "agregar 1", "agregar 1", "#pedido"]):
-    wa_inbound(text, f"wamid.e2e.{i}")
+    wa_inbound(text, f"wamid.{run_id}.{i}")
     time.sleep(2.5)
-wa_inbound("#catalogo", "wamid.e2e.0")  # duplicado: debe ignorarse
+wa_inbound("#catalogo", f"wamid.{run_id}.0")  # reintento del proveedor: debe ignorarse
 time.sleep(3)
 
 convs = call("GET", "/api/conversations?status=All&page=1&pageSize=30")

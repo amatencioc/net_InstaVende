@@ -738,6 +738,9 @@ namespace InstaVende.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ExternalMessageId")
+                        .HasFilter("[ExternalMessageId] IS NOT NULL");
+
+                    b.HasIndex("ConversationId", "ExternalMessageId")
                         .IsUnique()
                         .HasFilter("[ExternalMessageId] IS NOT NULL");
 

@@ -167,9 +167,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionK
         builder.Entity<Message>(e =>
         {
             e.HasIndex(m => new { m.ConversationId, m.SentAt });
-            // Idempotencia de webhooks: un mismo mensaje externo no se procesa dos veces
+            // Idempotencia de webhooks: un mismo mensaje externo no se procesa dos veces en una conversación
+            // (acotado por conversación para que un id repetido en otro negocio nunca se descarte)
             e.Property(m => m.ExternalMessageId).HasMaxLength(200);
-            e.HasIndex(m => m.ExternalMessageId).IsUnique().HasFilter("[ExternalMessageId] IS NOT NULL");
+            e.HasIndex(m => new { m.ConversationId, m.ExternalMessageId }).IsUnique().HasFilter("[ExternalMessageId] IS NOT NULL");
+            e.HasIndex(m => m.ExternalMessageId).HasFilter("[ExternalMessageId] IS NOT NULL"); // búsqueda de duplicados
             e.Property(m => m.MediaType).HasMaxLength(50);
         });
 

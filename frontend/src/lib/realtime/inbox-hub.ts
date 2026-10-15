@@ -54,23 +54,45 @@ function getConnection(): HubConnection {
   return connection
 }
 
-/** Inicia la conexión (idempotente). La llama el layout autenticado. */
-export async function startInboxHub(): Promise<void> {
-  const c = getConnection()
-  if (c.state !== HubConnectionState.Disconnected) return
-  try {
-    await c.start()
-  } catch {
-    // reintento manual: withAutomaticReconnect solo actúa tras una conexión exitosa
-    setTimeout(() => void startInboxHub(), 5_000)
-  } finally {
-    notify()
+let users = 0
+let stopTimer: ReturnType<typeof setTimeout> | undefined
+let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+/**
+ * Registra un consumidor de la conexión y la inicia si hace falta. Devuelve la función que lo libera.
+ * La parada se difiere: un desmontaje/montaje inmediato (StrictMode, cambio de layout) no corta
+ * la conexión a mitad de la negociación.
+ */
+export function acquireInboxHub(): () => void {
+  users++
+  clearTimeout(stopTimer)
+  void connect()
+  let released = false
+  return () => {
+    if (released) return
+    released = true
+    users = Math.max(0, users - 1)
+    if (users === 0) {
+      clearTimeout(retryTimer)
+      stopTimer = setTimeout(() => {
+        if (users === 0) void connection?.stop().finally(notify)
+      }, 1_000)
+    }
   }
 }
 
-export async function stopInboxHub(): Promise<void> {
-  if (connection) await connection.stop()
-  notify()
+async function connect(): Promise<void> {
+  const c = getConnection()
+  if (c.state !== HubConnectionState.Disconnected || users === 0) return
+  try {
+    await c.start()
+  } catch {
+    // withAutomaticReconnect solo actúa tras una conexión exitosa: reintento manual
+    clearTimeout(retryTimer)
+    if (users > 0) retryTimer = setTimeout(() => void connect(), 5_000)
+  } finally {
+    notify()
+  }
 }
 
 /** Estado de la conexión en tiempo real para mostrar un indicador en la UI. */

@@ -40,8 +40,11 @@ public class IncomingMessageHandler
         var cfg = await _channels.GetAsync(inbound.BusinessId, inbound.Channel, ct);
         if (cfg is not { IsActive: true }) return;
 
+        // Idempotencia: reintentos del proveedor para el mismo mensaje de este negocio y canal
         if (inbound.ExternalMessageId != null &&
-            await _db.Messages.AnyAsync(m => m.ExternalMessageId == inbound.ExternalMessageId, ct))
+            await _db.Messages.AnyAsync(m => m.ExternalMessageId == inbound.ExternalMessageId
+                                          && m.Conversation.BusinessId == inbound.BusinessId
+                                          && m.Conversation.ChannelType == inbound.Channel, ct))
         {
             _logger.LogDebug("Mensaje duplicado ignorado ({ExternalId})", inbound.ExternalMessageId);
             return;

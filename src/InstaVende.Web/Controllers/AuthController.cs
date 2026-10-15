@@ -56,14 +56,14 @@ public sealed class AuthController(
         return NoContent();
     }
 
-    /// <summary>Sesión actual (usuario y negocio). 401 si no hay sesión.</summary>
-    [HttpGet("session"), Authorize]
+    /// <summary>Sesión actual (usuario y negocio). 204 sin contenido si no hay sesión (visitante anónimo).</summary>
+    [HttpGet("session"), AllowAnonymous]
     [ProducesResponseType<SessionDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<ActionResult<SessionDto>> Session()
     {
-        var user = await userManager.GetUserAsync(User);
-        if (user == null) return Unauthorized();
+        var user = User.Identity?.IsAuthenticated == true ? await userManager.GetUserAsync(User) : null;
+        if (user == null) return NoContent();
         return await BuildSessionAsync(user);
     }
 

@@ -5,7 +5,7 @@ import { AppTopbar } from '@/components/layout/app-topbar'
 import { BusinessEventToasts } from '@/components/layout/business-event-toasts'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { sessionQuery } from '@/lib/auth/session'
-import { startInboxHub, stopInboxHub } from '@/lib/realtime/inbox-hub'
+import { acquireInboxHub } from '@/lib/realtime/inbox-hub'
 
 /** Layout protegido del panel: exige sesión con negocio. */
 export const Route = createFileRoute('/_app')({
@@ -18,10 +18,7 @@ export const Route = createFileRoute('/_app')({
 })
 
 function AppLayout() {
-  useEffect(() => {
-    void startInboxHub()
-    return () => void stopInboxHub()
-  }, [])
+  useEffect(() => acquireInboxHub(), [])
 
   return (
     <SidebarProvider>

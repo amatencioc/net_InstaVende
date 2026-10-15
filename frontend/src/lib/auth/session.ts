@@ -13,7 +13,9 @@ export const sessionQuery = queryOptions({
   queryFn: async (): Promise<Session | null> => {
     await ensureCsrf()
     try {
-      return await unwrap(api.GET('/api/auth/session'))
+      const result = await api.GET('/api/auth/session')
+      if (result.response.status === 204) return null // visitante anónimo
+      return (await unwrap(Promise.resolve(result))) as Session
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) return null
       throw e
