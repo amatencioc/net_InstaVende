@@ -4,7 +4,8 @@ import { useMoney } from '@/lib/auth/session'
 import { formatNumber, formatPercent } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { MetricsData } from '../../api'
-import { channelColors, subStatusTone } from '../../utils'
+import { statusTone } from '@/components/shared/order-status'
+import { channelColors } from '../../utils'
 
 /** Ingresos por canal: barras horizontales con el color de marca de cada canal. */
 export function ChannelRevenueCard({ channels }: { channels: MetricsData['channels'] }) {
@@ -90,7 +91,7 @@ export function SubStatusCard({ subStatuses }: { subStatuses: MetricsData['subSt
               {rows.map((s) => (
                 <div
                   key={s.subStatus}
-                  className={cn('h-full first:rounded-l-full last:rounded-r-full', subStatusTone(s.css).bar)}
+                  className={cn('h-full first:rounded-l-full last:rounded-r-full', statusTone(s.css).dot)}
                   style={{ width: `${(s.orders / total) * 100}%` }}
                 />
               ))}
@@ -99,7 +100,7 @@ export function SubStatusCard({ subStatuses }: { subStatuses: MetricsData['subSt
               {rows.map((s) => (
                 <li key={s.subStatus} className="flex items-center gap-2.5 py-2 text-sm">
                   <span
-                    className={cn('size-2.5 shrink-0 rounded-[3px]', subStatusTone(s.css).bar)}
+                    className={cn('size-2.5 shrink-0 rounded-[3px]', statusTone(s.css).dot)}
                     aria-hidden
                   />
                   <span className="flex-1">{s.label}</span>

@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { OrderSubStatus, OrderWorkflow } from '../api'
-import { StatusDot } from './status-badge'
+import { StatusDot } from '@/components/shared/order-status'
 
 interface MoveOrderMenuProps {
   workflow: OrderWorkflow | undefined

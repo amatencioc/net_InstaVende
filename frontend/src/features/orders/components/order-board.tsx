@@ -16,9 +16,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useMoney } from '@/lib/auth/session'
 import { cn } from '@/lib/utils'
 import type { OrderBoardColumn, OrderCard, OrderSubStatus, OrderWorkflow } from '../api'
-import { statusTone } from '../status'
+import { statusTone } from '@/components/shared/order-status'
 import { DraggableOrderCard, OrderCardView } from './order-card'
-import { StatusDot } from './status-badge'
+import { StatusDot } from '@/components/shared/order-status'
 
 interface OrderBoardProps {
   columns: OrderBoardColumn[]

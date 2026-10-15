@@ -35,7 +35,8 @@ export function RecentOrdersCard({ orders }: { orders: DashboardRecentOrder[] })
       {orders.map((o) => (
         <li key={o.id}>
           <Link
-            to="/orders"
+            to="/orders/$orderId"
+            params={{ orderId: String(o.id) }}
             className="hover:bg-muted/60 focus-visible:ring-ring/50 flex items-center gap-3 rounded-lg px-2 py-2.5 outline-none focus-visible:ring-[3px]"
           >
             <ChannelIcon channel={o.channel} className="size-8" />
@@ -90,7 +91,8 @@ export function AttentionCard({ conversations }: { conversations: DashboardAtten
         return (
           <li key={c.id}>
             <Link
-              to="/inbox"
+              to="/inbox/$conversationId"
+              params={{ conversationId: c.id }}
               className="hover:bg-muted/60 focus-visible:ring-ring/50 flex items-center gap-3 rounded-lg px-2 py-2.5 outline-none focus-visible:ring-[3px]"
             >
               <div className="relative">

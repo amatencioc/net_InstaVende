@@ -65,20 +65,6 @@ export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-/** Clases de badge para las clases `st-*` que devuelve OrderWorkflow.BadgeCss. */
-const subStatusTones: Record<string, { badge: string; bar: string }> = {
-  'st-purple': { badge: 'bg-violet-500/12 text-violet-700 dark:text-violet-300', bar: 'bg-violet-500' },
-  'st-blue': { badge: 'bg-blue-500/12 text-blue-700 dark:text-blue-300', bar: 'bg-blue-500' },
-  'st-orange': { badge: 'bg-orange-500/12 text-orange-700 dark:text-orange-300', bar: 'bg-orange-500' },
-  'st-sky': { badge: 'bg-sky-500/12 text-sky-700 dark:text-sky-300', bar: 'bg-sky-500' },
-  'st-green': { badge: 'bg-emerald-500/12 text-emerald-700 dark:text-emerald-300', bar: 'bg-emerald-500' },
-  'st-red': { badge: 'bg-red-500/12 text-red-700 dark:text-red-300', bar: 'bg-red-500' },
-}
-const neutralTone = { badge: 'bg-muted text-muted-foreground', bar: 'bg-muted-foreground' }
-
-export function subStatusTone(css: string) {
-  return subStatusTones[css] ?? neutralTone
-}
 
 /** Color de marca de cada canal (variables CSS de index.css). */
 export const channelColors: Record<ChannelType, string> = {
