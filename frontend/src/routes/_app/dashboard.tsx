@@ -1,7 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { UnderConstruction } from '@/components/shared/under-construction'
+import { dashboardQuery } from '@/features/analytics/api'
+import { DashboardPage } from '@/features/analytics/components/dashboard-page'
 
 export const Route = createFileRoute('/_app/dashboard')({
   head: () => ({ meta: [{ title: 'Inicio — InstaVende' }] }),
-  component: () => <UnderConstruction title="Inicio" description="Resumen de ventas y conversaciones." />,
+  // Precarga sin bloquear la navegación: la página muestra esqueletos mientras llega
+  loader: ({ context }) => void context.queryClient.prefetchQuery(dashboardQuery),
+  component: DashboardPage,
 })
