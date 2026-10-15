@@ -1,20 +1,21 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
-import { Button } from '@/components/ui/button'
-import { Logo } from '@/components/layout/app-sidebar'
+import { createFileRoute } from '@tanstack/react-router'
+import { LandingPage } from '@/features/landing/landing-page'
+
+const title = 'InstaVende — Vendedor con IA para WhatsApp, Instagram y Messenger'
+const description =
+  'Tu vendedor con IA que atiende, negocia y cierra ventas 24/7 por WhatsApp, Instagram y Messenger. Catálogo, pedidos, pagos, recordatorios y métricas en un solo lugar. Empieza gratis.'
 
 export const Route = createFileRoute('/')({
-  component: () => (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 p-6 text-center">
-      <Logo />
-      <h1 className="text-4xl font-semibold">Tu vendedor con IA, 24/7</h1>
-      <div className="flex gap-2">
-        <Button asChild>
-          <Link to="/register">Crear cuenta</Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link to="/login">Iniciar sesión</Link>
-        </Button>
-      </div>
-    </main>
-  ),
+  head: () => ({
+    meta: [
+      { title },
+      { name: 'description', content: description },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:title', content: title },
+      { property: 'og:description', content: description },
+      { property: 'og:locale', content: 'es_PE' },
+      { name: 'twitter:card', content: 'summary' },
+    ],
+  }),
+  component: LandingPage,
 })
