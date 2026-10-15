@@ -17,13 +17,15 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
 import { Route as AppMetricsRouteImport } from './routes/_app/metrics'
 import { Route as AppOrdersRouteImport } from './routes/_app/orders'
-import { Route as AppProductsRouteImport } from './routes/_app/products'
 import { Route as AppRemindersRouteImport } from './routes/_app/reminders'
 import { Route as AppSellerRouteImport } from './routes/_app/seller'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppProductsIndexRouteImport } from './routes/_app/products/index'
+import { Route as AppProductsProductIdRouteImport } from './routes/_app/products/$productId'
+import { Route as AppProductsNewRouteImport } from './routes/_app/products/new'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
 import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
 import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
@@ -70,11 +72,6 @@ const AppOrdersRoute = AppOrdersRouteImport.update({
   path: '/orders',
   getParentRoute: () => AppRoute,
 } as any)
-const AppProductsRoute = AppProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppRemindersRoute = AppRemindersRouteImport.update({
   id: '/reminders',
   path: '/reminders',
@@ -104,6 +101,21 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   id: '/setup-business',
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppProductsIndexRoute = AppProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProductsProductIdRoute = AppProductsProductIdRouteImport.update({
+  id: '/products/$productId',
+  path: '/products/$productId',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppProductsNewRoute = AppProductsNewRouteImport.update({
+  id: '/products/new',
+  path: '/products/new',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
   id: '/',
@@ -148,19 +160,21 @@ export interface FileRoutesByFullPath {
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
   '/orders': typeof AppOrdersRoute
-  '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
   '/seller': typeof AppSellerRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/products/$productId': typeof AppProductsProductIdRoute
+  '/products/new': typeof AppProductsNewRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/products/': typeof AppProductsIndexRoute
   '/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,18 +184,20 @@ export interface FileRoutesByTo {
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
   '/orders': typeof AppOrdersRoute
-  '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/products/$productId': typeof AppProductsProductIdRoute
+  '/products/new': typeof AppProductsNewRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/products': typeof AppProductsIndexRoute
   '/seller': typeof AppSellerIndexRoute
 }
 export interface FileRoutesById {
@@ -194,19 +210,21 @@ export interface FileRoutesById {
   '/_app/inbox': typeof AppInboxRoute
   '/_app/metrics': typeof AppMetricsRoute
   '/_app/orders': typeof AppOrdersRoute
-  '/_app/products': typeof AppProductsRoute
   '/_app/reminders': typeof AppRemindersRoute
   '/_app/seller': typeof AppSellerRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/products/$productId': typeof AppProductsProductIdRoute
+  '/_app/products/new': typeof AppProductsNewRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/_app/seller/payments': typeof AppSellerPaymentsRoute
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/products/': typeof AppProductsIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRouteTypes {
@@ -218,19 +236,21 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/metrics'
     | '/orders'
-    | '/products'
     | '/reminders'
     | '/seller'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/products/$productId'
+    | '/products/new'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/products/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -240,18 +260,20 @@ export interface FileRouteTypes {
     | '/inbox'
     | '/metrics'
     | '/orders'
-    | '/products'
     | '/reminders'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/products/$productId'
+    | '/products/new'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/products'
     | '/seller'
   id:
     | '__root__'
@@ -263,19 +285,21 @@ export interface FileRouteTypes {
     | '/_app/inbox'
     | '/_app/metrics'
     | '/_app/orders'
-    | '/_app/products'
     | '/_app/reminders'
     | '/_app/seller'
     | '/_app/settings'
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/products/$productId'
+    | '/_app/products/new'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
     | '/_app/seller/payments'
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/products/'
     | '/_app/seller/'
   fileRoutesById: FileRoutesById
 }
@@ -343,13 +367,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOrdersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/products': {
-      id: '/_app/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof AppProductsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/reminders': {
       id: '/_app/reminders'
       path: '/reminders'
@@ -391,6 +408,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/setup-business'
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_app/products/': {
+      id: '/_app/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AppProductsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/products/$productId': {
+      id: '/_app/products/$productId'
+      path: '/products/$productId'
+      fullPath: '/products/$productId'
+      preLoaderRoute: typeof AppProductsProductIdRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/products/new': {
+      id: '/_app/products/new'
+      path: '/products/new'
+      fullPath: '/products/new'
+      preLoaderRoute: typeof AppProductsNewRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/seller/': {
       id: '/_app/seller/'
@@ -474,10 +512,12 @@ interface AppRouteChildren {
   AppInboxRoute: typeof AppInboxRoute
   AppMetricsRoute: typeof AppMetricsRoute
   AppOrdersRoute: typeof AppOrdersRoute
-  AppProductsRoute: typeof AppProductsRoute
   AppRemindersRoute: typeof AppRemindersRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
+  AppProductsProductIdRoute: typeof AppProductsProductIdRoute
+  AppProductsNewRoute: typeof AppProductsNewRoute
+  AppProductsIndexRoute: typeof AppProductsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -486,10 +526,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppInboxRoute: AppInboxRoute,
   AppMetricsRoute: AppMetricsRoute,
   AppOrdersRoute: AppOrdersRoute,
-  AppProductsRoute: AppProductsRoute,
   AppRemindersRoute: AppRemindersRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
+  AppProductsProductIdRoute: AppProductsProductIdRoute,
+  AppProductsNewRoute: AppProductsNewRoute,
+  AppProductsIndexRoute: AppProductsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
