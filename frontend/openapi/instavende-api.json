@@ -5068,6 +5068,7 @@
           "MercadoPago",
           "PayPal",
           "Stripe",
+          "DigitalWallet",
           "Other"
         ]
       },

@@ -243,6 +243,7 @@ public class BotContextProvider
         PaymentMethodType.MercadoPago  => "Mercado Pago",
         PaymentMethodType.PayPal       => "PayPal",
         PaymentMethodType.Stripe       => "Stripe",
+        PaymentMethodType.DigitalWallet => "billetera digital",
         _                              => "otro",
     };
 

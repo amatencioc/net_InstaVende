@@ -47,6 +47,20 @@ public sealed class SellerTestController(IBotEngineService bot, AppDbContext db)
             .Select(b => (bool?)b.IsActive)
             .FirstOrDefaultAsync(ct) ?? true;
 
+        // Checklist de configuración inicial: el comercio ya probó su vendedor
+        if (reply.Text != null)
+        {
+            var updated = await db.OnboardingProgresses
+                .Where(o => o.BusinessId == BusinessId && !o.BotTested)
+                .ExecuteUpdateAsync(s => s.SetProperty(o => o.BotTested, true).SetProperty(o => o.UpdatedAt, DateTime.UtcNow), ct);
+            if (updated == 0 && !await db.OnboardingProgresses.AnyAsync(o => o.BusinessId == BusinessId, ct))
+            {
+                db.OnboardingProgresses.Add(new Core.Entities.OnboardingProgress { BusinessId = BusinessId, BotTested = true });
+                try { await db.SaveChangesAsync(ct); }
+                catch (DbUpdateException) { /* otra petición la creó en paralelo */ }
+            }
+        }
+
         return new SellerTestResponse(reply.Text, reply.HandoffTriggered, isActive);
     }
 }

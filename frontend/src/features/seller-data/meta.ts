@@ -70,12 +70,13 @@ export interface PaymentTypeMeta {
 
 export const paymentTypes: PaymentMethodType[] = [
   'BankTransfer',
-  'Other',
+  'DigitalWallet',
   'Cash',
   'CreditCard',
   'MercadoPago',
   'PayPal',
   'Stripe',
+  'Other',
 ]
 
 export const paymentTypeMeta: Record<PaymentMethodType, PaymentTypeMeta> = {
@@ -89,9 +90,19 @@ export const paymentTypeMeta: Record<PaymentMethodType, PaymentTypeMeta> = {
     aliasPlaceholder: 'CCI 002-191-112345678012-55',
     instructionsPlaceholder: 'Titular: Tu Negocio SAC. Envía la constancia por este chat para confirmar tu pedido.',
   },
+  DigitalWallet: {
+    label: 'Billetera digital',
+    description: 'Yape, Plin, Nequi u otra billetera.',
+    icon: Smartphone,
+    tone: 'bg-brand-accent/10 text-brand-accent',
+    namePlaceholder: 'Yape / Plin',
+    accountPlaceholder: '994 832 877',
+    aliasPlaceholder: 'Titular: Ana Pérez',
+    instructionsPlaceholder: 'Envía el pago al número indicado y comparte la captura por este chat.',
+  },
   Other: {
-    label: 'Billetera digital u otro',
-    description: 'Yape, Plin, Nequi u otro medio.',
+    label: 'Otro medio',
+    description: 'Cualquier otra forma de pago.',
     icon: Smartphone,
     tone: 'bg-brand-accent/10 text-brand-accent',
     namePlaceholder: 'Yape / Plin',
@@ -159,6 +170,7 @@ export function paymentFieldLabels(type: PaymentMethodType): { account: string; 
   switch (type) {
     case 'BankTransfer':
       return { account: 'Número de cuenta', alias: 'CCI o titular' }
+    case 'DigitalWallet':
     case 'Other':
       return { account: 'Número', alias: 'Titular' }
     case 'MercadoPago':

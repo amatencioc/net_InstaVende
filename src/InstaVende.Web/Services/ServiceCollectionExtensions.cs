@@ -51,6 +51,9 @@ internal static class ServiceCollectionExtensions
             .AddDefaultTokenProviders()
             .AddErrorDescriber<SpanishIdentityErrorDescriber>();
 
+        // "Cerrar sesión en otros dispositivos" y cambios de contraseña surten efecto en ~1 minuto
+        services.Configure<SecurityStampValidatorOptions>(o => o.ValidationInterval = TimeSpan.FromMinutes(1));
+
         services.ConfigureApplicationCookie(o =>
         {
             o.Cookie.Name = "iv.auth";

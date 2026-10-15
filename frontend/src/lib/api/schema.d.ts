@@ -4117,7 +4117,7 @@ export interface components {
             isActive: boolean;
         };
         /** @enum {unknown} */
-        PaymentMethodType: "BankTransfer" | "CreditCard" | "Cash" | "MercadoPago" | "PayPal" | "Stripe" | "Other";
+        PaymentMethodType: "BankTransfer" | "CreditCard" | "Cash" | "MercadoPago" | "PayPal" | "Stripe" | "DigitalWallet" | "Other";
         PaymentMethodUpsertRequest: {
             type: components["schemas"]["PaymentMethodType"];
             name: string;

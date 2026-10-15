@@ -7,5 +7,7 @@ public enum PaymentMethodType
     MercadoPago = 4,
     PayPal = 5,
     Stripe = 6,
+    /// <summary>Billeteras digitales locales (Yape, Plin, Nequi…).</summary>
+    DigitalWallet = 7,
     Other = 99
 }
