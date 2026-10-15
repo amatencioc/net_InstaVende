@@ -1,0 +1,108 @@
+/* Animaciones de la landing. Solo usa tokens de color (var(--…)) para soportar modo oscuro.
+   Todo el movimiento se desactiva con prefers-reduced-motion. */
+
+/* Aparición al hacer scroll (controlada por IntersectionObserver vía data-visible) */
+.lp-reveal {
+  opacity: 0;
+  transform: translate3d(0, 1.25rem, 0);
+  transition:
+    opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--lp-delay, 0ms);
+}
+.lp-reveal[data-visible='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Entrada de burbujas del chat */
+@keyframes lp-message-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.5rem, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.lp-message {
+  animation: lp-message-in 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Indicador "escribiendo…" */
+@keyframes lp-typing {
+  0%,
+  80%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+.lp-typing-dot {
+  animation: lp-typing 1.2s ease-in-out infinite;
+}
+.lp-typing-dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.lp-typing-dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* Flotación sutil de las tarjetas alrededor del teléfono */
+@keyframes lp-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.lp-float {
+  animation: lp-float 6s ease-in-out infinite;
+}
+
+/* Fondo de cuadrícula del hero, desvanecido hacia los bordes */
+.lp-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklch, var(--border) 80%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--border) 80%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* Fondo del chat (patrón suave tipo WhatsApp) */
+.lp-chat-bg {
+  background-color: var(--muted);
+  background-image: radial-gradient(
+    color-mix(in oklch, var(--foreground) 7%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 14px 14px;
+}
+
+/* Borde con degradado de marca para la tarjeta destacada */
+.lp-gradient-border {
+  background:
+    linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(135deg, var(--primary), var(--brand-accent)) border-box;
+  border: 1.5px solid transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .lp-message,
+  .lp-typing-dot,
+  .lp-float {
+    animation: none;
+  }
+}
