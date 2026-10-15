@@ -48,7 +48,7 @@ En PowerShell, ve a la carpeta donde quieras guardar el proyecto y clónalo:
 
 ```powershell
 cd D:\Proyectos            # o la carpeta que prefieras
-git clone <URL-del-repositorio> net_InstaVende
+git clone https://github.com/amatencioc/net_InstaVende.git net_InstaVende
 cd net_InstaVende
 ```
 
