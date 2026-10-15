@@ -1,7 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Hammer } from 'lucide-react'
-import { EmptyState } from '@/components/shared/empty-state'
+import { quickRepliesQuery, sellerRulesQuery } from '@/features/seller-profile/api'
+import { RulesPage } from '@/features/seller-profile/components/rules-form'
 
 export const Route = createFileRoute('/_app/seller/rules')({
-  component: () => <EmptyState icon={Hammer} title="Reglas y políticas" description="Sección en construcción." />,
+  head: () => ({ meta: [{ title: 'Reglas y políticas · Mi vendedor — InstaVende' }] }),
+  loader: ({ context }) => {
+    void context.queryClient.prefetchQuery(sellerRulesQuery)
+    void context.queryClient.prefetchQuery(quickRepliesQuery)
+  },
+  component: RulesPage,
 })

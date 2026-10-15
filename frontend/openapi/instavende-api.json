@@ -6,6 +6,390 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/api/seller/profile": {
+      "get": {
+        "tags": [
+          "SellerProfile"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SellerProfile"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProfileUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProfileUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerProfileUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerProfileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seller/rules": {
+      "get": {
+        "tags": [
+          "SellerRules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerRulesDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "SellerRules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerRulesDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seller/quick-replies": {
+      "get": {
+        "tags": [
+          "SellerRules"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SellerRulesQuickReplyDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "SellerRules"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerRulesQuickReplyDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seller/quick-replies/{id}": {
+      "put": {
+        "tags": [
+          "SellerRules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerRulesQuickReplyUpsertRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerRulesQuickReplyDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "SellerRules"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {
+              "application/json": { }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/seller/test": {
+      "post": {
+        "tags": [
+          "SellerTest"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerTestRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerTestRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SellerTestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SellerTestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/reminders": {
       "get": {
         "tags": [
@@ -2082,6 +2466,719 @@
           }
         }
       },
+      "SellerProfileDto": {
+        "required": [
+          "vendorName",
+          "vendorGender",
+          "country",
+          "businessDescription",
+          "targetAudience",
+          "rules",
+          "communicationStyle",
+          "salesStyle",
+          "responseLength",
+          "useEmojis",
+          "emojiPalette",
+          "useOpeningPunctuation",
+          "wordsToAvoid",
+          "welcomeMessage",
+          "purchaseConfirmationMessage",
+          "humanHandoffSituations",
+          "autoPauseOnHandoff",
+          "handoffMessage",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "vendorName": {
+            "type": "string"
+          },
+          "vendorGender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "country": {
+            "type": "string"
+          },
+          "businessDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetAudience": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rules": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "communicationStyle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "salesStyle": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "responseLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "useEmojis": {
+            "type": "boolean"
+          },
+          "emojiPalette": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "useOpeningPunctuation": {
+            "type": "boolean"
+          },
+          "wordsToAvoid": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "welcomeMessage": {
+            "type": "string"
+          },
+          "purchaseConfirmationMessage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "humanHandoffSituations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "autoPauseOnHandoff": {
+            "type": "boolean"
+          },
+          "handoffMessage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "updatedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "SellerProfileResponse": {
+        "required": [
+          "profile",
+          "countries",
+          "genders",
+          "templates"
+        ],
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/SellerProfileDto"
+          },
+          "countries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "genders": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "templates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SellerProfileTemplateDto"
+            }
+          }
+        }
+      },
+      "SellerProfileTemplateDto": {
+        "required": [
+          "id",
+          "name",
+          "description",
+          "communicationStyle",
+          "salesStyle",
+          "responseLength",
+          "useEmojis",
+          "emojiPalette",
+          "useOpeningPunctuation"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "communicationStyle": {
+            "type": "string"
+          },
+          "salesStyle": {
+            "type": "string"
+          },
+          "responseLength": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "useEmojis": {
+            "type": "boolean"
+          },
+          "emojiPalette": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "useOpeningPunctuation": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SellerProfileUpdateRequest": {
+        "required": [
+          "vendorName",
+          "vendorGender",
+          "country",
+          "businessDescription",
+          "targetAudience",
+          "rules",
+          "communicationStyle",
+          "salesStyle",
+          "responseLength",
+          "useEmojis",
+          "emojiPalette",
+          "useOpeningPunctuation",
+          "wordsToAvoid",
+          "welcomeMessage",
+          "purchaseConfirmationMessage",
+          "humanHandoffSituations",
+          "autoPauseOnHandoff",
+          "handoffMessage"
+        ],
+        "type": "object",
+        "properties": {
+          "vendorName": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string"
+          },
+          "vendorGender": {
+            "pattern": "^(Masculino|Femenino)$",
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "country": {
+            "type": "string"
+          },
+          "businessDescription": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetAudience": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rules": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "communicationStyle": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "salesStyle": {
+            "maxLength": 210,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "responseLength": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "useEmojis": {
+            "type": "boolean"
+          },
+          "emojiPalette": {
+            "maxItems": 24,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "useOpeningPunctuation": {
+            "type": "boolean"
+          },
+          "wordsToAvoid": {
+            "maxItems": 50,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "welcomeMessage": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "purchaseConfirmationMessage": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "humanHandoffSituations": {
+            "maxItems": 20,
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "autoPauseOnHandoff": {
+            "type": "boolean"
+          },
+          "handoffMessage": {
+            "maxLength": 300,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "SellerRulesDto": {
+        "required": [
+          "isActive",
+          "botName",
+          "fallbackMessage",
+          "enableHandoff",
+          "handoffTriggerPhrase",
+          "businessHours",
+          "returnPolicy",
+          "warrantyPolicy",
+          "shippingTimes",
+          "activePromotions",
+          "discountLevel1",
+          "discountLevel2",
+          "discountLevel3",
+          "maxDiscountPercent",
+          "loyaltyDiscount",
+          "bundleDiscount",
+          "freeShippingThreshold",
+          "currencySymbol",
+          "hoursStatus",
+          "updatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          },
+          "botName": {
+            "type": "string"
+          },
+          "fallbackMessage": {
+            "type": "string"
+          },
+          "enableHandoff": {
+            "type": "boolean"
+          },
+          "handoffTriggerPhrase": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "businessHours": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "returnPolicy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "warrantyPolicy": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "shippingTimes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "activePromotions": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "discountLevel1": {
+            "type": "number",
+            "format": "double"
+          },
+          "discountLevel2": {
+            "type": "number",
+            "format": "double"
+          },
+          "discountLevel3": {
+            "type": "number",
+            "format": "double"
+          },
+          "maxDiscountPercent": {
+            "type": "number",
+            "format": "double"
+          },
+          "loyaltyDiscount": {
+            "type": "number",
+            "format": "double"
+          },
+          "bundleDiscount": {
+            "type": "number",
+            "format": "double"
+          },
+          "freeShippingThreshold": {
+            "type": "number",
+            "format": "double"
+          },
+          "currencySymbol": {
+            "type": "string"
+          },
+          "hoursStatus": {
+            "$ref": "#/components/schemas/SellerRulesHoursStatus"
+          },
+          "updatedAt": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "SellerRulesHoursStatus": {
+        "enum": [
+          "Unknown",
+          "Open",
+          "Closed"
+        ]
+      },
+      "SellerRulesQuickReplyDto": {
+        "required": [
+          "id",
+          "name",
+          "triggerPhrases",
+          "response",
+          "priority",
+          "isActive",
+          "createdAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "triggerPhrases": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "response": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SellerRulesQuickReplyUpsertRequest": {
+        "required": [
+          "name",
+          "triggerPhrases",
+          "response",
+          "priority"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": "string"
+          },
+          "triggerPhrases": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "response": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          },
+          "priority": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "SellerRulesUpdateRequest": {
+        "required": [
+          "isActive",
+          "botName",
+          "fallbackMessage",
+          "enableHandoff",
+          "handoffTriggerPhrase",
+          "businessHours",
+          "returnPolicy",
+          "warrantyPolicy",
+          "shippingTimes",
+          "activePromotions",
+          "discountLevel1",
+          "discountLevel2",
+          "discountLevel3",
+          "maxDiscountPercent",
+          "loyaltyDiscount",
+          "bundleDiscount",
+          "freeShippingThreshold"
+        ],
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean"
+          },
+          "botName": {
+            "maxLength": 60,
+            "minLength": 0,
+            "type": "string"
+          },
+          "fallbackMessage": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": "string"
+          },
+          "enableHandoff": {
+            "type": "boolean"
+          },
+          "handoffTriggerPhrase": {
+            "maxLength": 100,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "businessHours": {
+            "maxLength": 200,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "returnPolicy": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "warrantyPolicy": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "shippingTimes": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "activePromotions": {
+            "maxLength": 2000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "discountLevel1": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "discountLevel2": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "discountLevel3": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "maxDiscountPercent": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "loyaltyDiscount": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "bundleDiscount": {
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          },
+          "freeShippingThreshold": {
+            "maximum": 99999999,
+            "minimum": 0,
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SellerTestRequest": {
+        "required": [
+          "message"
+        ],
+        "type": "object",
+        "properties": {
+          "message": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "SellerTestResponse": {
+        "required": [
+          "reply",
+          "handoffTriggered",
+          "botActive"
+        ],
+        "type": "object",
+        "properties": {
+          "reply": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "handoffTriggered": {
+            "type": "boolean"
+          },
+          "botActive": {
+            "type": "boolean"
+          }
+        }
+      },
       "SessionBusinessDto": {
         "required": [
           "id",
@@ -2247,6 +3344,15 @@
     }
   },
   "tags": [
+    {
+      "name": "SellerProfile"
+    },
+    {
+      "name": "SellerRules"
+    },
+    {
+      "name": "SellerTest"
+    },
     {
       "name": "Reminders"
     },

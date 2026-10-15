@@ -4,6 +4,381 @@
  */
 
 export interface paths {
+    "/api/seller/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerProfileResponse"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SellerProfileUpdateRequest"];
+                    "text/json": components["schemas"]["SellerProfileUpdateRequest"];
+                    "application/*+json": components["schemas"]["SellerProfileUpdateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerProfileResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerRulesDto"];
+                    };
+                };
+            };
+        };
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SellerRulesUpdateRequest"];
+                    "text/json": components["schemas"]["SellerRulesUpdateRequest"];
+                    "application/*+json": components["schemas"]["SellerRulesUpdateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerRulesDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/quick-replies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                    "text/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                    "application/*+json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/quick-replies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                    "text/json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                    "application/*+json": components["schemas"]["SellerRulesQuickReplyUpsertRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerRulesQuickReplyDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/seller/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SellerTestRequest"];
+                    "text/json": components["schemas"]["SellerTestRequest"];
+                    "application/*+json": components["schemas"]["SellerTestRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SellerTestResponse"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Too Many Requests */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/reminders": {
         parameters: {
             query?: never;
@@ -1316,6 +1691,155 @@ export interface components {
             /** Format: date-time */
             scheduledAt: string;
             templateKey?: null | string;
+        };
+        SellerProfileDto: {
+            vendorName: string;
+            vendorGender: null | string;
+            country: string;
+            businessDescription: null | string;
+            targetAudience: null | string;
+            rules: null | string;
+            communicationStyle: null | string;
+            salesStyle: null | string;
+            /** Format: int32 */
+            responseLength: number;
+            useEmojis: boolean;
+            emojiPalette: string[];
+            useOpeningPunctuation: boolean;
+            wordsToAvoid: string[];
+            welcomeMessage: string;
+            purchaseConfirmationMessage: null | string;
+            humanHandoffSituations: string[];
+            autoPauseOnHandoff: boolean;
+            handoffMessage: null | string;
+            /** Format: date-time */
+            updatedAt: null | string;
+        };
+        SellerProfileResponse: {
+            profile: components["schemas"]["SellerProfileDto"];
+            countries: string[];
+            genders: string[];
+            templates: components["schemas"]["SellerProfileTemplateDto"][];
+        };
+        SellerProfileTemplateDto: {
+            id: string;
+            name: string;
+            description: string;
+            communicationStyle: string;
+            salesStyle: string;
+            /** Format: int32 */
+            responseLength: number;
+            useEmojis: boolean;
+            emojiPalette: string[];
+            useOpeningPunctuation: boolean;
+        };
+        SellerProfileUpdateRequest: {
+            vendorName: string;
+            vendorGender: null | string;
+            country: string;
+            businessDescription: null | string;
+            targetAudience: null | string;
+            rules: null | string;
+            communicationStyle: null | string;
+            salesStyle: null | string;
+            /** Format: int32 */
+            responseLength: number;
+            useEmojis: boolean;
+            emojiPalette: null | string[];
+            useOpeningPunctuation: boolean;
+            wordsToAvoid: null | string[];
+            welcomeMessage: string;
+            purchaseConfirmationMessage: null | string;
+            humanHandoffSituations: null | string[];
+            autoPauseOnHandoff: boolean;
+            handoffMessage: null | string;
+        };
+        SellerRulesDto: {
+            isActive: boolean;
+            botName: string;
+            fallbackMessage: string;
+            enableHandoff: boolean;
+            handoffTriggerPhrase: null | string;
+            businessHours: null | string;
+            returnPolicy: null | string;
+            warrantyPolicy: null | string;
+            shippingTimes: null | string;
+            activePromotions: null | string;
+            /** Format: double */
+            discountLevel1: number;
+            /** Format: double */
+            discountLevel2: number;
+            /** Format: double */
+            discountLevel3: number;
+            /** Format: double */
+            maxDiscountPercent: number;
+            /** Format: double */
+            loyaltyDiscount: number;
+            /** Format: double */
+            bundleDiscount: number;
+            /** Format: double */
+            freeShippingThreshold: number;
+            currencySymbol: string;
+            hoursStatus: components["schemas"]["SellerRulesHoursStatus"];
+            /** Format: date-time */
+            updatedAt: null | string;
+        };
+        /** @enum {unknown} */
+        SellerRulesHoursStatus: "Unknown" | "Open" | "Closed";
+        SellerRulesQuickReplyDto: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            triggerPhrases: string[];
+            response: string;
+            /** Format: int32 */
+            priority: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        SellerRulesQuickReplyUpsertRequest: {
+            name: string;
+            triggerPhrases: string[];
+            response: string;
+            /** Format: int32 */
+            priority: number;
+            /** @default true */
+            isActive: boolean;
+        };
+        SellerRulesUpdateRequest: {
+            isActive: boolean;
+            botName: string;
+            fallbackMessage: string;
+            enableHandoff: boolean;
+            handoffTriggerPhrase: null | string;
+            businessHours: null | string;
+            returnPolicy: null | string;
+            warrantyPolicy: null | string;
+            shippingTimes: null | string;
+            activePromotions: null | string;
+            /** Format: double */
+            discountLevel1: number;
+            /** Format: double */
+            discountLevel2: number;
+            /** Format: double */
+            discountLevel3: number;
+            /** Format: double */
+            maxDiscountPercent: number;
+            /** Format: double */
+            loyaltyDiscount: number;
+            /** Format: double */
+            bundleDiscount: number;
+            /** Format: double */
+            freeShippingThreshold: number;
+        };
+        SellerTestRequest: {
+            message: string;
+        };
+        SellerTestResponse: {
+            reply: null | string;
+            handoffTriggered: boolean;
+            botActive: boolean;
         };
         SessionBusinessDto: {
             /** Format: int32 */
