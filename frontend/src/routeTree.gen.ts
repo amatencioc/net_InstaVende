@@ -16,7 +16,6 @@ import { Route as AppChannelsRouteImport } from './routes/_app/channels'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
 import { Route as AppMetricsRouteImport } from './routes/_app/metrics'
-import { Route as AppOrdersRouteImport } from './routes/_app/orders'
 import { Route as AppProductsRouteImport } from './routes/_app/products'
 import { Route as AppRemindersRouteImport } from './routes/_app/reminders'
 import { Route as AppSellerRouteImport } from './routes/_app/seller'
@@ -24,6 +23,8 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppOrdersOrderIdRouteImport } from './routes/_app/orders/$orderId'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
 import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
 import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
@@ -65,11 +66,6 @@ const AppMetricsRoute = AppMetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => AppRoute,
 } as any)
-const AppOrdersRoute = AppOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppProductsRoute = AppProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -104,6 +100,16 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   id: '/setup-business',
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersOrderIdRoute = AppOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
   id: '/',
@@ -147,7 +153,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
   '/seller': typeof AppSellerRouteWithChildren
@@ -155,12 +160,14 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/orders/': typeof AppOrdersIndexRoute
   '/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRoutesByTo {
@@ -169,19 +176,20 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/reminders': typeof AppRemindersRoute
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/orders': typeof AppOrdersIndexRoute
   '/seller': typeof AppSellerIndexRoute
 }
 export interface FileRoutesById {
@@ -193,7 +201,6 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/inbox': typeof AppInboxRoute
   '/_app/metrics': typeof AppMetricsRoute
-  '/_app/orders': typeof AppOrdersRoute
   '/_app/products': typeof AppProductsRoute
   '/_app/reminders': typeof AppRemindersRoute
   '/_app/seller': typeof AppSellerRouteWithChildren
@@ -201,12 +208,14 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/_app/seller/payments': typeof AppSellerPaymentsRoute
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRouteTypes {
@@ -217,7 +226,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/metrics'
-    | '/orders'
     | '/products'
     | '/reminders'
     | '/seller'
@@ -225,12 +233,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/orders/$orderId'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/orders/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -239,19 +249,20 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/metrics'
-    | '/orders'
     | '/products'
     | '/reminders'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/orders/$orderId'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/orders'
     | '/seller'
   id:
     | '__root__'
@@ -262,7 +273,6 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/inbox'
     | '/_app/metrics'
-    | '/_app/orders'
     | '/_app/products'
     | '/_app/reminders'
     | '/_app/seller'
@@ -270,12 +280,14 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/orders/$orderId'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
     | '/_app/seller/payments'
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/orders/'
     | '/_app/seller/'
   fileRoutesById: FileRoutesById
 }
@@ -336,13 +348,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMetricsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/orders': {
-      id: '/_app/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AppOrdersRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/products': {
       id: '/_app/products'
       path: '/products'
@@ -391,6 +396,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/setup-business'
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_app/orders/': {
+      id: '/_app/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AppOrdersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders/$orderId': {
+      id: '/_app/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AppOrdersOrderIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/seller/': {
       id: '/_app/seller/'
@@ -473,11 +492,12 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppInboxRoute: typeof AppInboxRoute
   AppMetricsRoute: typeof AppMetricsRoute
-  AppOrdersRoute: typeof AppOrdersRoute
   AppProductsRoute: typeof AppProductsRoute
   AppRemindersRoute: typeof AppRemindersRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
+  AppOrdersOrderIdRoute: typeof AppOrdersOrderIdRoute
+  AppOrdersIndexRoute: typeof AppOrdersIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -485,11 +505,12 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppInboxRoute: AppInboxRoute,
   AppMetricsRoute: AppMetricsRoute,
-  AppOrdersRoute: AppOrdersRoute,
   AppProductsRoute: AppProductsRoute,
   AppRemindersRoute: AppRemindersRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
+  AppOrdersOrderIdRoute: AppOrdersOrderIdRoute,
+  AppOrdersIndexRoute: AppOrdersIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
