@@ -39,13 +39,13 @@ public sealed record ReminderCountsDto(int Pending, int Sent, int Failed, int Ca
 /// </param>
 /// <param name="TemplateKey">Identificador opcional de la plantilla de origen. Si se omite al editar, se conserva el actual.</param>
 public sealed record ReminderUpsertRequest(
-    [property: Range(1, int.MaxValue, ErrorMessage = "Selecciona un contacto.")] int ContactId,
+    [Range(1, int.MaxValue, ErrorMessage = "Selecciona un contacto.")] int ContactId,
     int? ConversationId,
-    [property: Required(ErrorMessage = "Escribe el mensaje del recordatorio."),
+    [Required(ErrorMessage = "Escribe el mensaje del recordatorio."),
                StringLength(1000, MinimumLength = 1, ErrorMessage = "El mensaje debe tener entre 1 y 1000 caracteres.")]
     string Message,
-    [property: Required(ErrorMessage = "Indica la fecha y hora de envío.")] DateTime ScheduledAt,
-    [property: StringLength(100, ErrorMessage = "La clave de plantilla no puede superar los 100 caracteres.")] string? TemplateKey = null);
+    [Required(ErrorMessage = "Indica la fecha y hora de envío.")] DateTime ScheduledAt,
+    [StringLength(100, ErrorMessage = "La clave de plantilla no puede superar los 100 caracteres.")] string? TemplateKey = null);
 
 /// <summary>Contacto del negocio para el selector del recordatorio.</summary>
 public sealed record ReminderContactOptionDto(
@@ -74,14 +74,14 @@ public sealed record ReminderTemplateItemDto(int Order, string TimeWindow, strin
 
 /// <summary>Nuevo conjunto de recordatorios de un segmento (reemplaza el actual).</summary>
 public sealed record ReminderTemplateSegmentUpdateRequest(
-    [property: Required(ErrorMessage = "Envía los recordatorios del segmento."),
+    [Required(ErrorMessage = "Envía los recordatorios del segmento."),
                MinLength(1, ErrorMessage = "Envía al menos un recordatorio."),
                MaxLength(2, ErrorMessage = "Un segmento admite como máximo 2 recordatorios.")]
     IReadOnlyList<ReminderTemplateItemUpdate> Reminders);
 
 public sealed record ReminderTemplateItemUpdate(
-    [property: Range(1, 2, ErrorMessage = "El orden del recordatorio debe ser 1 o 2.")] int Order,
-    [property: Required(ErrorMessage = "Escribe el mensaje del recordatorio."),
+    [Range(1, 2, ErrorMessage = "El orden del recordatorio debe ser 1 o 2.")] int Order,
+    [Required(ErrorMessage = "Escribe el mensaje del recordatorio."),
                StringLength(ReminderTemplateCatalog.MaxMessageLength, MinimumLength = 1,
                    ErrorMessage = "El mensaje debe tener entre 1 y 200 caracteres.")]
     string Message,

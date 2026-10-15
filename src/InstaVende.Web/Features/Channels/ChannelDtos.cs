@@ -67,24 +67,24 @@ public sealed record ChannelsOverviewDto(IReadOnlyList<ChannelSummaryDto> Channe
 // ── Meta (WhatsApp Cloud API, Messenger, Instagram) ──────────────────────────
 
 public sealed record ChannelMetaConfigRequest(
-    [property: StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
+    [StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
                RegularExpression(@"^\d+$", ErrorMessage = "El identificador del número solo contiene dígitos.")]
     string? PhoneNumberId,
-    [property: StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
+    [StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
                RegularExpression(@"^\d+$", ErrorMessage = "El identificador de la cuenta de WhatsApp Business solo contiene dígitos.")]
     string? WabaId,
-    [property: StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
+    [StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
                RegularExpression(@"^\d+$", ErrorMessage = "El identificador de la página solo contiene dígitos.")]
     string? PageId,
-    [property: StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
+    [StringLength(32, ErrorMessage = "El identificador es demasiado largo."),
                RegularExpression(@"^\d+$", ErrorMessage = "El identificador de la cuenta de Instagram solo contiene dígitos.")]
     string? InstagramAccountId,
     // Vacío o null conserva el token actual.
-    [property: StringLength(2048, ErrorMessage = "El token de acceso es demasiado largo."),
+    [StringLength(2048, ErrorMessage = "El token de acceso es demasiado largo."),
                RegularExpression(@"^\S*$", ErrorMessage = "El token de acceso no puede contener espacios.")]
     string? AccessToken,
     // Vacío o null conserva la clave secreta actual.
-    [property: StringLength(256, ErrorMessage = "La clave secreta es demasiado larga."),
+    [StringLength(256, ErrorMessage = "La clave secreta es demasiado larga."),
                RegularExpression(@"^\S*$", ErrorMessage = "La clave secreta no puede contener espacios.")]
     string? AppSecret,
     bool IsActive);

@@ -22,13 +22,13 @@ public sealed record KnowledgeCategoryCountDto(KnowledgeCategory Category, int C
 public sealed record KnowledgeListDto(IReadOnlyList<KnowledgeEntryDto> Items, IReadOnlyList<KnowledgeCategoryCountDto> Counts, int Total);
 
 public sealed record KnowledgeUpsertRequest(
-    [property: Required(ErrorMessage = "El título es obligatorio."),
+    [Required(ErrorMessage = "El título es obligatorio."),
                StringLength(KnowledgeLimits.TitleMax, MinimumLength = 1, ErrorMessage = "El título debe tener entre 1 y 200 caracteres.")]
     string Title,
-    [property: Required(ErrorMessage = "El contenido es obligatorio."),
+    [Required(ErrorMessage = "El contenido es obligatorio."),
                StringLength(KnowledgeLimits.ContentMax, MinimumLength = 1, ErrorMessage = "El contenido debe tener entre 1 y 2000 caracteres.")]
     string Content,
-    [property: EnumDataType(typeof(KnowledgeCategory), ErrorMessage = "Selecciona una categoría válida.")]
+    [EnumDataType(typeof(KnowledgeCategory), ErrorMessage = "Selecciona una categoría válida.")]
     KnowledgeCategory Category);
 
 public sealed record KnowledgeFavoriteRequest(bool IsFavorite);

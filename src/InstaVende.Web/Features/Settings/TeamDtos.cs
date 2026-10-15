@@ -33,14 +33,14 @@ public sealed record TeamDto(
     bool CanManage);
 
 public sealed record TeamInviteRequest(
-    [property: Required(ErrorMessage = "Ingresa el email de la persona a invitar."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string Email,
-    [property: EnumDataType(typeof(UserRole), ErrorMessage = "Selecciona un rol válido.")] UserRole Role = UserRole.Member);
+    [Required(ErrorMessage = "Ingresa el email de la persona a invitar."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string Email,
+    [EnumDataType(typeof(UserRole), ErrorMessage = "Selecciona un rol válido.")] UserRole Role = UserRole.Member);
 
 /// <summary>Invitación recién creada. <see cref="InviteUrl"/> solo se puede obtener ahora: el servidor guarda únicamente el hash del token.</summary>
 public sealed record TeamInvitationCreatedDto(TeamInvitationDto Invitation, string InviteUrl);
 
 public sealed record TeamRoleUpdateRequest(
-    [property: EnumDataType(typeof(UserRole), ErrorMessage = "Selecciona un rol válido.")] UserRole Role);
+    [EnumDataType(typeof(UserRole), ErrorMessage = "Selecciona un rol válido.")] UserRole Role);
 
 // ── Invitación pública ───────────────────────────────────────────────────────
 
@@ -68,6 +68,6 @@ public sealed record InvitationDetailsDto(
 /// para crear la cuenta con el email invitado.
 /// </summary>
 public sealed record InvitationAcceptRequest(
-    [property: StringLength(100, ErrorMessage = "El nombre admite hasta 100 caracteres.")] string? FirstName,
-    [property: StringLength(100, ErrorMessage = "El apellido admite hasta 100 caracteres.")] string? LastName,
-    [property: StringLength(100, ErrorMessage = "La contraseña admite hasta 100 caracteres.")] string? Password);
+    [StringLength(100, ErrorMessage = "El nombre admite hasta 100 caracteres.")] string? FirstName,
+    [StringLength(100, ErrorMessage = "El apellido admite hasta 100 caracteres.")] string? LastName,
+    [StringLength(100, ErrorMessage = "La contraseña admite hasta 100 caracteres.")] string? Password);

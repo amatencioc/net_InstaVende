@@ -41,36 +41,36 @@ public sealed record SellerRulesDto(
 
 public sealed record SellerRulesUpdateRequest(
     bool IsActive,
-    [property: Required(ErrorMessage = "El nombre interno del bot es obligatorio."), StringLength(60, ErrorMessage = "El nombre admite como máximo 60 caracteres.")]
+    [Required(ErrorMessage = "El nombre interno del bot es obligatorio."), StringLength(60, ErrorMessage = "El nombre admite como máximo 60 caracteres.")]
     string BotName,
-    [property: Required(ErrorMessage = "El mensaje de respaldo es obligatorio."), StringLength(500, ErrorMessage = "El mensaje de respaldo admite como máximo 500 caracteres.")]
+    [Required(ErrorMessage = "El mensaje de respaldo es obligatorio."), StringLength(500, ErrorMessage = "El mensaje de respaldo admite como máximo 500 caracteres.")]
     string FallbackMessage,
     bool EnableHandoff,
-    [property: StringLength(100, ErrorMessage = "La frase disparadora admite como máximo 100 caracteres.")]
+    [StringLength(100, ErrorMessage = "La frase disparadora admite como máximo 100 caracteres.")]
     string? HandoffTriggerPhrase,
-    [property: StringLength(200, ErrorMessage = "El horario admite como máximo 200 caracteres.")]
+    [StringLength(200, ErrorMessage = "El horario admite como máximo 200 caracteres.")]
     string? BusinessHours,
-    [property: StringLength(2000, ErrorMessage = "La política de devoluciones admite como máximo 2000 caracteres.")]
+    [StringLength(2000, ErrorMessage = "La política de devoluciones admite como máximo 2000 caracteres.")]
     string? ReturnPolicy,
-    [property: StringLength(2000, ErrorMessage = "La política de garantía admite como máximo 2000 caracteres.")]
+    [StringLength(2000, ErrorMessage = "La política de garantía admite como máximo 2000 caracteres.")]
     string? WarrantyPolicy,
-    [property: StringLength(1000, ErrorMessage = "Los tiempos de envío admiten como máximo 1000 caracteres.")]
+    [StringLength(1000, ErrorMessage = "Los tiempos de envío admiten como máximo 1000 caracteres.")]
     string? ShippingTimes,
-    [property: StringLength(2000, ErrorMessage = "Las promociones admiten como máximo 2000 caracteres.")]
+    [StringLength(2000, ErrorMessage = "Las promociones admiten como máximo 2000 caracteres.")]
     string? ActivePromotions,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 1 debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 1 debe estar entre 0 y 100 %.")]
     decimal DiscountLevel1,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 2 debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 2 debe estar entre 0 y 100 %.")]
     decimal DiscountLevel2,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 3 debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El nivel 3 debe estar entre 0 y 100 %.")]
     decimal DiscountLevel3,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento máximo debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento máximo debe estar entre 0 y 100 %.")]
     decimal MaxDiscountPercent,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento por fidelidad debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento por fidelidad debe estar entre 0 y 100 %.")]
     decimal LoyaltyDiscount,
-    [property: Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento por combo debe estar entre 0 y 100 %.")]
+    [Range(typeof(decimal), "0", "100", ErrorMessage = "El descuento por combo debe estar entre 0 y 100 %.")]
     decimal BundleDiscount,
-    [property: Range(typeof(decimal), "0", "99999999", ErrorMessage = "El umbral de envío gratis no puede ser negativo.")]
+    [Range(typeof(decimal), "0", "99999999", ErrorMessage = "El umbral de envío gratis no puede ser negativo.")]
     decimal FreeShippingThreshold) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -97,13 +97,13 @@ public sealed record SellerRulesQuickReplyDto(
     DateTime CreatedAt);
 
 public sealed record SellerRulesQuickReplyUpsertRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."), StringLength(200, ErrorMessage = "El nombre admite como máximo 200 caracteres.")]
+    [Required(ErrorMessage = "El nombre es obligatorio."), StringLength(200, ErrorMessage = "El nombre admite como máximo 200 caracteres.")]
     string Name,
-    [property: Required(ErrorMessage = "Agrega al menos una frase disparadora."), MaxLength(20, ErrorMessage = "Puedes agregar como máximo 20 frases.")]
+    [Required(ErrorMessage = "Agrega al menos una frase disparadora."), MaxLength(20, ErrorMessage = "Puedes agregar como máximo 20 frases.")]
     IReadOnlyList<string> TriggerPhrases,
-    [property: Required(ErrorMessage = "La respuesta es obligatoria."), StringLength(1000, ErrorMessage = "La respuesta admite como máximo 1000 caracteres.")]
+    [Required(ErrorMessage = "La respuesta es obligatoria."), StringLength(1000, ErrorMessage = "La respuesta admite como máximo 1000 caracteres.")]
     string Response,
-    [property: Range(0, 100, ErrorMessage = "La prioridad debe estar entre 0 y 100.")]
+    [Range(0, 100, ErrorMessage = "La prioridad debe estar entre 0 y 100.")]
     int Priority,
     bool IsActive = true) : IValidatableObject
 {

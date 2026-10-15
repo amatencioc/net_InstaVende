@@ -86,7 +86,7 @@ public sealed record InboxMessagePageDto(IReadOnlyList<InboxMessageDto> Items, b
 // ── Peticiones ───────────────────────────────────────────────────────────────
 
 public sealed record InboxSendMessageRequest(
-    [property: Required(ErrorMessage = "Escribe un mensaje."),
+    [Required(ErrorMessage = "Escribe un mensaje."),
                StringLength(4096, MinimumLength = 1, ErrorMessage = "El mensaje debe tener entre 1 y 4096 caracteres.")]
     string Text);
 
@@ -100,9 +100,9 @@ public sealed record InboxSetLabelRequest(int? LabelId);
 public sealed record ConversationLabelDto(int Id, string Name, string Color, int ConversationCount);
 
 public sealed record ConversationLabelUpsertRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."),
+    [Required(ErrorMessage = "El nombre es obligatorio."),
                StringLength(100, MinimumLength = 1, ErrorMessage = "El nombre debe tener entre 1 y 100 caracteres.")]
     string Name,
-    [property: Required(ErrorMessage = "El color es obligatorio."),
+    [Required(ErrorMessage = "El color es obligatorio."),
                RegularExpression("^#[0-9a-fA-F]{6}$", ErrorMessage = "El color debe tener el formato #RRGGBB.")]
     string Color);

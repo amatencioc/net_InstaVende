@@ -21,19 +21,19 @@ public sealed record SessionBusinessDto(int Id, string Name, string? Country, st
     string TimeZone, UserRole Role);
 
 public sealed record LoginRequest(
-    [property: Required(ErrorMessage = "El email es obligatorio."), EmailAddress(ErrorMessage = "Ingresa un email válido.")] string Email,
-    [property: Required(ErrorMessage = "La contraseña es obligatoria.")] string Password,
+    [Required(ErrorMessage = "El email es obligatorio."), EmailAddress(ErrorMessage = "Ingresa un email válido.")] string Email,
+    [Required(ErrorMessage = "La contraseña es obligatoria.")] string Password,
     bool RememberMe = false);
 
 public sealed record RegisterRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."), StringLength(100)] string FirstName,
-    [property: Required(ErrorMessage = "El apellido es obligatorio."), StringLength(100)] string LastName,
-    [property: Required(ErrorMessage = "El email es obligatorio."), EmailAddress(ErrorMessage = "Ingresa un email válido.")] string Email,
-    [property: Required(ErrorMessage = "La contraseña es obligatoria."), StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")] string Password,
-    [property: Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200)] string BusinessName);
+    [Required(ErrorMessage = "El nombre es obligatorio."), StringLength(100)] string FirstName,
+    [Required(ErrorMessage = "El apellido es obligatorio."), StringLength(100)] string LastName,
+    [Required(ErrorMessage = "El email es obligatorio."), EmailAddress(ErrorMessage = "Ingresa un email válido.")] string Email,
+    [Required(ErrorMessage = "La contraseña es obligatoria."), StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener al menos 8 caracteres.")] string Password,
+    [Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200)] string BusinessName);
 
 public sealed record SetupBusinessRequest(
-    [property: Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200)] string BusinessName);
+    [Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200)] string BusinessName);
 
 /// <summary>Autenticación del SPA con cookie HttpOnly + token CSRF (cookie XSRF-TOKEN / cabecera X-XSRF-TOKEN).</summary>
 [ApiController]

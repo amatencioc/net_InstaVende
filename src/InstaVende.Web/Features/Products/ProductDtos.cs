@@ -98,34 +98,34 @@ public sealed record ProductDetailDto(
 /// <summary>Opción/variante del producto. Sin <c>Id</c> se crea; con <c>Id</c> se actualiza.</summary>
 public sealed record ProductVariantUpsertRequest(
     int? Id,
-    [property: Required(ErrorMessage = "El nombre de la opción es obligatorio."),
+    [Required(ErrorMessage = "El nombre de la opción es obligatorio."),
                StringLength(50, MinimumLength = 1, ErrorMessage = "La opción debe tener entre 1 y 50 caracteres.")]
     string AttributeName,
-    [property: Required(ErrorMessage = "El valor de la opción es obligatorio."),
+    [Required(ErrorMessage = "El valor de la opción es obligatorio."),
                StringLength(100, MinimumLength = 1, ErrorMessage = "El valor debe tener entre 1 y 100 caracteres.")]
     string AttributeValue,
-    [property: Range(-ProductRules.MaxPrice, ProductRules.MaxPrice, ErrorMessage = "El ajuste de precio no es válido.")]
+    [Range(-ProductRules.MaxPrice, ProductRules.MaxPrice, ErrorMessage = "El ajuste de precio no es válido.")]
     decimal PriceModifier,
-    [property: Range(0, int.MaxValue, ErrorMessage = "El stock de la variante no puede ser negativo.")]
+    [Range(0, int.MaxValue, ErrorMessage = "El stock de la variante no puede ser negativo.")]
     int Stock,
-    [property: StringLength(ProductRules.SkuMaxLength, ErrorMessage = "El SKU de la variante admite como máximo 64 caracteres.")]
+    [StringLength(ProductRules.SkuMaxLength, ErrorMessage = "El SKU de la variante admite como máximo 64 caracteres.")]
     string? Sku,
     bool IsActive = true);
 
 /// <summary>Alta o edición de un producto (JSON).</summary>
 public sealed record ProductUpsertRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."),
+    [Required(ErrorMessage = "El nombre es obligatorio."),
                StringLength(ProductRules.NameMaxLength, MinimumLength = 1, ErrorMessage = "El nombre debe tener entre 1 y 150 caracteres.")]
     string Name,
-    [property: StringLength(ProductRules.DescriptionMaxLength, ErrorMessage = "La descripción admite como máximo 2000 caracteres.")]
+    [StringLength(ProductRules.DescriptionMaxLength, ErrorMessage = "La descripción admite como máximo 2000 caracteres.")]
     string? Description,
-    [property: StringLength(ProductRules.SkuMaxLength, ErrorMessage = "El SKU admite como máximo 64 caracteres.")]
+    [StringLength(ProductRules.SkuMaxLength, ErrorMessage = "El SKU admite como máximo 64 caracteres.")]
     string? Sku,
-    [property: Range(0, ProductRules.MaxPrice, ErrorMessage = "El precio debe ser mayor o igual a 0.")]
+    [Range(0, ProductRules.MaxPrice, ErrorMessage = "El precio debe ser mayor o igual a 0.")]
     decimal Price,
-    [property: Range(0, ProductRules.MaxPrice, ErrorMessage = "El precio anterior debe ser mayor o igual a 0.")]
+    [Range(0, ProductRules.MaxPrice, ErrorMessage = "El precio anterior debe ser mayor o igual a 0.")]
     decimal? PriceOriginal,
-    [property: Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
+    [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo.")]
     int Stock,
     int? CategoryId,
     bool IsActive = true,
@@ -133,7 +133,7 @@ public sealed record ProductUpsertRequest(
     // Posición en el catálogo. Si no se envía se conserva la actual (o se añade al final al crear).
     int? SortOrder = null,
     // Reemplazo completo de variantes: las ausentes se eliminan. null = no modificar.
-    [property: MaxLength(ProductRules.MaxVariants, ErrorMessage = "Un producto admite como máximo 100 variantes.")]
+    [MaxLength(ProductRules.MaxVariants, ErrorMessage = "Un producto admite como máximo 100 variantes.")]
     IReadOnlyList<ProductVariantUpsertRequest>? Variants = null) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -170,7 +170,7 @@ public sealed record ProductUpsertRequest(
 
 /// <summary>Nuevo orden de la galería. La primera imagen pasa a ser la principal.</summary>
 public sealed record ProductImageOrderRequest(
-    [property: Required(ErrorMessage = "Indica el orden de las imágenes."),
+    [Required(ErrorMessage = "Indica el orden de las imágenes."),
                MinLength(1, ErrorMessage = "Indica el orden de las imágenes.")]
     IReadOnlyList<int> ImageIds);
 
@@ -187,7 +187,7 @@ public enum ProductBulkAction
 
 /// <summary>Acción masiva sobre varios productos. Con <c>setCategory</c>, <c>CategoryId = null</c> quita la categoría.</summary>
 public sealed record ProductBulkRequest(
-    [property: Required(ErrorMessage = "Selecciona al menos un producto."),
+    [Required(ErrorMessage = "Selecciona al menos un producto."),
                MinLength(1, ErrorMessage = "Selecciona al menos un producto."),
                MaxLength(500, ErrorMessage = "Puedes procesar como máximo 500 productos a la vez.")]
     IReadOnlyList<int> Ids,
@@ -201,8 +201,8 @@ public sealed record ProductBulkResultDto(int Affected, int Deleted, int Deactiv
 public sealed record ProductCategoryDto(int Id, string Name, string? Description, int ProductCount, DateTime CreatedAt);
 
 public sealed record ProductCategoryUpsertRequest(
-    [property: Required(ErrorMessage = "El nombre de la categoría es obligatorio."),
+    [Required(ErrorMessage = "El nombre de la categoría es obligatorio."),
                StringLength(100, MinimumLength = 1, ErrorMessage = "El nombre debe tener entre 1 y 100 caracteres.")]
     string Name,
-    [property: StringLength(500, ErrorMessage = "La descripción admite como máximo 500 caracteres.")]
+    [StringLength(500, ErrorMessage = "La descripción admite como máximo 500 caracteres.")]
     string? Description = null);

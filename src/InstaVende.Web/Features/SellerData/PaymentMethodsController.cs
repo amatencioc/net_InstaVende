@@ -16,25 +16,25 @@ public sealed record PaymentMethodDto(
     string? PaymentLink, bool IsActive, int SortOrder);
 
 public sealed record PaymentMethodUpsertRequest(
-    [property: EnumDataType(typeof(PaymentMethodType), ErrorMessage = "Selecciona un tipo de método de pago válido.")]
+    [EnumDataType(typeof(PaymentMethodType), ErrorMessage = "Selecciona un tipo de método de pago válido.")]
     PaymentMethodType Type,
-    [property: Required(ErrorMessage = "El nombre es obligatorio."),
+    [Required(ErrorMessage = "El nombre es obligatorio."),
                StringLength(150, MinimumLength = 1, ErrorMessage = "El nombre debe tener entre 1 y 150 caracteres.")]
     string Name,
-    [property: StringLength(1000, ErrorMessage = "Las instrucciones no pueden superar los 1000 caracteres.")]
+    [StringLength(1000, ErrorMessage = "Las instrucciones no pueden superar los 1000 caracteres.")]
     string? Instructions,
-    [property: StringLength(100, ErrorMessage = "El número de cuenta no puede superar los 100 caracteres.")]
+    [StringLength(100, ErrorMessage = "El número de cuenta no puede superar los 100 caracteres.")]
     string? AccountNumber,
-    [property: StringLength(100, ErrorMessage = "El alias no puede superar los 100 caracteres.")]
+    [StringLength(100, ErrorMessage = "El alias no puede superar los 100 caracteres.")]
     string? AccountAlias,
-    [property: StringLength(500, ErrorMessage = "El enlace no puede superar los 500 caracteres."), HttpUrl]
+    [StringLength(500, ErrorMessage = "El enlace no puede superar los 500 caracteres."), HttpUrl]
     string? PaymentLink,
     bool IsActive = true);
 
 public sealed record PaymentMethodToggleRequest(bool IsActive);
 
 public sealed record PaymentMethodOrderRequest(
-    [property: Required(ErrorMessage = "Envía el nuevo orden.")] IReadOnlyList<int> Ids);
+    [Required(ErrorMessage = "Envía el nuevo orden.")] IReadOnlyList<int> Ids);
 
 /// <summary>Métodos de pago del negocio (fuente única: tipo <see cref="PaymentMethodType"/>, sin textos libres).</summary>
 [Route("api/payment-methods")]

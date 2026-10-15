@@ -95,7 +95,7 @@ public sealed record OrderLineDto(
 
 /// <summary>Mover un pedido a otro sub-estado (columna).</summary>
 public sealed record OrderMoveRequest(
-    [property: Required(ErrorMessage = "Indica el estado de destino.")] OrderSubStatus SubStatus,
+    [Required(ErrorMessage = "Indica el estado de destino.")] OrderSubStatus SubStatus,
     bool NotifyCustomer = false);
 
 public sealed record OrderMoveResultDto(
@@ -111,9 +111,9 @@ public sealed record OrderMoveResultDto(
 
 /// <summary>Datos administrativos editables. Los valores vacíos se guardan como "sin dato".</summary>
 public sealed record OrderUpdateRequest(
-    [property: StringLength(1000, ErrorMessage = "Las notas no pueden superar 1000 caracteres.")] string? Notes,
-    [property: StringLength(500, ErrorMessage = "La dirección no puede superar 500 caracteres.")] string? ShippingAddress,
-    [property: StringLength(150, ErrorMessage = "El método de pago no puede superar 150 caracteres.")] string? PaymentMethodName);
+    [StringLength(1000, ErrorMessage = "Las notas no pueden superar 1000 caracteres.")] string? Notes,
+    [StringLength(500, ErrorMessage = "La dirección no puede superar 500 caracteres.")] string? ShippingAddress,
+    [StringLength(150, ErrorMessage = "El método de pago no puede superar 150 caracteres.")] string? PaymentMethodName);
 
 internal static class OrderPresentation
 {

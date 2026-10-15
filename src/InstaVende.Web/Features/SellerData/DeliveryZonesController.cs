@@ -13,19 +13,19 @@ namespace InstaVende.Web.Features.SellerData;
 public sealed record DeliveryZoneDto(int Id, string Name, decimal? Cost, string? Description, bool IsActive, int SortOrder);
 
 public sealed record DeliveryZoneUpsertRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."),
+    [Required(ErrorMessage = "El nombre es obligatorio."),
                StringLength(100, MinimumLength = 1, ErrorMessage = "El nombre debe tener entre 1 y 100 caracteres.")]
     string Name,
-    [property: Range(typeof(decimal), "0", "999999999", ErrorMessage = "El costo debe ser 0 o mayor.")]
+    [Range(typeof(decimal), "0", "999999999", ErrorMessage = "El costo debe ser 0 o mayor.")]
     decimal? Cost,
-    [property: StringLength(500, ErrorMessage = "La descripción no puede superar los 500 caracteres.")]
+    [StringLength(500, ErrorMessage = "La descripción no puede superar los 500 caracteres.")]
     string? Description,
     bool IsActive = true);
 
 public sealed record DeliveryZoneToggleRequest(bool IsActive);
 
 public sealed record DeliveryZoneOrderRequest(
-    [property: Required(ErrorMessage = "Envía el nuevo orden.")] IReadOnlyList<int> Ids);
+    [Required(ErrorMessage = "Envía el nuevo orden.")] IReadOnlyList<int> Ids);
 
 /// <summary>Zonas y costos de entrega que el vendedor IA informa a los clientes.</summary>
 [Route("api/delivery-zones")]

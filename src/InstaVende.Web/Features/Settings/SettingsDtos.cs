@@ -35,21 +35,21 @@ public sealed record SettingsProfileDto(
     DateTime? LastLoginAt);
 
 public sealed record SettingsProfileUpdateRequest(
-    [property: Required(ErrorMessage = "El nombre es obligatorio."), StringLength(100, ErrorMessage = "El nombre admite hasta 100 caracteres.")] string FirstName,
-    [property: Required(ErrorMessage = "El apellido es obligatorio."), StringLength(100, ErrorMessage = "El apellido admite hasta 100 caracteres.")] string LastName,
-    [property: RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? PhoneNumber);
+    [Required(ErrorMessage = "El nombre es obligatorio."), StringLength(100, ErrorMessage = "El nombre admite hasta 100 caracteres.")] string FirstName,
+    [Required(ErrorMessage = "El apellido es obligatorio."), StringLength(100, ErrorMessage = "El apellido admite hasta 100 caracteres.")] string LastName,
+    [RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? PhoneNumber);
 
 public sealed record SettingsImageDto(string? Url);
 
 // ── Seguridad ────────────────────────────────────────────────────────────────
 
 public sealed record SettingsChangePasswordRequest(
-    [property: Required(ErrorMessage = "Ingresa tu contraseña actual.")] string CurrentPassword,
-    [property: Required(ErrorMessage = "Ingresa la nueva contraseña."), StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres.")] string NewPassword);
+    [Required(ErrorMessage = "Ingresa tu contraseña actual.")] string CurrentPassword,
+    [Required(ErrorMessage = "Ingresa la nueva contraseña."), StringLength(100, MinimumLength = 8, ErrorMessage = "La contraseña debe tener entre 8 y 100 caracteres.")] string NewPassword);
 
 public sealed record SettingsChangeEmailRequest(
-    [property: Required(ErrorMessage = "Ingresa el nuevo email."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string NewEmail,
-    [property: Required(ErrorMessage = "Confirma con tu contraseña actual.")] string CurrentPassword);
+    [Required(ErrorMessage = "Ingresa el nuevo email."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string NewEmail,
+    [Required(ErrorMessage = "Confirma con tu contraseña actual.")] string CurrentPassword);
 
 // ── Negocio ──────────────────────────────────────────────────────────────────
 
@@ -70,16 +70,16 @@ public sealed record SettingsBusinessDto(
     IReadOnlyList<string> SectorOptions);
 
 public sealed record SettingsBusinessUpdateRequest(
-    [property: Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200, ErrorMessage = "El nombre admite hasta 200 caracteres.")] string Name,
-    [property: StringLength(1000, ErrorMessage = "La descripción admite hasta 1000 caracteres.")] string? Description,
-    [property: StringLength(100, ErrorMessage = "El sector admite hasta 100 caracteres.")] string? Sector,
-    [property: Required(ErrorMessage = "Selecciona el país.")] string Country,
-    [property: Required(ErrorMessage = "Selecciona la moneda.")] string Currency,
-    [property: RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? Phone,
-    [property: EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string? Email,
-    [property: HttpUrl, StringLength(500, ErrorMessage = "La URL admite hasta 500 caracteres.")] string? WebsiteUrl,
-    [property: StringLength(500, ErrorMessage = "Las redes sociales admiten hasta 500 caracteres.")] string? SocialMedia,
-    [property: RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? WhatsAppNumber);
+    [Required(ErrorMessage = "El nombre del negocio es obligatorio."), StringLength(200, ErrorMessage = "El nombre admite hasta 200 caracteres.")] string Name,
+    [StringLength(1000, ErrorMessage = "La descripción admite hasta 1000 caracteres.")] string? Description,
+    [StringLength(100, ErrorMessage = "El sector admite hasta 100 caracteres.")] string? Sector,
+    [Required(ErrorMessage = "Selecciona el país.")] string Country,
+    [Required(ErrorMessage = "Selecciona la moneda.")] string Currency,
+    [RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? Phone,
+    [EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string? Email,
+    [HttpUrl, StringLength(500, ErrorMessage = "La URL admite hasta 500 caracteres.")] string? WebsiteUrl,
+    [StringLength(500, ErrorMessage = "Las redes sociales admiten hasta 500 caracteres.")] string? SocialMedia,
+    [RegularExpression(SettingsPatterns.Phone, ErrorMessage = SettingsPatterns.PhoneMessage)] string? WhatsAppNumber);
 
 // ── Notificaciones por email ─────────────────────────────────────────────────
 
@@ -88,6 +88,6 @@ public sealed record SettingsNotificationEmailDto(int Id, string Email, bool IsA
 public sealed record SettingsNotificationEmailsDto(IReadOnlyList<SettingsNotificationEmailDto> Items, int MaxEmails);
 
 public sealed record SettingsNotificationEmailCreateRequest(
-    [property: Required(ErrorMessage = "Ingresa un email."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string Email);
+    [Required(ErrorMessage = "Ingresa un email."), EmailAddress(ErrorMessage = "Ingresa un email válido."), StringLength(256)] string Email);
 
 public sealed record SettingsNotificationEmailUpdateRequest(bool IsActive);

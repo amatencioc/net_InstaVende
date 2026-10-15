@@ -54,38 +54,38 @@ public sealed record SellerProfileResponse(
     IReadOnlyList<SellerProfileTemplateDto> Templates);
 
 public sealed record SellerProfileUpdateRequest(
-    [property: Required(ErrorMessage = "El nombre del vendedor es obligatorio."), StringLength(60, ErrorMessage = "El nombre admite como máximo 60 caracteres.")]
+    [Required(ErrorMessage = "El nombre del vendedor es obligatorio."), StringLength(60, ErrorMessage = "El nombre admite como máximo 60 caracteres.")]
     string VendorName,
-    [property: RegularExpression("^(Masculino|Femenino)$", ErrorMessage = "Selecciona un género válido.")]
+    [RegularExpression("^(Masculino|Femenino)$", ErrorMessage = "Selecciona un género válido.")]
     string? VendorGender,
-    [property: Required(ErrorMessage = "Selecciona el país de operación.")]
+    [Required(ErrorMessage = "Selecciona el país de operación.")]
     string Country,
-    [property: StringLength(1000, ErrorMessage = "La descripción admite como máximo 1000 caracteres.")]
+    [StringLength(1000, ErrorMessage = "La descripción admite como máximo 1000 caracteres.")]
     string? BusinessDescription,
-    [property: StringLength(300, ErrorMessage = "La audiencia admite como máximo 300 caracteres.")]
+    [StringLength(300, ErrorMessage = "La audiencia admite como máximo 300 caracteres.")]
     string? TargetAudience,
-    [property: StringLength(2000, ErrorMessage = "Las reglas admiten como máximo 2000 caracteres.")]
+    [StringLength(2000, ErrorMessage = "Las reglas admiten como máximo 2000 caracteres.")]
     string? Rules,
-    [property: StringLength(200, ErrorMessage = "El estilo de comunicación admite como máximo 200 caracteres.")]
+    [StringLength(200, ErrorMessage = "El estilo de comunicación admite como máximo 200 caracteres.")]
     string? CommunicationStyle,
-    [property: StringLength(210, ErrorMessage = "El estilo de ventas admite como máximo 210 caracteres.")]
+    [StringLength(210, ErrorMessage = "El estilo de ventas admite como máximo 210 caracteres.")]
     string? SalesStyle,
-    [property: Range(1, 5, ErrorMessage = "La longitud de respuesta debe estar entre 1 y 5.")]
+    [Range(1, 5, ErrorMessage = "La longitud de respuesta debe estar entre 1 y 5.")]
     int ResponseLength,
     bool UseEmojis,
-    [property: MaxLength(24, ErrorMessage = "La paleta admite como máximo 24 emojis.")]
+    [MaxLength(24, ErrorMessage = "La paleta admite como máximo 24 emojis.")]
     IReadOnlyList<string>? EmojiPalette,
     bool UseOpeningPunctuation,
-    [property: MaxLength(50, ErrorMessage = "Puedes indicar como máximo 50 palabras a evitar.")]
+    [MaxLength(50, ErrorMessage = "Puedes indicar como máximo 50 palabras a evitar.")]
     IReadOnlyList<string>? WordsToAvoid,
-    [property: Required(ErrorMessage = "El mensaje de bienvenida es obligatorio."), StringLength(500, ErrorMessage = "El mensaje de bienvenida admite como máximo 500 caracteres.")]
+    [Required(ErrorMessage = "El mensaje de bienvenida es obligatorio."), StringLength(500, ErrorMessage = "El mensaje de bienvenida admite como máximo 500 caracteres.")]
     string WelcomeMessage,
-    [property: StringLength(500, ErrorMessage = "El mensaje de confirmación admite como máximo 500 caracteres.")]
+    [StringLength(500, ErrorMessage = "El mensaje de confirmación admite como máximo 500 caracteres.")]
     string? PurchaseConfirmationMessage,
-    [property: MaxLength(20, ErrorMessage = "Puedes indicar como máximo 20 situaciones de derivación.")]
+    [MaxLength(20, ErrorMessage = "Puedes indicar como máximo 20 situaciones de derivación.")]
     IReadOnlyList<string>? HumanHandoffSituations,
     bool AutoPauseOnHandoff,
-    [property: StringLength(300, ErrorMessage = "El mensaje de derivación admite como máximo 300 caracteres.")]
+    [StringLength(300, ErrorMessage = "El mensaje de derivación admite como máximo 300 caracteres.")]
     string? HandoffMessage) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

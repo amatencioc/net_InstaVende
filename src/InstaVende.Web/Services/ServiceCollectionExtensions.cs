@@ -88,7 +88,7 @@ internal static class ServiceCollectionExtensions
             json.Converters.Add(new JsonStringEnumConverter());
             json.NumberHandling = JsonNumberHandling.Strict;
         }
-        services.AddControllers(o => o.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute()))
+        services.AddControllers(o => o.Filters.Add<CsrfValidationFilter>())
             .AddJsonOptions(o => ConfigureJson(o.JsonSerializerOptions));
         services.ConfigureHttpJsonOptions(o => ConfigureJson(o.SerializerOptions));
         services.AddProblemDetails();

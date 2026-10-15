@@ -16,7 +16,7 @@ namespace InstaVende.Web.Features.Seller;
 /// guarda historial ni carrito), por eso no se envía la conversación anterior.
 /// </summary>
 public sealed record SellerTestRequest(
-    [property: Required(ErrorMessage = "Escribe un mensaje."), StringLength(1000, ErrorMessage = "El mensaje admite como máximo 1000 caracteres.")]
+    [Required(ErrorMessage = "Escribe un mensaje."), StringLength(1000, ErrorMessage = "El mensaje admite como máximo 1000 caracteres.")]
     string Message);
 
 /// <param name="Reply">Respuesta del bot; null si el bot no respondería (p.ej. está pausado).</param>
