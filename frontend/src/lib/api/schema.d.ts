@@ -4,6 +4,89 @@
  */
 
 export interface paths {
+    "/api/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["DashboardDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    period?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MetricsDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/csrf": {
         parameters: {
             query?: never;
@@ -281,12 +364,235 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        ChannelType: "WhatsApp" | "FacebookMessenger" | "Instagram";
+        /** @enum {unknown} */
+        ConversationStatus: "BotActive" | "WaitingHuman" | "HumanActive" | "Resolved";
+        DashboardAttentionConversationDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            contactId: number;
+            contactName: string;
+            channel: components["schemas"]["ChannelType"];
+            status: components["schemas"]["ConversationStatus"];
+            lastMessagePreview: null | string;
+            /** Format: date-time */
+            lastMessageAt: null | string;
+            /** Format: int32 */
+            unreadCount: number;
+        };
+        DashboardChannelDto: {
+            channel: components["schemas"]["ChannelType"];
+            /** Format: int32 */
+            conversations: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: double */
+            revenue: number;
+        };
+        DashboardDailyPointDto: {
+            /** Format: date */
+            date: string;
+            /** Format: int32 */
+            conversations: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: double */
+            revenue: number;
+        };
+        DashboardDto: {
+            /** Format: date-time */
+            generatedAt: string;
+            /** Format: date */
+            localDate: string;
+            today: components["schemas"]["DashboardKpisDto"];
+            yesterday: components["schemas"]["DashboardKpisDto"];
+            last7Days: components["schemas"]["DashboardKpisDto"];
+            previous7Days: components["schemas"]["DashboardKpisDto"];
+            /** Format: int32 */
+            conversationsWaitingHuman: number;
+            /** Format: int32 */
+            ordersInValidation: number;
+            daily: components["schemas"]["DashboardDailyPointDto"][];
+            channels: components["schemas"]["DashboardChannelDto"][];
+            recentOrders: components["schemas"]["DashboardRecentOrderDto"][];
+            attentionConversations: components["schemas"]["DashboardAttentionConversationDto"][];
+            setup: components["schemas"]["DashboardSetupDto"];
+        };
+        DashboardKpisDto: {
+            /** Format: int32 */
+            newConversations: number;
+            /** Format: int32 */
+            inboundMessages: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: double */
+            revenue: number;
+            /** Format: double */
+            averageTicket: number;
+        };
+        DashboardRecentOrderDto: {
+            /** Format: int32 */
+            id: number;
+            orderNumber: string;
+            customerName: string;
+            /** Format: double */
+            total: number;
+            subStatus: components["schemas"]["OrderSubStatus"];
+            subStatusLabel: string;
+            subStatusCss: string;
+            channel: components["schemas"]["ChannelType"];
+            /** Format: date-time */
+            createdAt: string;
+        };
+        DashboardSetupDto: {
+            /** Format: int32 */
+            completedSteps: number;
+            /** Format: int32 */
+            totalSteps: number;
+            /** Format: int32 */
+            percent: number;
+            steps: components["schemas"]["DashboardSetupStepDto"][];
+        };
+        DashboardSetupStepDto: {
+            key: string;
+            title: string;
+            description: string;
+            done: boolean;
+        };
         LoginRequest: {
             email: string;
             password: string;
             /** @default false */
             rememberMe: boolean;
         };
+        MetricsBotDto: {
+            /** Format: int32 */
+            botMessages: number;
+            /** Format: int32 */
+            humanMessages: number;
+            /** Format: double */
+            automationRate: number;
+            /** Format: int32 */
+            conversations: number;
+            /** Format: int32 */
+            handoffs: number;
+            /** Format: double */
+            handoffRate: number;
+            /** Format: double */
+            averageFirstResponseSeconds: null | number;
+        };
+        MetricsChannelDto: {
+            channel: components["schemas"]["ChannelType"];
+            /** Format: double */
+            revenue: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: int32 */
+            conversations: number;
+        };
+        MetricsDailyPointDto: {
+            /** Format: date */
+            date: string;
+            /** Format: double */
+            revenue: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: int32 */
+            conversations: number;
+            /** Format: int32 */
+            botMessages: number;
+            /** Format: int32 */
+            humanMessages: number;
+        };
+        MetricsDto: {
+            range: components["schemas"]["MetricsRangeDto"];
+            sales: components["schemas"]["MetricsSalesDto"];
+            previousSales: components["schemas"]["MetricsSalesDto"];
+            bot: components["schemas"]["MetricsBotDto"];
+            previousBot: components["schemas"]["MetricsBotDto"];
+            funnel: components["schemas"]["MetricsFunnelStepDto"][];
+            daily: components["schemas"]["MetricsDailyPointDto"][];
+            channels: components["schemas"]["MetricsChannelDto"][];
+            topProductsByUnits: components["schemas"]["MetricsTopProductDto"][];
+            topProductsByRevenue: components["schemas"]["MetricsTopProductDto"][];
+            topCustomers: components["schemas"]["MetricsTopCustomerDto"][];
+            subStatuses: components["schemas"]["MetricsSubStatusDto"][];
+        };
+        MetricsFunnelStepDto: {
+            key: string;
+            label: string;
+            /** Format: int32 */
+            value: number;
+        };
+        MetricsRangeDto: {
+            period: string;
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            /** Format: date */
+            previousFrom: string;
+            /** Format: date */
+            previousTo: string;
+            /** Format: int32 */
+            days: number;
+            /** Format: date-time */
+            generatedAt: string;
+        };
+        MetricsSalesDto: {
+            /** Format: double */
+            revenue: number;
+            /** Format: int32 */
+            orders: number;
+            /** Format: int32 */
+            revenueOrders: number;
+            /** Format: double */
+            averageTicket: number;
+            /** Format: int32 */
+            conversations: number;
+            /** Format: int32 */
+            conversationsWithOrder: number;
+            /** Format: double */
+            conversionRate: number;
+            /** Format: int32 */
+            newContacts: number;
+        };
+        MetricsSubStatusDto: {
+            subStatus: components["schemas"]["OrderSubStatus"];
+            label: string;
+            css: string;
+            /** Format: int32 */
+            orders: number;
+            /** Format: double */
+            total: number;
+        };
+        MetricsTopCustomerDto: {
+            /** Format: int32 */
+            contactId: number;
+            name: string;
+            channel: components["schemas"]["ChannelType"];
+            /** Format: int32 */
+            orders: number;
+            /** Format: double */
+            spent: number;
+            /** Format: date-time */
+            lastOrderAt: string;
+        };
+        MetricsTopProductDto: {
+            /** Format: int32 */
+            productId: number;
+            name: string;
+            /** Format: int32 */
+            units: number;
+            /** Format: double */
+            revenue: number;
+            /** Format: int32 */
+            orders: number;
+        };
+        /** @enum {unknown} */
+        OrderSubStatus: "EnValidacion" | "EnPreparacion" | "ListoParaEnvio" | "Enviado" | "Entregado" | "Finalizado" | "Rechazado" | "Cancelado";
         ProblemDetails: {
             type?: null | string;
             title?: null | string;
