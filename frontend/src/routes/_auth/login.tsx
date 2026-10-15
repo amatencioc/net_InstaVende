@@ -25,6 +25,14 @@ const formSchema = z.object({
 })
 type FormValues = z.infer<typeof formSchema>
 
+/**
+ * Credenciales precargadas solo en desarrollo (VITE_DEV_LOGIN_EMAIL / VITE_DEV_LOGIN_PASSWORD en
+ * .env.development.local, que no se versiona). En el build de producción import.meta.env.DEV es false.
+ */
+const devLogin = import.meta.env.DEV
+  ? { email: import.meta.env.VITE_DEV_LOGIN_EMAIL ?? '', password: import.meta.env.VITE_DEV_LOGIN_PASSWORD ?? '' }
+  : { email: '', password: '' }
+
 /** Solo se permite volver a rutas internas (evita redirecciones abiertas). */
 function safeRedirect(target: string | undefined): string {
   return target && target.startsWith('/') && !target.startsWith('//') ? target : '/dashboard'
@@ -36,7 +44,7 @@ function LoginPage() {
   const login = useLogin()
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: '', password: '', rememberMe: true },
+    defaultValues: { ...devLogin, rememberMe: true },
   })
 
   const onSubmit = form.handleSubmit((values) =>
