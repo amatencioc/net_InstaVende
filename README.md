@@ -23,6 +23,22 @@ El análisis funcional de referencia está en [docs/producto/](docs/producto/).
 - SQL Server 2019+ (local, contenedor o Azure SQL)
 - Clave de OpenAI para el vendedor IA
 
+## Arranque rápido en Windows (scripts)
+
+En la carpeta `scripts/` (doble clic en los `.cmd` o ejecutar los `.ps1` desde PowerShell):
+
+| Script | Qué hace |
+|---|---|
+| `iniciar-app.cmd` | Verifica requisitos (.NET 10, Node 22), instala dependencias, compila, migra la base activa (con respaldo) y levanta API + panel; abre el navegador. Opciones: `-SeedDemo correo`, `-SinMigrar`, `-SinRespaldo`, `-SoloCompilar`. |
+| `migrar-bd.cmd` | Solo migra la base de datos activa: respaldo previo + `database/migraciones.sql` (idempotente, se puede repetir). |
+| `detener-app.cmd` | Detiene API, panel y servicio de WhatsApp. |
+
+**Cambiar de base de datos:** en `src/InstaVende.Web/appsettings.Development.json` deja sin comentar (`//`) solo la
+`DefaultConnection` que quieras usar. Los scripts y la API leen esa misma línea.
+
+Tras crear una migración nueva, regenera el SQL de los scripts:
+`dotnet ef migrations script --idempotent --project src/InstaVende.Infrastructure --startup-project src/InstaVende.Web -o database/migraciones.sql`
+
 ## Desarrollo local
 
 ```bash

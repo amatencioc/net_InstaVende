@@ -30,16 +30,17 @@ namespace InstaVende.Infrastructure.Data.Migrations
                 name: "IX_BusinessUsers_BusinessId",
                 table: "BusinessUsers");
 
-            // Business.BusinessSector y Business.Sector eran duplicados: se conserva el dato en Sector
-            migrationBuilder.Sql("UPDATE [Businesses] SET [Sector] = [BusinessSector] WHERE [Sector] IS NULL AND [BusinessSector] IS NOT NULL;");
+            // Business.BusinessSector y Business.Sector eran duplicados: se conserva el dato en Sector.
+            // EXEC(...) evita errores de compilación del lote al reejecutar el script idempotente.
+            migrationBuilder.Sql("EXEC(N'UPDATE [Businesses] SET [Sector] = [BusinessSector] WHERE [Sector] IS NULL AND [BusinessSector] IS NOT NULL;')");
 
             migrationBuilder.DropColumn(
                 name: "BusinessSector",
                 table: "Businesses");
 
             // Recorta textos que excedan los nuevos límites antes de reducir las columnas
-            migrationBuilder.Sql("UPDATE [Reminders] SET [Message] = LEFT([Message], 1000) WHERE LEN([Message]) > 1000;");
-            migrationBuilder.Sql("UPDATE [Messages] SET [MediaType] = LEFT([MediaType], 50) WHERE LEN([MediaType]) > 50;");
+            migrationBuilder.Sql("EXEC(N'UPDATE [Reminders] SET [Message] = LEFT([Message], 1000) WHERE LEN([Message]) > 1000;')");
+            migrationBuilder.Sql("EXEC(N'UPDATE [Messages] SET [MediaType] = LEFT([MediaType], 50) WHERE LEN([MediaType]) > 50;')");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Message",

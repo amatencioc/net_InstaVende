@@ -84,3 +84,7 @@ deploy/.env
 
 ## Herramientas locales (worktrees de agentes, configuración del editor)
 .claude/
+
+## Respaldos locales de la base de datos
+database/respaldos/
+*.bak
