@@ -45,6 +45,17 @@ var app = builder.Build();
 if (!isGeneratingOpenApi)
     await InitializeDatabaseAsync(app);
 
+// Datos de demostración (solo Development): dotnet run --project src/InstaVende.Web -- --seed-demo <email>
+var seedIndex = Array.IndexOf(args, "--seed-demo");
+if (seedIndex >= 0)
+{
+    if (!app.Environment.IsDevelopment())
+        throw new InvalidOperationException("--seed-demo solo está permitido en el entorno Development.");
+    var email = args.ElementAtOrDefault(seedIndex + 1) ?? throw new ArgumentException("Indica el email: --seed-demo <email>");
+    await InstaVende.Web.Infrastructure.DemoData.DemoDataSeeder.RunAsync(app.Services, email);
+    return;
+}
+
 app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
