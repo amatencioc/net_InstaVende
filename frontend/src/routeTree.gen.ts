@@ -16,7 +16,6 @@ import { Route as AppChannelsRouteImport } from './routes/_app/channels'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
 import { Route as AppMetricsRouteImport } from './routes/_app/metrics'
-import { Route as AppOrdersRouteImport } from './routes/_app/orders'
 import { Route as AppProductsRouteImport } from './routes/_app/products'
 import { Route as AppRemindersRouteRouteImport } from './routes/_app/reminders/route'
 import { Route as AppSellerRouteImport } from './routes/_app/seller'
@@ -24,6 +23,8 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppOrdersOrderIdRouteImport } from './routes/_app/orders/$orderId'
 import { Route as AppRemindersIndexRouteImport } from './routes/_app/reminders/index'
 import { Route as AppRemindersTemplatesRouteImport } from './routes/_app/reminders/templates'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
@@ -67,11 +68,6 @@ const AppMetricsRoute = AppMetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => AppRoute,
 } as any)
-const AppOrdersRoute = AppOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppProductsRoute = AppProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -106,6 +102,16 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   id: '/setup-business',
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
+} as any)
+const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersOrderIdRoute = AppOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRemindersIndexRoute = AppRemindersIndexRouteImport.update({
   id: '/',
@@ -160,13 +166,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/seller': typeof AppSellerRouteWithChildren
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/reminders/templates': typeof AppRemindersTemplatesRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
@@ -174,6 +180,7 @@ export interface FileRoutesByFullPath {
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/orders/': typeof AppOrdersIndexRoute
   '/reminders/': typeof AppRemindersIndexRoute
   '/seller/': typeof AppSellerIndexRoute
 }
@@ -183,12 +190,12 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
   '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/reminders/templates': typeof AppRemindersTemplatesRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
@@ -196,6 +203,7 @@ export interface FileRoutesByTo {
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/orders': typeof AppOrdersIndexRoute
   '/reminders': typeof AppRemindersIndexRoute
   '/seller': typeof AppSellerIndexRoute
 }
@@ -209,13 +217,13 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/inbox': typeof AppInboxRoute
   '/_app/metrics': typeof AppMetricsRoute
-  '/_app/orders': typeof AppOrdersRoute
   '/_app/products': typeof AppProductsRoute
   '/_app/seller': typeof AppSellerRouteWithChildren
   '/_app/settings': typeof AppSettingsRoute
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/_app/reminders/templates': typeof AppRemindersTemplatesRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
@@ -223,6 +231,7 @@ export interface FileRoutesById {
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/reminders/': typeof AppRemindersIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
 }
@@ -235,13 +244,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/metrics'
-    | '/orders'
     | '/products'
     | '/seller'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/orders/$orderId'
     | '/reminders/templates'
     | '/seller/delivery'
     | '/seller/knowledge'
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/orders/'
     | '/reminders/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
@@ -258,12 +268,12 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/inbox'
     | '/metrics'
-    | '/orders'
     | '/products'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/orders/$orderId'
     | '/reminders/templates'
     | '/seller/delivery'
     | '/seller/knowledge'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/orders'
     | '/reminders'
     | '/seller'
   id:
@@ -283,13 +294,13 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/inbox'
     | '/_app/metrics'
-    | '/_app/orders'
     | '/_app/products'
     | '/_app/seller'
     | '/_app/settings'
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/orders/$orderId'
     | '/_app/reminders/templates'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/orders/'
     | '/_app/reminders/'
     | '/_app/seller/'
   fileRoutesById: FileRoutesById
@@ -358,13 +370,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMetricsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/orders': {
-      id: '/_app/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AppOrdersRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/products': {
       id: '/_app/products'
       path: '/products'
@@ -413,6 +418,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/setup-business'
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/_app/orders/': {
+      id: '/_app/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AppOrdersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders/$orderId': {
+      id: '/_app/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AppOrdersOrderIdRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/reminders/': {
       id: '/_app/reminders/'
@@ -523,10 +542,11 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppInboxRoute: typeof AppInboxRoute
   AppMetricsRoute: typeof AppMetricsRoute
-  AppOrdersRoute: typeof AppOrdersRoute
   AppProductsRoute: typeof AppProductsRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
   AppSettingsRoute: typeof AppSettingsRoute
+  AppOrdersOrderIdRoute: typeof AppOrdersOrderIdRoute
+  AppOrdersIndexRoute: typeof AppOrdersIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -535,10 +555,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppInboxRoute: AppInboxRoute,
   AppMetricsRoute: AppMetricsRoute,
-  AppOrdersRoute: AppOrdersRoute,
   AppProductsRoute: AppProductsRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
   AppSettingsRoute: AppSettingsRoute,
+  AppOrdersOrderIdRoute: AppOrdersOrderIdRoute,
+  AppOrdersIndexRoute: AppOrdersIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

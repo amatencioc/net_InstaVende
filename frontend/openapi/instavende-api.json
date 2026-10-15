@@ -525,6 +525,337 @@
         }
       }
     },
+    "/api/orders/workflow": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderWorkflowDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/board": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "tab",
+            "in": "query",
+            "schema": {
+              "default": "Nuevos",
+              "$ref": "#/components/schemas/OrderBoardTab"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderBoardDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{id}": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetailDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdateRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdateRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderDetailDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/{id}/move": {
+      "post": {
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderMoveRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderMoveRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderMoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderMoveResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/orders/export": {
+      "get": {
+        "tags": [
+          "Orders"
+        ],
+        "parameters": [
+          {
+            "name": "tab",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/OrderBoardTab"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              },
+              "application/json": { }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/csrf": {
       "get": {
         "tags": [
@@ -774,6 +1105,545 @@
           "rememberMe": {
             "type": "boolean",
             "default": false
+          }
+        }
+      },
+      "OrderBoardColumnDto": {
+        "required": [
+          "subStatus",
+          "label",
+          "css",
+          "count",
+          "totalAmount",
+          "orders"
+        ],
+        "type": "object",
+        "properties": {
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "label": {
+            "type": "string"
+          },
+          "css": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalAmount": {
+            "type": "number",
+            "format": "double"
+          },
+          "orders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderCardDto"
+            }
+          }
+        }
+      },
+      "OrderBoardDto": {
+        "required": [
+          "tab",
+          "columns",
+          "tabCounts"
+        ],
+        "type": "object",
+        "properties": {
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderBoardColumnDto"
+            }
+          },
+          "tabCounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderBoardTabCountDto"
+            }
+          }
+        }
+      },
+      "OrderBoardTab": {
+        "enum": [
+          "Nuevos",
+          "EnCurso",
+          "Completados",
+          "Cancelados"
+        ]
+      },
+      "OrderBoardTabCountDto": {
+        "required": [
+          "tab",
+          "label",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "label": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OrderCardDto": {
+        "required": [
+          "id",
+          "orderNumber",
+          "contactId",
+          "contactName",
+          "channel",
+          "total",
+          "itemCount",
+          "createdAt",
+          "subStatus",
+          "subStatusLabel",
+          "subStatusCss",
+          "conversationId"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "contactId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "contactName": {
+            "type": "string"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "subStatusLabel": {
+            "type": "string"
+          },
+          "subStatusCss": {
+            "type": "string"
+          },
+          "conversationId": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "OrderContactDto": {
+        "required": [
+          "id",
+          "name",
+          "phone",
+          "channel",
+          "avatarUrl"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "avatarUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OrderDetailDto": {
+        "required": [
+          "id",
+          "orderNumber",
+          "status",
+          "statusLabel",
+          "subStatus",
+          "subStatusLabel",
+          "subStatusCss",
+          "tab",
+          "channel",
+          "subtotal",
+          "discount",
+          "shippingCost",
+          "total",
+          "paymentMethodName",
+          "shippingAddress",
+          "notes",
+          "createdAt",
+          "updatedAt",
+          "conversationId",
+          "contact",
+          "items"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderNumber": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "subStatusLabel": {
+            "type": "string"
+          },
+          "subStatusCss": {
+            "type": "string"
+          },
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "channel": {
+            "$ref": "#/components/schemas/ChannelType"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "discount": {
+            "type": "number",
+            "format": "double"
+          },
+          "shippingCost": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "paymentMethodName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "shippingAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "conversationId": {
+            "type": [
+              "null",
+              "integer"
+            ],
+            "format": "int32"
+          },
+          "contact": {
+            "$ref": "#/components/schemas/OrderContactDto"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderLineDto"
+            }
+          }
+        }
+      },
+      "OrderLineDto": {
+        "required": [
+          "id",
+          "productId",
+          "productName",
+          "variantDescription",
+          "imageUrl",
+          "quantity",
+          "unitPrice",
+          "subtotal"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "variantDescription": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "imageUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unitPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "subtotal": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "OrderMoveRequest": {
+        "required": [
+          "subStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "notifyCustomer": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "OrderMoveResultDto": {
+        "required": [
+          "id",
+          "status",
+          "subStatus",
+          "subStatusLabel",
+          "subStatusCss",
+          "tab",
+          "updatedAt",
+          "customerNotified",
+          "notificationError"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "subStatusLabel": {
+            "type": "string"
+          },
+          "subStatusCss": {
+            "type": "string"
+          },
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "customerNotified": {
+            "type": "boolean"
+          },
+          "notificationError": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OrderStatus": {
+        "enum": [
+          "Pending",
+          "Confirmed",
+          "Preparing",
+          "Shipped",
+          "Delivered",
+          "Cancelled",
+          "Refunded",
+          "Cart"
+        ]
+      },
+      "OrderSubStatus": {
+        "enum": [
+          "EnValidacion",
+          "EnPreparacion",
+          "ListoParaEnvio",
+          "Enviado",
+          "Entregado",
+          "Finalizado",
+          "Rechazado",
+          "Cancelado"
+        ]
+      },
+      "OrderSubStatusInfoDto": {
+        "required": [
+          "subStatus",
+          "label",
+          "css",
+          "tab",
+          "status",
+          "countsAsRevenue"
+        ],
+        "type": "object",
+        "properties": {
+          "subStatus": {
+            "$ref": "#/components/schemas/OrderSubStatus"
+          },
+          "label": {
+            "type": "string"
+          },
+          "css": {
+            "type": "string"
+          },
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrderStatus"
+          },
+          "countsAsRevenue": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OrderUpdateRequest": {
+        "required": [
+          "notes",
+          "shippingAddress",
+          "paymentMethodName"
+        ],
+        "type": "object",
+        "properties": {
+          "notes": {
+            "maxLength": 1000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "shippingAddress": {
+            "maxLength": 500,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "paymentMethodName": {
+            "maxLength": 150,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OrderWorkflowDto": {
+        "required": [
+          "tabs"
+        ],
+        "type": "object",
+        "properties": {
+          "tabs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderWorkflowTabDto"
+            }
+          }
+        }
+      },
+      "OrderWorkflowTabDto": {
+        "required": [
+          "tab",
+          "label",
+          "columns"
+        ],
+        "type": "object",
+        "properties": {
+          "tab": {
+            "$ref": "#/components/schemas/OrderBoardTab"
+          },
+          "label": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrderSubStatusInfoDto"
+            }
           }
         }
       },
@@ -1319,6 +2189,10 @@
           }
         }
       },
+      "Stream": {
+        "type": "string",
+        "format": "binary"
+      },
       "UserRole": {
         "enum": [
           "Admin",
@@ -1378,6 +2252,9 @@
     },
     {
       "name": "ReminderTemplates"
+    },
+    {
+      "name": "Orders"
     },
     {
       "name": "Auth"

@@ -483,6 +483,301 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/orders/workflow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OrderWorkflowDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/board": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    tab?: components["schemas"]["OrderBoardTab"];
+                    search?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OrderBoardDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OrderDetailDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OrderUpdateRequest"];
+                    "text/json": components["schemas"]["OrderUpdateRequest"];
+                    "application/*+json": components["schemas"]["OrderUpdateRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OrderDetailDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/orders/{id}/move": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["OrderMoveRequest"];
+                    "text/json": components["schemas"]["OrderMoveRequest"];
+                    "application/*+json": components["schemas"]["OrderMoveRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["OrderMoveResultDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/orders/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    tab?: components["schemas"]["OrderBoardTab"];
+                    search?: string;
+                    from?: string;
+                    to?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": components["schemas"]["Stream"];
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/csrf": {
         parameters: {
             query?: never;
@@ -770,6 +1065,146 @@ export interface components {
             /** @default false */
             rememberMe: boolean;
         };
+        OrderBoardColumnDto: {
+            subStatus: components["schemas"]["OrderSubStatus"];
+            label: string;
+            css: string;
+            /** Format: int32 */
+            count: number;
+            /** Format: double */
+            totalAmount: number;
+            orders: components["schemas"]["OrderCardDto"][];
+        };
+        OrderBoardDto: {
+            tab: components["schemas"]["OrderBoardTab"];
+            columns: components["schemas"]["OrderBoardColumnDto"][];
+            tabCounts: components["schemas"]["OrderBoardTabCountDto"][];
+        };
+        /** @enum {unknown} */
+        OrderBoardTab: "Nuevos" | "EnCurso" | "Completados" | "Cancelados";
+        OrderBoardTabCountDto: {
+            tab: components["schemas"]["OrderBoardTab"];
+            label: string;
+            /** Format: int32 */
+            count: number;
+        };
+        OrderCardDto: {
+            /** Format: int32 */
+            id: number;
+            orderNumber: string;
+            /** Format: int32 */
+            contactId: number;
+            contactName: string;
+            channel: components["schemas"]["ChannelType"];
+            /** Format: double */
+            total: number;
+            /** Format: int32 */
+            itemCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            subStatus: components["schemas"]["OrderSubStatus"];
+            subStatusLabel: string;
+            subStatusCss: string;
+            /** Format: int32 */
+            conversationId: null | number;
+        };
+        OrderContactDto: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            phone: null | string;
+            channel: components["schemas"]["ChannelType"];
+            avatarUrl: null | string;
+        };
+        OrderDetailDto: {
+            /** Format: int32 */
+            id: number;
+            orderNumber: string;
+            status: components["schemas"]["OrderStatus"];
+            statusLabel: string;
+            subStatus: components["schemas"]["OrderSubStatus"];
+            subStatusLabel: string;
+            subStatusCss: string;
+            tab: components["schemas"]["OrderBoardTab"];
+            channel: components["schemas"]["ChannelType"];
+            /** Format: double */
+            subtotal: number;
+            /** Format: double */
+            discount: number;
+            /** Format: double */
+            shippingCost: number;
+            /** Format: double */
+            total: number;
+            paymentMethodName: null | string;
+            shippingAddress: null | string;
+            notes: null | string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            /** Format: int32 */
+            conversationId: null | number;
+            contact: components["schemas"]["OrderContactDto"];
+            items: components["schemas"]["OrderLineDto"][];
+        };
+        OrderLineDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            productId: number;
+            productName: string;
+            variantDescription: null | string;
+            imageUrl: null | string;
+            /** Format: int32 */
+            quantity: number;
+            /** Format: double */
+            unitPrice: number;
+            /** Format: double */
+            subtotal: number;
+        };
+        OrderMoveRequest: {
+            subStatus: components["schemas"]["OrderSubStatus"];
+            /** @default false */
+            notifyCustomer: boolean;
+        };
+        OrderMoveResultDto: {
+            /** Format: int32 */
+            id: number;
+            status: components["schemas"]["OrderStatus"];
+            subStatus: components["schemas"]["OrderSubStatus"];
+            subStatusLabel: string;
+            subStatusCss: string;
+            tab: components["schemas"]["OrderBoardTab"];
+            /** Format: date-time */
+            updatedAt: string;
+            customerNotified: boolean;
+            notificationError: null | string;
+        };
+        /** @enum {unknown} */
+        OrderStatus: "Pending" | "Confirmed" | "Preparing" | "Shipped" | "Delivered" | "Cancelled" | "Refunded" | "Cart";
+        /** @enum {unknown} */
+        OrderSubStatus: "EnValidacion" | "EnPreparacion" | "ListoParaEnvio" | "Enviado" | "Entregado" | "Finalizado" | "Rechazado" | "Cancelado";
+        OrderSubStatusInfoDto: {
+            subStatus: components["schemas"]["OrderSubStatus"];
+            label: string;
+            css: string;
+            tab: components["schemas"]["OrderBoardTab"];
+            status: components["schemas"]["OrderStatus"];
+            countsAsRevenue: boolean;
+        };
+        OrderUpdateRequest: {
+            notes: null | string;
+            shippingAddress: null | string;
+            paymentMethodName: null | string;
+        };
+        OrderWorkflowDto: {
+            tabs: components["schemas"]["OrderWorkflowTabDto"][];
+        };
+        OrderWorkflowTabDto: {
+            tab: components["schemas"]["OrderBoardTab"];
+            label: string;
+            columns: components["schemas"]["OrderSubStatusInfoDto"][];
+        };
         PagedResultOfReminderDto: {
             items: components["schemas"]["ReminderDto"][];
             /** Format: int32 */
@@ -906,6 +1341,8 @@ export interface components {
         SetupBusinessRequest: {
             businessName: string;
         };
+        /** Format: binary */
+        Stream: string;
         /** @enum {unknown} */
         UserRole: "Admin" | "Member";
         ValidationProblemDetails: {

@@ -127,14 +127,19 @@ public class CartService
         OrderWorkflow.ConfirmCart(cart);
 
         var total = cart.Total;
-        await using var tx = await _db.Database.BeginTransactionAsync(ct);
-        await _db.SaveChangesAsync(ct);
-        await _db.Contacts.Where(c => c.Id == cart.ContactId)
-            .ExecuteUpdateAsync(s => s
-                .SetProperty(c => c.TotalPurchases, c => c.TotalPurchases + 1)
-                .SetProperty(c => c.TotalSpent, c => c.TotalSpent + total)
-                .SetProperty(c => c.LastPurchaseAt, DateTime.UtcNow), ct);
-        await tx.CommitAsync(ct);
+        // Transacción explícita compatible con EnableRetryOnFailure: toda la unidad se reintenta junta
+        var strategy = _db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await _db.Database.BeginTransactionAsync(ct);
+            await _db.SaveChangesAsync(ct);
+            await _db.Contacts.Where(c => c.Id == cart.ContactId)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(c => c.TotalPurchases, c => c.TotalPurchases + 1)
+                    .SetProperty(c => c.TotalSpent, c => c.TotalSpent + total)
+                    .SetProperty(c => c.LastPurchaseAt, DateTime.UtcNow), ct);
+            await tx.CommitAsync(ct);
+        });
 
         var customer = await _db.Contacts.AsNoTracking().Where(c => c.Id == cart.ContactId)
             .Select(c => c.Name ?? c.Phone ?? c.ExternalId).FirstAsync(ct);
