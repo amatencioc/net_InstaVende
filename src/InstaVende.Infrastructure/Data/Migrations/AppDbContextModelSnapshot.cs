@@ -540,6 +540,8 @@ namespace InstaVende.Infrastructure.Data.Migrations
 
                     b.HasIndex("BusinessId", "CreatedAt");
 
+                    b.HasIndex("BusinessId", "LastMessageAt");
+
                     b.HasIndex("BusinessId", "UpdatedAt");
 
                     b.HasIndex("ContactId", "Status");

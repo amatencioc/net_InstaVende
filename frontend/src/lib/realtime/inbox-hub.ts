@@ -15,6 +15,8 @@ export interface InboxEvents {
     message: {
       id: number
       content: string
+      mediaUrl?: string | null
+      mediaType?: string | null
       direction: MessageDirection
       sentByBot: boolean
       deliveryStatus: MessageDeliveryStatus

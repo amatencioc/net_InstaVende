@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Sparkles } from 'lucide-react'
 import {
@@ -9,11 +10,13 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
 } from '@/components/ui/sidebar'
+import { countsQuery } from '@/features/inbox/api'
 import { useSession } from '@/lib/auth/session'
 import { navSections } from './nav'
 
@@ -36,6 +39,8 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
   const { business } = useSession()
   const { state, setOpenMobile } = useSidebar()
+  // Conversaciones que esperan a un humano con mensajes sin leer (se refresca con los eventos en tiempo real)
+  const unattended = useQuery({ ...countsQuery({}), select: (c) => c.unattended }).data ?? 0
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -60,6 +65,14 @@ export function AppSidebar() {
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>
+                      {item.to === '/inbox' && unattended > 0 && (
+                        <SidebarMenuBadge
+                          className="bg-destructive text-white"
+                          aria-label={`${unattended} conversaciones sin atender`}
+                        >
+                          {unattended > 99 ? '99+' : unattended}
+                        </SidebarMenuBadge>
+                      )}
                     </SidebarMenuItem>
                   )
                 })}

@@ -190,6 +190,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionK
             e.HasIndex(c => new { c.BusinessId, c.CreatedAt });
             e.HasIndex(c => new { c.BusinessId, c.UpdatedAt });
             e.HasIndex(c => new { c.BusinessId, c.Status, c.UpdatedAt });
+            // Bandeja: listado ordenado por último mensaje
+            e.HasIndex(c => new { c.BusinessId, c.LastMessageAt });
             e.HasOne(c => c.AssignedAgent).WithMany()
                 .HasForeignKey(c => c.AssignedAgentId).OnDelete(DeleteBehavior.SetNull);
             // Business → Conversation: NoAction para no crear ciclo con Business → Contact → Conversation

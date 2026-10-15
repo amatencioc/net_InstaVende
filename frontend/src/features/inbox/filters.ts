@@ -27,7 +27,8 @@ export function useInboxFilters() {
     (patch: Partial<InboxSearch>, options?: { replace?: boolean }) => {
       void navigate({
         to: '.',
-        search: (prev: InboxSearch) => compact({ ...prev, ...patch }),
+        // Desde "." el tipo de prev es la unión de todas las rutas: se acota a la búsqueda de la bandeja
+        search: (prev) => compact({ ...(prev as InboxSearch), ...patch }),
         replace: options?.replace,
       })
     },

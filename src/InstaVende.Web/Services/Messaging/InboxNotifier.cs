@@ -20,6 +20,8 @@ public sealed class InboxNotifier
             {
                 id             = message.Id,
                 content        = message.Content,
+                mediaUrl       = message.MediaUrl,
+                mediaType      = message.MediaType,
                 direction      = message.Direction,
                 sentByBot      = message.SentByBot,
                 deliveryStatus = message.DeliveryStatus,

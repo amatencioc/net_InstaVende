@@ -10,7 +10,7 @@ export function BusinessEventToasts() {
 
   useInboxEvent('businessEvent', (event) => {
     // Refresca los datos afectados aunque el usuario esté en otra pantalla
-    void queryClient.invalidateQueries({ queryKey: [event.type === 'OrderCreated' ? 'orders' : 'conversations'] })
+    void queryClient.invalidateQueries({ queryKey: [event.type === 'OrderCreated' ? 'orders' : 'inbox'] })
     void queryClient.invalidateQueries({ queryKey: ['dashboard'] })
 
     const show = event.type === 'OrderCreated' ? toast.success : toast.warning
