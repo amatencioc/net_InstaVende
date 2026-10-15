@@ -81,3 +81,6 @@ keys/
 
 ## Docker
 deploy/.env
+
+## Herramientas locales (worktrees de agentes, configuración del editor)
+.claude/
