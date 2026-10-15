@@ -12,20 +12,30 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AuthRouteImport } from './routes/_auth'
-import { Route as AppChannelsRouteImport } from './routes/_app/channels'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppInboxRouteImport } from './routes/_app/inbox'
 import { Route as AppMetricsRouteImport } from './routes/_app/metrics'
-import { Route as AppOrdersRouteImport } from './routes/_app/orders'
-import { Route as AppRemindersRouteImport } from './routes/_app/reminders'
+import { Route as AppRemindersRouteRouteImport } from './routes/_app/reminders/route'
 import { Route as AppSellerRouteImport } from './routes/_app/seller'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as AppChannelsIndexRouteImport } from './routes/_app/channels/index'
+import { Route as AppChannelsMetaRouteImport } from './routes/_app/channels/meta'
+import { Route as AppChannelsWhatsappRouteImport } from './routes/_app/channels/whatsapp'
+import { Route as AppInboxIndexRouteImport } from './routes/_app/inbox/index'
+import { Route as AppInboxConversationIdRouteImport } from './routes/_app/inbox/$conversationId'
+import { Route as AppOrdersIndexRouteImport } from './routes/_app/orders/index'
+import { Route as AppOrdersOrderIdRouteImport } from './routes/_app/orders/$orderId'
 import { Route as AppProductsIndexRouteImport } from './routes/_app/products/index'
 import { Route as AppProductsProductIdRouteImport } from './routes/_app/products/$productId'
 import { Route as AppProductsNewRouteImport } from './routes/_app/products/new'
+import { Route as AppRemindersIndexRouteImport } from './routes/_app/reminders/index'
+import { Route as AppRemindersTemplatesRouteImport } from './routes/_app/reminders/templates'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
 import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
 import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
@@ -33,6 +43,12 @@ import { Route as AppSellerPaymentsRouteImport } from './routes/_app/seller/paym
 import { Route as AppSellerPersonalityRouteImport } from './routes/_app/seller/personality'
 import { Route as AppSellerRulesRouteImport } from './routes/_app/seller/rules'
 import { Route as AppSellerTestRouteImport } from './routes/_app/seller/test'
+import { Route as AppSettingsIndexRouteImport } from './routes/_app/settings/index'
+import { Route as AppSettingsBusinessRouteImport } from './routes/_app/settings/business'
+import { Route as AppSettingsNotificationsRouteImport } from './routes/_app/settings/notifications'
+import { Route as AppSettingsProfileRouteImport } from './routes/_app/settings/profile'
+import { Route as AppSettingsSecurityRouteImport } from './routes/_app/settings/security'
+import { Route as AppSettingsTeamRouteImport } from './routes/_app/settings/team'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -47,10 +63,15 @@ const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppChannelsRoute = AppChannelsRouteImport.update({
-  id: '/channels',
-  path: '/channels',
-  getParentRoute: () => AppRoute,
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
@@ -67,12 +88,7 @@ const AppMetricsRoute = AppMetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => AppRoute,
 } as any)
-const AppOrdersRoute = AppOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppRemindersRoute = AppRemindersRouteImport.update({
+const AppRemindersRouteRoute = AppRemindersRouteRouteImport.update({
   id: '/reminders',
   path: '/reminders',
   getParentRoute: () => AppRoute,
@@ -102,6 +118,46 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppChannelsIndexRoute = AppChannelsIndexRouteImport.update({
+  id: '/channels/',
+  path: '/channels/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChannelsMetaRoute = AppChannelsMetaRouteImport.update({
+  id: '/channels/meta',
+  path: '/channels/meta',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppChannelsWhatsappRoute = AppChannelsWhatsappRouteImport.update({
+  id: '/channels/whatsapp',
+  path: '/channels/whatsapp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInboxIndexRoute = AppInboxIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppInboxRoute,
+} as any)
+const AppInboxConversationIdRoute = AppInboxConversationIdRouteImport.update({
+  id: '/$conversationId',
+  path: '/$conversationId',
+  getParentRoute: () => AppInboxRoute,
+} as any)
+const AppOrdersIndexRoute = AppOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOrdersOrderIdRoute = AppOrdersOrderIdRouteImport.update({
+  id: '/orders/$orderId',
+  path: '/orders/$orderId',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppProductsIndexRoute = AppProductsIndexRouteImport.update({
   id: '/products/',
   path: '/products/',
@@ -116,6 +172,16 @@ const AppProductsNewRoute = AppProductsNewRouteImport.update({
   id: '/products/new',
   path: '/products/new',
   getParentRoute: () => AppRoute,
+} as any)
+const AppRemindersIndexRoute = AppRemindersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRemindersRouteRoute,
+} as any)
+const AppRemindersTemplatesRoute = AppRemindersTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => AppRemindersRouteRoute,
 } as any)
 const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
   id: '/',
@@ -152,161 +218,285 @@ const AppSellerTestRoute = AppSellerTestRouteImport.update({
   path: '/test',
   getParentRoute: () => AppSellerRoute,
 } as any)
+const AppSettingsIndexRoute = AppSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsBusinessRoute = AppSettingsBusinessRouteImport.update({
+  id: '/business',
+  path: '/business',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsNotificationsRoute =
+  AppSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AppSettingsRoute,
+  } as any)
+const AppSettingsProfileRoute = AppSettingsProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsSecurityRoute = AppSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
+const AppSettingsTeamRoute = AppSettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AppSettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/channels': typeof AppChannelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/reminders': typeof AppRemindersRouteRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
-  '/inbox': typeof AppInboxRoute
+  '/inbox': typeof AppInboxRouteWithChildren
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
-  '/reminders': typeof AppRemindersRoute
   '/seller': typeof AppSellerRouteWithChildren
-  '/settings': typeof AppSettingsRoute
+  '/settings': typeof AppSettingsRouteWithChildren
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/channels/meta': typeof AppChannelsMetaRoute
+  '/channels/whatsapp': typeof AppChannelsWhatsappRoute
+  '/inbox/$conversationId': typeof AppInboxConversationIdRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/products/$productId': typeof AppProductsProductIdRoute
   '/products/new': typeof AppProductsNewRoute
+  '/reminders/templates': typeof AppRemindersTemplatesRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/settings/business': typeof AppSettingsBusinessRoute
+  '/settings/notifications': typeof AppSettingsNotificationsRoute
+  '/settings/profile': typeof AppSettingsProfileRoute
+  '/settings/security': typeof AppSettingsSecurityRoute
+  '/settings/team': typeof AppSettingsTeamRoute
+  '/channels/': typeof AppChannelsIndexRoute
+  '/inbox/': typeof AppInboxIndexRoute
+  '/orders/': typeof AppOrdersIndexRoute
   '/products/': typeof AppProductsIndexRoute
+  '/reminders/': typeof AppRemindersIndexRoute
   '/seller/': typeof AppSellerIndexRoute
+  '/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/channels': typeof AppChannelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
   '/dashboard': typeof AppDashboardRoute
-  '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
-  '/orders': typeof AppOrdersRoute
-  '/reminders': typeof AppRemindersRoute
-  '/settings': typeof AppSettingsRoute
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/channels/meta': typeof AppChannelsMetaRoute
+  '/channels/whatsapp': typeof AppChannelsWhatsappRoute
+  '/inbox/$conversationId': typeof AppInboxConversationIdRoute
+  '/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/products/$productId': typeof AppProductsProductIdRoute
   '/products/new': typeof AppProductsNewRoute
+  '/reminders/templates': typeof AppRemindersTemplatesRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/settings/business': typeof AppSettingsBusinessRoute
+  '/settings/notifications': typeof AppSettingsNotificationsRoute
+  '/settings/profile': typeof AppSettingsProfileRoute
+  '/settings/security': typeof AppSettingsSecurityRoute
+  '/settings/team': typeof AppSettingsTeamRoute
+  '/channels': typeof AppChannelsIndexRoute
+  '/inbox': typeof AppInboxIndexRoute
+  '/orders': typeof AppOrdersIndexRoute
   '/products': typeof AppProductsIndexRoute
+  '/reminders': typeof AppRemindersIndexRoute
   '/seller': typeof AppSellerIndexRoute
+  '/settings': typeof AppSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/_auth': typeof AuthRouteWithChildren
-  '/_app/channels': typeof AppChannelsRoute
+  '/privacy': typeof PrivacyRoute
+  '/terms': typeof TermsRoute
+  '/_app/reminders': typeof AppRemindersRouteRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/inbox': typeof AppInboxRoute
+  '/_app/inbox': typeof AppInboxRouteWithChildren
   '/_app/metrics': typeof AppMetricsRoute
-  '/_app/orders': typeof AppOrdersRoute
-  '/_app/reminders': typeof AppRemindersRoute
   '/_app/seller': typeof AppSellerRouteWithChildren
-  '/_app/settings': typeof AppSettingsRoute
+  '/_app/settings': typeof AppSettingsRouteWithChildren
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/invite/$token': typeof InviteTokenRoute
+  '/_app/channels/meta': typeof AppChannelsMetaRoute
+  '/_app/channels/whatsapp': typeof AppChannelsWhatsappRoute
+  '/_app/inbox/$conversationId': typeof AppInboxConversationIdRoute
+  '/_app/orders/$orderId': typeof AppOrdersOrderIdRoute
   '/_app/products/$productId': typeof AppProductsProductIdRoute
   '/_app/products/new': typeof AppProductsNewRoute
+  '/_app/reminders/templates': typeof AppRemindersTemplatesRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/_app/seller/payments': typeof AppSellerPaymentsRoute
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/settings/business': typeof AppSettingsBusinessRoute
+  '/_app/settings/notifications': typeof AppSettingsNotificationsRoute
+  '/_app/settings/profile': typeof AppSettingsProfileRoute
+  '/_app/settings/security': typeof AppSettingsSecurityRoute
+  '/_app/settings/team': typeof AppSettingsTeamRoute
+  '/_app/channels/': typeof AppChannelsIndexRoute
+  '/_app/inbox/': typeof AppInboxIndexRoute
+  '/_app/orders/': typeof AppOrdersIndexRoute
   '/_app/products/': typeof AppProductsIndexRoute
+  '/_app/reminders/': typeof AppRemindersIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
+  '/_app/settings/': typeof AppSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/channels'
+    | '/privacy'
+    | '/terms'
+    | '/reminders'
     | '/dashboard'
     | '/inbox'
     | '/metrics'
-    | '/orders'
-    | '/reminders'
     | '/seller'
     | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/invite/$token'
+    | '/channels/meta'
+    | '/channels/whatsapp'
+    | '/inbox/$conversationId'
+    | '/orders/$orderId'
     | '/products/$productId'
     | '/products/new'
+    | '/reminders/templates'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/settings/business'
+    | '/settings/notifications'
+    | '/settings/profile'
+    | '/settings/security'
+    | '/settings/team'
+    | '/channels/'
+    | '/inbox/'
+    | '/orders/'
     | '/products/'
+    | '/reminders/'
     | '/seller/'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/channels'
+    | '/privacy'
+    | '/terms'
     | '/dashboard'
-    | '/inbox'
     | '/metrics'
-    | '/orders'
-    | '/reminders'
-    | '/settings'
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/invite/$token'
+    | '/channels/meta'
+    | '/channels/whatsapp'
+    | '/inbox/$conversationId'
+    | '/orders/$orderId'
     | '/products/$productId'
     | '/products/new'
+    | '/reminders/templates'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/settings/business'
+    | '/settings/notifications'
+    | '/settings/profile'
+    | '/settings/security'
+    | '/settings/team'
+    | '/channels'
+    | '/inbox'
+    | '/orders'
     | '/products'
+    | '/reminders'
     | '/seller'
+    | '/settings'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_auth'
-    | '/_app/channels'
+    | '/privacy'
+    | '/terms'
+    | '/_app/reminders'
     | '/_app/dashboard'
     | '/_app/inbox'
     | '/_app/metrics'
-    | '/_app/orders'
-    | '/_app/reminders'
     | '/_app/seller'
     | '/_app/settings'
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/invite/$token'
+    | '/_app/channels/meta'
+    | '/_app/channels/whatsapp'
+    | '/_app/inbox/$conversationId'
+    | '/_app/orders/$orderId'
     | '/_app/products/$productId'
     | '/_app/products/new'
+    | '/_app/reminders/templates'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
     | '/_app/seller/payments'
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/settings/business'
+    | '/_app/settings/notifications'
+    | '/_app/settings/profile'
+    | '/_app/settings/security'
+    | '/_app/settings/team'
+    | '/_app/channels/'
+    | '/_app/inbox/'
+    | '/_app/orders/'
     | '/_app/products/'
+    | '/_app/reminders/'
     | '/_app/seller/'
+    | '/_app/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
+  TermsRoute: typeof TermsRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,12 +522,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/channels': {
-      id: '/_app/channels'
-      path: '/channels'
-      fullPath: '/channels'
-      preLoaderRoute: typeof AppChannelsRouteImport
-      parentRoute: typeof AppRoute
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/dashboard': {
       id: '/_app/dashboard'
@@ -360,18 +557,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMetricsRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/orders': {
-      id: '/_app/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AppOrdersRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/reminders': {
       id: '/_app/reminders'
       path: '/reminders'
       fullPath: '/reminders'
-      preLoaderRoute: typeof AppRemindersRouteImport
+      preLoaderRoute: typeof AppRemindersRouteRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/seller': {
@@ -409,6 +599,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/channels/': {
+      id: '/_app/channels/'
+      path: '/channels'
+      fullPath: '/channels/'
+      preLoaderRoute: typeof AppChannelsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/channels/meta': {
+      id: '/_app/channels/meta'
+      path: '/channels/meta'
+      fullPath: '/channels/meta'
+      preLoaderRoute: typeof AppChannelsMetaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/channels/whatsapp': {
+      id: '/_app/channels/whatsapp'
+      path: '/channels/whatsapp'
+      fullPath: '/channels/whatsapp'
+      preLoaderRoute: typeof AppChannelsWhatsappRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/inbox/': {
+      id: '/_app/inbox/'
+      path: '/'
+      fullPath: '/inbox/'
+      preLoaderRoute: typeof AppInboxIndexRouteImport
+      parentRoute: typeof AppInboxRoute
+    }
+    '/_app/inbox/$conversationId': {
+      id: '/_app/inbox/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/inbox/$conversationId'
+      preLoaderRoute: typeof AppInboxConversationIdRouteImport
+      parentRoute: typeof AppInboxRoute
+    }
+    '/_app/orders/': {
+      id: '/_app/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AppOrdersIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/orders/$orderId': {
+      id: '/_app/orders/$orderId'
+      path: '/orders/$orderId'
+      fullPath: '/orders/$orderId'
+      preLoaderRoute: typeof AppOrdersOrderIdRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/products/': {
       id: '/_app/products/'
       path: '/products'
@@ -429,6 +675,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/products/new'
       preLoaderRoute: typeof AppProductsNewRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/reminders/': {
+      id: '/_app/reminders/'
+      path: '/'
+      fullPath: '/reminders/'
+      preLoaderRoute: typeof AppRemindersIndexRouteImport
+      parentRoute: typeof AppRemindersRouteRoute
+    }
+    '/_app/reminders/templates': {
+      id: '/_app/reminders/templates'
+      path: '/templates'
+      fullPath: '/reminders/templates'
+      preLoaderRoute: typeof AppRemindersTemplatesRouteImport
+      parentRoute: typeof AppRemindersRouteRoute
     }
     '/_app/seller/': {
       id: '/_app/seller/'
@@ -479,8 +739,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSellerTestRouteImport
       parentRoute: typeof AppSellerRoute
     }
+    '/_app/settings/': {
+      id: '/_app/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AppSettingsIndexRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/_app/settings/business': {
+      id: '/_app/settings/business'
+      path: '/business'
+      fullPath: '/settings/business'
+      preLoaderRoute: typeof AppSettingsBusinessRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/_app/settings/notifications': {
+      id: '/_app/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
+      preLoaderRoute: typeof AppSettingsNotificationsRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/_app/settings/profile': {
+      id: '/_app/settings/profile'
+      path: '/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof AppSettingsProfileRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/_app/settings/security': {
+      id: '/_app/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof AppSettingsSecurityRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
+    '/_app/settings/team': {
+      id: '/_app/settings/team'
+      path: '/team'
+      fullPath: '/settings/team'
+      preLoaderRoute: typeof AppSettingsTeamRouteImport
+      parentRoute: typeof AppSettingsRoute
+    }
   }
 }
+
+interface AppRemindersRouteRouteChildren {
+  AppRemindersTemplatesRoute: typeof AppRemindersTemplatesRoute
+  AppRemindersIndexRoute: typeof AppRemindersIndexRoute
+}
+
+const AppRemindersRouteRouteChildren: AppRemindersRouteRouteChildren = {
+  AppRemindersTemplatesRoute: AppRemindersTemplatesRoute,
+  AppRemindersIndexRoute: AppRemindersIndexRoute,
+}
+
+const AppRemindersRouteRouteWithChildren =
+  AppRemindersRouteRoute._addFileChildren(AppRemindersRouteRouteChildren)
+
+interface AppInboxRouteChildren {
+  AppInboxConversationIdRoute: typeof AppInboxConversationIdRoute
+  AppInboxIndexRoute: typeof AppInboxIndexRoute
+}
+
+const AppInboxRouteChildren: AppInboxRouteChildren = {
+  AppInboxConversationIdRoute: AppInboxConversationIdRoute,
+  AppInboxIndexRoute: AppInboxIndexRoute,
+}
+
+const AppInboxRouteWithChildren = AppInboxRoute._addFileChildren(
+  AppInboxRouteChildren,
+)
 
 interface AppSellerRouteChildren {
   AppSellerDeliveryRoute: typeof AppSellerDeliveryRoute
@@ -506,31 +835,59 @@ const AppSellerRouteWithChildren = AppSellerRoute._addFileChildren(
   AppSellerRouteChildren,
 )
 
+interface AppSettingsRouteChildren {
+  AppSettingsBusinessRoute: typeof AppSettingsBusinessRoute
+  AppSettingsNotificationsRoute: typeof AppSettingsNotificationsRoute
+  AppSettingsProfileRoute: typeof AppSettingsProfileRoute
+  AppSettingsSecurityRoute: typeof AppSettingsSecurityRoute
+  AppSettingsTeamRoute: typeof AppSettingsTeamRoute
+  AppSettingsIndexRoute: typeof AppSettingsIndexRoute
+}
+
+const AppSettingsRouteChildren: AppSettingsRouteChildren = {
+  AppSettingsBusinessRoute: AppSettingsBusinessRoute,
+  AppSettingsNotificationsRoute: AppSettingsNotificationsRoute,
+  AppSettingsProfileRoute: AppSettingsProfileRoute,
+  AppSettingsSecurityRoute: AppSettingsSecurityRoute,
+  AppSettingsTeamRoute: AppSettingsTeamRoute,
+  AppSettingsIndexRoute: AppSettingsIndexRoute,
+}
+
+const AppSettingsRouteWithChildren = AppSettingsRoute._addFileChildren(
+  AppSettingsRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppChannelsRoute: typeof AppChannelsRoute
+  AppRemindersRouteRoute: typeof AppRemindersRouteRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
-  AppInboxRoute: typeof AppInboxRoute
+  AppInboxRoute: typeof AppInboxRouteWithChildren
   AppMetricsRoute: typeof AppMetricsRoute
-  AppOrdersRoute: typeof AppOrdersRoute
-  AppRemindersRoute: typeof AppRemindersRoute
   AppSellerRoute: typeof AppSellerRouteWithChildren
-  AppSettingsRoute: typeof AppSettingsRoute
+  AppSettingsRoute: typeof AppSettingsRouteWithChildren
+  AppChannelsMetaRoute: typeof AppChannelsMetaRoute
+  AppChannelsWhatsappRoute: typeof AppChannelsWhatsappRoute
+  AppOrdersOrderIdRoute: typeof AppOrdersOrderIdRoute
   AppProductsProductIdRoute: typeof AppProductsProductIdRoute
   AppProductsNewRoute: typeof AppProductsNewRoute
+  AppChannelsIndexRoute: typeof AppChannelsIndexRoute
+  AppOrdersIndexRoute: typeof AppOrdersIndexRoute
   AppProductsIndexRoute: typeof AppProductsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppChannelsRoute: AppChannelsRoute,
+  AppRemindersRouteRoute: AppRemindersRouteRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
-  AppInboxRoute: AppInboxRoute,
+  AppInboxRoute: AppInboxRouteWithChildren,
   AppMetricsRoute: AppMetricsRoute,
-  AppOrdersRoute: AppOrdersRoute,
-  AppRemindersRoute: AppRemindersRoute,
   AppSellerRoute: AppSellerRouteWithChildren,
-  AppSettingsRoute: AppSettingsRoute,
+  AppSettingsRoute: AppSettingsRouteWithChildren,
+  AppChannelsMetaRoute: AppChannelsMetaRoute,
+  AppChannelsWhatsappRoute: AppChannelsWhatsappRoute,
+  AppOrdersOrderIdRoute: AppOrdersOrderIdRoute,
   AppProductsProductIdRoute: AppProductsProductIdRoute,
   AppProductsNewRoute: AppProductsNewRoute,
+  AppChannelsIndexRoute: AppChannelsIndexRoute,
+  AppOrdersIndexRoute: AppOrdersIndexRoute,
   AppProductsIndexRoute: AppProductsIndexRoute,
 }
 
@@ -554,6 +911,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
+  TermsRoute: TermsRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
