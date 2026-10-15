@@ -19,8 +19,7 @@ public static partial class BusinessHours
     public static bool? IsOpen(string? text, DateTime localNow)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
-        var normalized = BotCommandRouter.Normalize(text.Replace(":", " : ").Replace("-", " - "))
-            .Replace(" : ", ":").Replace(" - ", "-");
+        var normalized = Normalize(text);
 
         var days = DayRange().Match(normalized);
         if (days.Success)
@@ -41,5 +40,18 @@ public static partial class BusinessHours
 
         var now = localNow.Hour * 60 + localNow.Minute;
         return end > start ? now >= start && now < end : now >= start || now < end; // rango que cruza medianoche
+    }
+
+    /// <summary>Minúsculas y sin tildes, conservando dígitos, letras, ':' y guiones.</summary>
+    private static string Normalize(string text)
+    {
+        var decomposed = text.Trim().ToLowerInvariant().Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder(decomposed.Length);
+        foreach (var c in decomposed)
+        {
+            if (System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.NonSpacingMark) continue;
+            sb.Append(char.IsLetterOrDigit(c) || c is ':' or '-' or '–' ? c : ' ');
+        }
+        return System.Text.RegularExpressions.Regex.Replace(sb.ToString(), @"\s+", " ").Trim();
     }
 }

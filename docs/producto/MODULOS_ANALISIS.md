@@ -1,4 +1,7 @@
 # Análisis de Módulos y Funcionalidades — InstaVende
+
+> **Documento histórico (2025).** Describe el estado previo a la refactorización a API + SPA; varias
+> funcionalidades marcadas como faltantes ya existen. Úsalo como referencia de producto, no como estado actual.
 ## Basado en: Referencia visual (ya.onl / yavendio) vs. Proyecto actual
 
 > **Fuente de análisis:** 39 capturas de pantalla de la app de referencia + revisión completa del código fuente del proyecto InstaVende.
@@ -10,9 +13,9 @@
 
 | Estado | Cantidad | Detalle |
 |--------|----------|---------|
-| ? Implementado | 7 módulos | Funcional, puede mejorar UI |
-| ?? Parcial | 5 módulos | Existe la base pero faltan funcionalidades clave |
-| ? Faltante | 6 módulos | No existe en el proyecto, debe construirse |
+| ✅ Implementado | 7 módulos | Funcional, puede mejorar UI |
+| 🟡 Parcial | 5 módulos | Existe la base pero faltan funcionalidades clave |
+| ❌ Faltante | 6 módulos | No existe en el proyecto, debe construirse |
 
 ---
 

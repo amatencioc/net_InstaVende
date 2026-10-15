@@ -1,0 +1,60 @@
+# Entorno completo: SQL Server + API + wa-client + SPA (nginx).
+#   cp deploy/.env.example deploy/.env  &&  docker compose -f deploy/docker-compose.yml --env-file deploy/.env up --build
+# Panel en http://localhost:8080
+name: instavende
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD:?define SQL_SA_PASSWORD}
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      retries: 12
+
+  api:
+    build:
+      context: ..
+      dockerfile: src/InstaVende.Web/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Server=db;Database=InstaVende;User Id=sa;Password=${SQL_SA_PASSWORD};TrustServerCertificate=True;MultipleActiveResultSets=true
+      OpenAI__ApiKey: ${OPENAI_API_KEY:?define OPENAI_API_KEY}
+      OpenAI__Model: ${OPENAI_MODEL:-gpt-4o}
+      App__PublicBaseUrl: ${PUBLIC_BASE_URL:-http://localhost:8080}
+      WhatsAppClient__BaseUrl: http://wa-client:3001
+      WhatsAppClient__SharedSecret: ${WA_SHARED_SECRET:?define WA_SHARED_SECRET}
+    volumes:
+      - uploads:/app/wwwroot/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  wa-client:
+    build:
+      context: ../wa-client
+    environment:
+      DOTNET_BASE_URL: http://api:8080
+      WA_SHARED_SECRET: ${WA_SHARED_SECRET}
+    volumes:
+      - wa-sessions:/data/sessions
+    shm_size: 1gb
+    depends_on:
+      - api
+
+  web:
+    build:
+      context: ../frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  sqldata:
+  uploads:
+  wa-sessions:

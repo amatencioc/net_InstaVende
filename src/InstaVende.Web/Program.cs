@@ -3,6 +3,7 @@ using InstaVende.Web.Hubs;
 using InstaVende.Web.Infrastructure;
 using InstaVende.Web.Services;
 using InstaVende.Web.Services.Bot;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -28,11 +29,20 @@ builder.Services
 if (!isGeneratingOpenApi)
     builder.Services.AddInstaVendeMessaging();
 
+// Detrás de un proxy (nginx del SPA, balanceador): respeta X-Forwarded-Proto/For
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownIPNetworks.Clear();
+    o.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 if (!isGeneratingOpenApi)
     await InitializeDatabaseAsync(app);
 
+app.UseForwardedHeaders();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 if (!app.Environment.IsDevelopment()) app.UseHsts();

@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'refactor/**', 'feature/**']
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: API (.NET 10)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - run: dotnet restore InstaVende.slnx
+      - run: dotnet build InstaVende.slnx -c Release --no-restore -warnaserror
+      - run: dotnet test --solution InstaVende.slnx -c Release --no-build
+      - name: Contrato OpenAPI actualizado
+        run: git diff --exit-code -- frontend/openapi/instavende-api.json
+
+  frontend:
+    name: SPA (React)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Tipos de la API sincronizados con el contrato
+        run: npm run gen:api && git diff --exit-code -- src/lib/api/schema.d.ts
+      - run: npx tsc -b
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  wa-client:
+    name: wa-client (Node)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wa-client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --check index.js

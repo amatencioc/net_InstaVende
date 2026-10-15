@@ -4,4 +4,7 @@
     <Project Path="src/InstaVende.Infrastructure/InstaVende.Infrastructure.csproj" />
     <Project Path="src/InstaVende.Web/InstaVende.Web.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/InstaVende.UnitTests/InstaVende.UnitTests.csproj" />
+  </Folder>
 </Solution>
