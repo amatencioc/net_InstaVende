@@ -76,14 +76,4 @@ public class CurrentUserService
     }
 
     public async Task<int?> GetBusinessIdAsync() => (await GetTenantAsync())?.BusinessId;
-
-    /// <summary>Entidad completa del negocio (sin tracking). Úsese solo cuando se necesitan más campos que <see cref="TenantInfo"/>.</summary>
-    public async Task<Business?> GetBusinessAsync()
-    {
-        var id = await GetBusinessIdAsync();
-        return id is null ? null : await _db.Businesses.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
-    }
-
-    public async Task<string> GetCurrencySymbolAsync()
-        => (await GetTenantAsync())?.CurrencySymbol ?? BusinessLocale.CurrencySymbol(null);
 }

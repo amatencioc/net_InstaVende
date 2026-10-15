@@ -14,7 +14,8 @@ namespace InstaVende.Web.Infrastructure.DemoData;
 /// <summary>
 /// Genera datos de demostración realistas para el negocio de un usuario (solo entorno Development):
 /// catálogo, clientes, conversaciones, pedidos en todas las etapas, recordatorios, configuración del
-/// vendedor y equipo. Reejecutable: borra y vuelve a crear los datos de ESE negocio únicamente.
+/// vendedor y equipo. Si el usuario no existe lo crea (contraseña Demo12345) con su negocio.
+/// Reejecutable: borra y vuelve a crear los datos de ESE negocio únicamente.
 /// <para>Uso: <c>dotnet run --project src/InstaVende.Web -- --seed-demo demo@instavende.pe</c></para>
 /// </summary>
 public sealed class DemoDataSeeder(AppDbContext db, UserManager<ApplicationUser> users, IWebHostEnvironment env, ILogger<DemoDataSeeder> logger)
@@ -34,10 +35,25 @@ public sealed class DemoDataSeeder(AppDbContext db, UserManager<ApplicationUser>
 
     public async Task SeedAsync(string email)
     {
-        var owner = await users.FindByEmailAsync(email)
-            ?? throw new InvalidOperationException($"No existe el usuario {email}. Regístralo primero en la app.");
-        var business = await db.Businesses.FirstOrDefaultAsync(b => b.UserId == owner.Id)
-            ?? throw new InvalidOperationException($"El usuario {email} no es propietario de ningún negocio.");
+        var owner = await users.FindByEmailAsync(email);
+        if (owner == null)
+        {
+            // PC nueva: se crea el propietario demo con la contraseña conocida
+            owner = new ApplicationUser { UserName = email, Email = email, FirstName = "Demo", LastName = "InstaVende", EmailConfirmed = true };
+            var created = await users.CreateAsync(owner, DemoPassword);
+            if (!created.Succeeded) throw new InvalidOperationException(string.Join(" ", created.Errors.Select(e => e.Description)));
+            await users.AddToRoleAsync(owner, AppRoles.Merchant);
+            logger.LogInformation("Usuario demo creado: {Email} / {Password}", email, DemoPassword);
+        }
+        var business = await db.Businesses.FirstOrDefaultAsync(b => b.UserId == owner.Id);
+        if (business == null)
+        {
+            if (await db.BusinessUsers.AnyAsync(u => u.UserId == owner.Id))
+                throw new InvalidOperationException($"{email} es miembro de otro negocio; usa una cuenta propietaria.");
+            business = new Business { UserId = owner.Id, Name = "Urban Step" };
+            db.Businesses.Add(business);
+            await db.SaveChangesAsync();
+        }
 
         logger.LogInformation("Generando datos de demostración para «{Business}» (id {Id})…", business.Name, business.Id);
         await WipeAsync(business.Id);

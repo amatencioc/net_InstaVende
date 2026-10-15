@@ -5,11 +5,9 @@ export type Reminder = Schemas['ReminderDto']
 export type ReminderStatus = Schemas['ReminderStatus']
 export type ReminderCounts = Schemas['ReminderCountsDto']
 export type ReminderUpsert = Schemas['ReminderUpsertRequest']
-export type ReminderContactOption = Schemas['ReminderContactOptionDto']
 export type CustomerSegment = Schemas['CustomerSegment']
 export type ReminderTemplateSegment = Schemas['ReminderTemplateSegmentDto']
 export type ReminderTemplateItem = Schemas['ReminderTemplateItemDto']
-export type ReminderTemplateSuggestion = Schemas['ReminderTemplateSuggestionDto']
 
 export interface ReminderListParams {
   status?: ReminderStatus

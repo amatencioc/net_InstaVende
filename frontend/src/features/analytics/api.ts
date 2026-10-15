@@ -3,12 +3,9 @@ import { api, unwrap, type Schemas } from '@/lib/api/client'
 import type { MetricsParams } from './schemas'
 
 export type DashboardData = Schemas['DashboardDto']
-export type DashboardKpis = Schemas['DashboardKpisDto']
-export type DashboardSetupStep = Schemas['DashboardSetupStepDto']
 export type DashboardRecentOrder = Schemas['DashboardRecentOrderDto']
 export type DashboardAttentionConversation = Schemas['DashboardAttentionConversationDto']
 export type MetricsData = Schemas['MetricsDto']
-export type MetricsTopProduct = Schemas['MetricsTopProductDto']
 export type ChannelType = Schemas['ChannelType']
 export type OrderSubStatus = Schemas['OrderSubStatus']
 

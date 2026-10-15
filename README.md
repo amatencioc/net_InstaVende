@@ -13,8 +13,10 @@ envía recordatorios y deriva a un humano cuando hace falta. El comercio lo gest
 | **WhatsApp QR** | Node.js · whatsapp-web.js (una sesión por negocio) | `wa-client/` |
 | **Pruebas** | xUnit v3 · Vitest | `tests/`, `frontend/src/**/__tests__` |
 
+**¿PC nueva? Sigue la [guía de instalación paso a paso](docs/GUIA_INSTALACION.md).**
+
 La arquitectura, convenciones y decisiones están en **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
-El análisis funcional de referencia está en [docs/producto/](docs/producto/).
+El análisis funcional de referencia (capturas de la app de referencia) está en [docs/producto/](docs/producto/).
 
 ## Requisitos
 

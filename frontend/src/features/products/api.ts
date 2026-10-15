@@ -14,7 +14,6 @@ import { api, unwrap, type Schemas } from '@/lib/api/client'
 export type ProductListItem = Schemas['ProductListItemDto']
 export type ProductDetail = Schemas['ProductDetailDto']
 export type ProductImage = Schemas['ProductImageDto']
-export type ProductVariant = Schemas['ProductVariantDto']
 export type ProductUpsertRequest = Schemas['ProductUpsertRequest']
 export type ProductCategory = Schemas['ProductCategoryDto']
 export type ProductBulkAction = Schemas['ProductBulkAction']

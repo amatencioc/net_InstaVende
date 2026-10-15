@@ -25,12 +25,6 @@ public static class OrderWorkflow
         OrderStatus.Shipped, OrderStatus.Delivered
     ];
 
-    /// <summary>Estados "abiertos" que requieren gestión del comercio.</summary>
-    public static readonly OrderStatus[] OpenStatuses =
-    [
-        OrderStatus.Pending, OrderStatus.Confirmed, OrderStatus.Preparing, OrderStatus.Shipped
-    ];
-
     public static OrderStatus StatusFor(OrderSubStatus subStatus) => subStatus switch
     {
         OrderSubStatus.EnValidacion   => OrderStatus.Pending,
@@ -42,19 +36,6 @@ public static class OrderWorkflow
         OrderSubStatus.Rechazado      => OrderStatus.Cancelled,
         OrderSubStatus.Cancelado      => OrderStatus.Cancelled,
         _ => throw new ArgumentOutOfRangeException(nameof(subStatus), subStatus, null)
-    };
-
-    /// <summary>Sub-estado equivalente para un estado agregado (compatibilidad con datos antiguos).</summary>
-    public static OrderSubStatus SubStatusFor(OrderStatus status) => status switch
-    {
-        OrderStatus.Pending   => OrderSubStatus.EnValidacion,
-        OrderStatus.Confirmed => OrderSubStatus.EnPreparacion,
-        OrderStatus.Preparing => OrderSubStatus.EnPreparacion,
-        OrderStatus.Shipped   => OrderSubStatus.Enviado,
-        OrderStatus.Delivered => OrderSubStatus.Entregado,
-        OrderStatus.Cancelled => OrderSubStatus.Cancelado,
-        OrderStatus.Refunded  => OrderSubStatus.Cancelado,
-        _ => OrderSubStatus.EnValidacion
     };
 
     public static bool CanMove(Order order, OrderSubStatus target)

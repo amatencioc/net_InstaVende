@@ -30,7 +30,6 @@ public abstract class TenantController : ControllerBase
     protected ObjectResult BadRequestProblem(string detail) => Problem(detail: detail, statusCode: StatusCodes.Status400BadRequest);
     protected ObjectResult NotFoundProblem(string detail = "El recurso no existe o fue eliminado.") => Problem(detail: detail, statusCode: StatusCodes.Status404NotFound);
     protected ObjectResult ConflictProblem(string detail) => Problem(detail: detail, statusCode: StatusCodes.Status409Conflict);
-    protected ObjectResult ForbiddenProblem(string detail) => Problem(detail: detail, statusCode: StatusCodes.Status403Forbidden);
 }
 
 /// <summary>Identificadores <c>type</c> de ProblemDetails que el frontend interpreta.</summary>

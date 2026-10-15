@@ -34,8 +34,6 @@ internal sealed record MetricsCountsRow(
     int ConversationsCompleted,
     int Handoffs, int PreviousHandoffs);
 
-internal sealed record MetricsFirstResponseRow(double? CurrentSeconds, double? PreviousSeconds);
-
 internal sealed record MetricsTopProductRow(int ProductId, string? Name, int Units, decimal Revenue, int Orders);
 
 internal sealed record MetricsTopCustomerRow(int ContactId, string? Name, ChannelType Channel, int Orders, decimal Spent, DateTime LastOrderAt);

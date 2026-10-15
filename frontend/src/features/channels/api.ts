@@ -7,7 +7,6 @@ export type ChannelType = Schemas['ChannelType']
 export type ChannelStatus = Schemas['ChannelConnectionStatus']
 export type ChannelServiceStatus = Schemas['ChannelServiceStatusDto']
 export type ChannelMetaConfigRequest = Schemas['ChannelMetaConfigRequest']
-export type ChannelTestResult = Schemas['ChannelTestResultDto']
 export type ChannelActionResult = Schemas['ChannelActionResultDto']
 export type WhatsAppSession = Schemas['WhatsAppSessionDto']
 
