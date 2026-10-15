@@ -4,6 +4,655 @@
  */
 
 export interface paths {
+    "/api/conversation-labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConversationLabelDto"][];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConversationLabelUpsertRequest"];
+                    "text/json": components["schemas"]["ConversationLabelUpsertRequest"];
+                    "application/*+json": components["schemas"]["ConversationLabelUpsertRequest"];
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConversationLabelDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversation-labels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConversationLabelUpsertRequest"];
+                    "text/json": components["schemas"]["ConversationLabelUpsertRequest"];
+                    "application/*+json": components["schemas"]["ConversationLabelUpsertRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ConversationLabelDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    status?: components["schemas"]["InboxStatusFilter"];
+                    channel?: components["schemas"]["ChannelType"];
+                    search?: string;
+                    labelId?: number;
+                    page?: number;
+                    pageSize?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["PagedResultOfInboxConversationDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    channel?: components["schemas"]["ChannelType"];
+                    labelId?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxCountsDto"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxConversationDetailDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    before?: number;
+                    limit?: number;
+                };
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxMessagePageDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InboxSendMessageRequest"];
+                    "text/json": components["schemas"]["InboxSendMessageRequest"];
+                    "application/*+json": components["schemas"]["InboxSendMessageRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxMessageDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}/messages/{messageId}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    messageId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxMessageDto"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InboxChangeStatusRequest"];
+                    "text/json": components["schemas"]["InboxChangeStatusRequest"];
+                    "application/*+json": components["schemas"]["InboxChangeStatusRequest"];
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["InboxConversationStateDto"];
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ValidationProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/conversations/{id}/label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["InboxSetLabelRequest"];
+                    "text/json": components["schemas"]["InboxSetLabelRequest"];
+                    "application/*+json": components["schemas"]["InboxSetLabelRequest"];
+                };
+            };
+            responses: {
+                /** @description No Content */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": unknown;
+                    };
+                };
+                /** @description Bad Request */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+                /** @description Not Found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["ProblemDetails"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/csrf": {
         parameters: {
             query?: never;
@@ -281,11 +930,180 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** @enum {unknown} */
+        ChannelType: "WhatsApp" | "FacebookMessenger" | "Instagram";
+        ConversationLabelDto: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            color: string;
+            /** Format: int32 */
+            conversationCount: number;
+        };
+        ConversationLabelUpsertRequest: {
+            name: string;
+            color: string;
+        };
+        /** @enum {unknown} */
+        ConversationStatus: "BotActive" | "WaitingHuman" | "HumanActive" | "Resolved";
+        InboxAgentDto: {
+            id: string;
+            firstName: string;
+            lastName: string;
+        };
+        InboxChangeStatusRequest: {
+            status: components["schemas"]["ConversationStatus"];
+        };
+        InboxContactDetailDto: {
+            /** Format: int32 */
+            id: number;
+            name: null | string;
+            phone: null | string;
+            externalId: string;
+            avatarUrl: null | string;
+            channel: components["schemas"]["ChannelType"];
+            /** Format: date-time */
+            firstSeenAt: string;
+            /** Format: date-time */
+            lastSeenAt: string;
+            /** Format: int32 */
+            totalPurchases: number;
+            /** Format: double */
+            totalSpent: number;
+            /** Format: date-time */
+            lastPurchaseAt: null | string;
+            recentOrders: components["schemas"]["InboxContactOrderDto"][];
+        };
+        InboxContactOrderDto: {
+            /** Format: int32 */
+            id: number;
+            orderNumber: string;
+            status: components["schemas"]["OrderStatus"];
+            subStatus: components["schemas"]["OrderSubStatus"];
+            statusLabel: string;
+            /** Format: double */
+            total: number;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        InboxContactSummaryDto: {
+            /** Format: int32 */
+            id: number;
+            name: null | string;
+            phone: null | string;
+            externalId: string;
+            avatarUrl: null | string;
+        };
+        InboxConversationDetailDto: {
+            /** Format: int32 */
+            id: number;
+            channel: components["schemas"]["ChannelType"];
+            status: components["schemas"]["ConversationStatus"];
+            /** Format: int32 */
+            unreadCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            resolvedAt: null | string;
+            /** Format: date-time */
+            lastMessageAt: null | string;
+            label: null | components["schemas"]["InboxLabelRefDto"];
+            assignedAgent: null | components["schemas"]["InboxAgentDto"];
+            contact: components["schemas"]["InboxContactDetailDto"];
+        };
+        InboxConversationDto: {
+            /** Format: int32 */
+            id: number;
+            contact: components["schemas"]["InboxContactSummaryDto"];
+            channel: components["schemas"]["ChannelType"];
+            status: components["schemas"]["ConversationStatus"];
+            /** Format: int32 */
+            unreadCount: number;
+            lastMessagePreview: null | string;
+            /** Format: date-time */
+            lastMessageAt: null | string;
+            label: null | components["schemas"]["InboxLabelRefDto"];
+            assignedAgent: null | components["schemas"]["InboxAgentDto"];
+        };
+        InboxConversationStateDto: {
+            /** Format: int32 */
+            id: number;
+            status: components["schemas"]["ConversationStatus"];
+            assignedAgent: null | components["schemas"]["InboxAgentDto"];
+            /** Format: date-time */
+            resolvedAt: null | string;
+        };
+        InboxCountsDto: {
+            /** Format: int32 */
+            all: number;
+            /** Format: int32 */
+            unattended: number;
+            /** Format: int32 */
+            botActive: number;
+            /** Format: int32 */
+            waitingHuman: number;
+            /** Format: int32 */
+            humanActive: number;
+            /** Format: int32 */
+            resolved: number;
+        };
+        InboxLabelRefDto: {
+            /** Format: int32 */
+            id: number;
+            name: string;
+            color: string;
+        };
+        InboxMessageDto: {
+            /** Format: int32 */
+            id: number;
+            /** Format: int32 */
+            conversationId: number;
+            direction: components["schemas"]["MessageDirection"];
+            content: string;
+            sentByBot: boolean;
+            deliveryStatus: components["schemas"]["MessageDeliveryStatus"];
+            /** Format: date-time */
+            sentAt: string;
+            mediaUrl: null | string;
+            mediaType: null | string;
+        };
+        InboxMessagePageDto: {
+            items: components["schemas"]["InboxMessageDto"][];
+            hasMore: boolean;
+        };
+        InboxSendMessageRequest: {
+            text: string;
+        };
+        InboxSetLabelRequest: {
+            /** Format: int32 */
+            labelId: null | number;
+        };
+        /** @enum {unknown} */
+        InboxStatusFilter: "All" | "Unattended" | "BotActive" | "WaitingHuman" | "HumanActive" | "Resolved";
         LoginRequest: {
             email: string;
             password: string;
             /** @default false */
             rememberMe: boolean;
+        };
+        /** @enum {unknown} */
+        MessageDeliveryStatus: "Pending" | "Sent" | "Failed";
+        /** @enum {unknown} */
+        MessageDirection: "Inbound" | "Outbound";
+        /** @enum {unknown} */
+        OrderStatus: "Pending" | "Confirmed" | "Preparing" | "Shipped" | "Delivered" | "Cancelled" | "Refunded" | "Cart";
+        /** @enum {unknown} */
+        OrderSubStatus: "EnValidacion" | "EnPreparacion" | "ListoParaEnvio" | "Enviado" | "Entregado" | "Finalizado" | "Rechazado" | "Cancelado";
+        PagedResultOfInboxConversationDto: {
+            items: components["schemas"]["InboxConversationDto"][];
+            /** Format: int32 */
+            page: number;
+            /** Format: int32 */
+            pageSize: number;
+            /** Format: int32 */
+            totalCount: number;
+            /** Format: int32 */
+            totalPages?: number;
         };
         ProblemDetails: {
             type?: null | string;

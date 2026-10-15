@@ -24,6 +24,8 @@ import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthSetupBusinessRouteImport } from './routes/_auth/setup-business'
+import { Route as AppInboxIndexRouteImport } from './routes/_app/inbox/index'
+import { Route as AppInboxConversationIdRouteImport } from './routes/_app/inbox/$conversationId'
 import { Route as AppSellerIndexRouteImport } from './routes/_app/seller/index'
 import { Route as AppSellerDeliveryRouteImport } from './routes/_app/seller/delivery'
 import { Route as AppSellerKnowledgeRouteImport } from './routes/_app/seller/knowledge'
@@ -105,6 +107,16 @@ const AuthSetupBusinessRoute = AuthSetupBusinessRouteImport.update({
   path: '/setup-business',
   getParentRoute: () => AuthRoute,
 } as any)
+const AppInboxIndexRoute = AppInboxIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppInboxRoute,
+} as any)
+const AppInboxConversationIdRoute = AppInboxConversationIdRouteImport.update({
+  id: '/$conversationId',
+  path: '/$conversationId',
+  getParentRoute: () => AppInboxRoute,
+} as any)
 const AppSellerIndexRoute = AppSellerIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -145,7 +157,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/channels': typeof AppChannelsRoute
   '/dashboard': typeof AppDashboardRoute
-  '/inbox': typeof AppInboxRoute
+  '/inbox': typeof AppInboxRouteWithChildren
   '/metrics': typeof AppMetricsRoute
   '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
@@ -155,19 +167,20 @@ export interface FileRoutesByFullPath {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/inbox/$conversationId': typeof AppInboxConversationIdRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/inbox/': typeof AppInboxIndexRoute
   '/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/channels': typeof AppChannelsRoute
   '/dashboard': typeof AppDashboardRoute
-  '/inbox': typeof AppInboxRoute
   '/metrics': typeof AppMetricsRoute
   '/orders': typeof AppOrdersRoute
   '/products': typeof AppProductsRoute
@@ -176,12 +189,14 @@ export interface FileRoutesByTo {
   '/login': typeof AuthLoginRoute
   '/register': typeof AuthRegisterRoute
   '/setup-business': typeof AuthSetupBusinessRoute
+  '/inbox/$conversationId': typeof AppInboxConversationIdRoute
   '/seller/delivery': typeof AppSellerDeliveryRoute
   '/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/seller/payments': typeof AppSellerPaymentsRoute
   '/seller/personality': typeof AppSellerPersonalityRoute
   '/seller/rules': typeof AppSellerRulesRoute
   '/seller/test': typeof AppSellerTestRoute
+  '/inbox': typeof AppInboxIndexRoute
   '/seller': typeof AppSellerIndexRoute
 }
 export interface FileRoutesById {
@@ -191,7 +206,7 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_app/channels': typeof AppChannelsRoute
   '/_app/dashboard': typeof AppDashboardRoute
-  '/_app/inbox': typeof AppInboxRoute
+  '/_app/inbox': typeof AppInboxRouteWithChildren
   '/_app/metrics': typeof AppMetricsRoute
   '/_app/orders': typeof AppOrdersRoute
   '/_app/products': typeof AppProductsRoute
@@ -201,12 +216,14 @@ export interface FileRoutesById {
   '/_auth/login': typeof AuthLoginRoute
   '/_auth/register': typeof AuthRegisterRoute
   '/_auth/setup-business': typeof AuthSetupBusinessRoute
+  '/_app/inbox/$conversationId': typeof AppInboxConversationIdRoute
   '/_app/seller/delivery': typeof AppSellerDeliveryRoute
   '/_app/seller/knowledge': typeof AppSellerKnowledgeRoute
   '/_app/seller/payments': typeof AppSellerPaymentsRoute
   '/_app/seller/personality': typeof AppSellerPersonalityRoute
   '/_app/seller/rules': typeof AppSellerRulesRoute
   '/_app/seller/test': typeof AppSellerTestRoute
+  '/_app/inbox/': typeof AppInboxIndexRoute
   '/_app/seller/': typeof AppSellerIndexRoute
 }
 export interface FileRouteTypes {
@@ -225,19 +242,20 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/inbox/$conversationId'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/inbox/'
     | '/seller/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/channels'
     | '/dashboard'
-    | '/inbox'
     | '/metrics'
     | '/orders'
     | '/products'
@@ -246,12 +264,14 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/setup-business'
+    | '/inbox/$conversationId'
     | '/seller/delivery'
     | '/seller/knowledge'
     | '/seller/payments'
     | '/seller/personality'
     | '/seller/rules'
     | '/seller/test'
+    | '/inbox'
     | '/seller'
   id:
     | '__root__'
@@ -270,12 +290,14 @@ export interface FileRouteTypes {
     | '/_auth/login'
     | '/_auth/register'
     | '/_auth/setup-business'
+    | '/_app/inbox/$conversationId'
     | '/_app/seller/delivery'
     | '/_app/seller/knowledge'
     | '/_app/seller/payments'
     | '/_app/seller/personality'
     | '/_app/seller/rules'
     | '/_app/seller/test'
+    | '/_app/inbox/'
     | '/_app/seller/'
   fileRoutesById: FileRoutesById
 }
@@ -392,6 +414,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSetupBusinessRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_app/inbox/': {
+      id: '/_app/inbox/'
+      path: '/'
+      fullPath: '/inbox/'
+      preLoaderRoute: typeof AppInboxIndexRouteImport
+      parentRoute: typeof AppInboxRoute
+    }
+    '/_app/inbox/$conversationId': {
+      id: '/_app/inbox/$conversationId'
+      path: '/$conversationId'
+      fullPath: '/inbox/$conversationId'
+      preLoaderRoute: typeof AppInboxConversationIdRouteImport
+      parentRoute: typeof AppInboxRoute
+    }
     '/_app/seller/': {
       id: '/_app/seller/'
       path: '/'
@@ -444,6 +480,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppInboxRouteChildren {
+  AppInboxConversationIdRoute: typeof AppInboxConversationIdRoute
+  AppInboxIndexRoute: typeof AppInboxIndexRoute
+}
+
+const AppInboxRouteChildren: AppInboxRouteChildren = {
+  AppInboxConversationIdRoute: AppInboxConversationIdRoute,
+  AppInboxIndexRoute: AppInboxIndexRoute,
+}
+
+const AppInboxRouteWithChildren = AppInboxRoute._addFileChildren(
+  AppInboxRouteChildren,
+)
+
 interface AppSellerRouteChildren {
   AppSellerDeliveryRoute: typeof AppSellerDeliveryRoute
   AppSellerKnowledgeRoute: typeof AppSellerKnowledgeRoute
@@ -471,7 +521,7 @@ const AppSellerRouteWithChildren = AppSellerRoute._addFileChildren(
 interface AppRouteChildren {
   AppChannelsRoute: typeof AppChannelsRoute
   AppDashboardRoute: typeof AppDashboardRoute
-  AppInboxRoute: typeof AppInboxRoute
+  AppInboxRoute: typeof AppInboxRouteWithChildren
   AppMetricsRoute: typeof AppMetricsRoute
   AppOrdersRoute: typeof AppOrdersRoute
   AppProductsRoute: typeof AppProductsRoute
@@ -483,7 +533,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppChannelsRoute: AppChannelsRoute,
   AppDashboardRoute: AppDashboardRoute,
-  AppInboxRoute: AppInboxRoute,
+  AppInboxRoute: AppInboxRouteWithChildren,
   AppMetricsRoute: AppMetricsRoute,
   AppOrdersRoute: AppOrdersRoute,
   AppProductsRoute: AppProductsRoute,
