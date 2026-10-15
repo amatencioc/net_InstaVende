@@ -29,6 +29,9 @@ builder.Services
 if (!isGeneratingOpenApi)
     builder.Services.AddInstaVendeMessaging();
 
+builder.Services.AddHealthChecks().AddDbContextCheck<AppDbContext>("database");
+builder.Services.AddResponseCompression(o => o.EnableForHttps = true);
+
 // Detrás de un proxy (nginx del SPA, balanceador): respeta X-Forwarded-Proto/For
 builder.Services.Configure<ForwardedHeadersOptions>(o =>
 {
@@ -49,6 +52,7 @@ if (!app.Environment.IsDevelopment()) app.UseHsts();
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseHttpsRedirection();
+app.UseResponseCompression();
 app.UseSerilogRequestLogging();
 
 // Imágenes subidas por los comercios (wwwroot/uploads)
@@ -71,6 +75,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<InboxHub>("/hubs/inbox");
+app.MapHealthChecks("/health").DisableHttpMetrics();
 app.MapOpenApi();
 if (app.Environment.IsDevelopment())
     app.MapScalarApiReference("/api/docs", o => o.WithTitle("InstaVende API"));

@@ -3,6 +3,7 @@ using InstaVende.Core.Domain;
 using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
 using InstaVende.Infrastructure.Data;
+using InstaVende.Web.Services.Notifications;
 using Microsoft.EntityFrameworkCore;
 
 namespace InstaVende.Web.Services.Bot;
@@ -19,8 +20,13 @@ public class CartService
     public const int MaxQuantityPerItem = 99;
 
     private readonly AppDbContext _db;
+    private readonly BusinessEvents _events;
 
-    public CartService(AppDbContext db) => _db = db;
+    public CartService(AppDbContext db, BusinessEvents events)
+    {
+        _db = db;
+        _events = events;
+    }
 
     public Task<Order?> GetCartAsync(int businessId, int conversationId, CancellationToken ct = default)
         => _db.Orders
@@ -129,6 +135,13 @@ public class CartService
                 .SetProperty(c => c.TotalSpent, c => c.TotalSpent + total)
                 .SetProperty(c => c.LastPurchaseAt, DateTime.UtcNow), ct);
         await tx.CommitAsync(ct);
+
+        var customer = await _db.Contacts.AsNoTracking().Where(c => c.Id == cart.ContactId)
+            .Select(c => c.Name ?? c.Phone ?? c.ExternalId).FirstAsync(ct);
+        _events.Publish(new BusinessEvent(ctx.BusinessId, BusinessEventType.OrderCreated,
+            $"Nuevo pedido {cart.OrderNumber}",
+            $"{customer} confirmó un pedido por {ctx.Money(total)} ({cart.Items.Sum(i => i.Quantity)} unidades). Revisa el pago y prepáralo.",
+            $"/orders/{cart.Id}", cart.ConversationId, cart.Id));
         return new(true, $"Pedido {cart.OrderNumber} registrado.", cart);
     }
 

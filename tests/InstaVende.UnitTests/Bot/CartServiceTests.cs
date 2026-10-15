@@ -52,7 +52,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     [Fact]
     public async Task AddItem_UsaElPrecioDelCatalogoYAcumulaCantidades()
     {
-        var cart = new CartService(_db);
+        var cart = new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents());
 
         await cart.AddItemAsync(Context(), _conversationId, _productId, 1, ct: TestContext.Current.CancellationToken);
         var result = await cart.AddItemAsync(Context(), _conversationId, _productId, 2, ct: TestContext.Current.CancellationToken);
@@ -68,7 +68,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     [Fact]
     public async Task AddItem_RechazaStockInsuficiente()
     {
-        var result = await new CartService(_db).AddItemAsync(Context(), _conversationId, _productId, 4, ct: TestContext.Current.CancellationToken);
+        var result = await new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents()).AddItemAsync(Context(), _conversationId, _productId, 4, ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.Contains("3", result.Message);
@@ -77,7 +77,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     [Fact]
     public async Task AddItem_NoPermiteProductosDeOtroNegocio()
     {
-        var result = await new CartService(_db).AddItemAsync(Context(), _conversationId, _foreignProductId, 1, ct: TestContext.Current.CancellationToken);
+        var result = await new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents()).AddItemAsync(Context(), _conversationId, _foreignProductId, 1, ct: TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
         Assert.False(await _db.Orders.AnyAsync(o => o.BusinessId == _otherBusinessId, TestContext.Current.CancellationToken));
@@ -87,7 +87,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     public async Task Confirm_CreaPedidoEnValidacionConEnvioYActualizaElCliente()
     {
         var ct = TestContext.Current.CancellationToken;
-        var cart = new CartService(_db);
+        var cart = new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents());
         var ctx = Context(zones: new DeliveryZoneInfo("Miraflores", 10m, null));
         await cart.AddItemAsync(ctx, _conversationId, _productId, 2, ct: ct);
 
@@ -112,7 +112,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     public async Task Confirm_AplicaEnvioGratisSobreElUmbral()
     {
         var ct = TestContext.Current.CancellationToken;
-        var cart = new CartService(_db);
+        var cart = new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents());
         var ctx = Context(freeShippingThreshold: 150, new DeliveryZoneInfo("Lima", 12m, null));
         await cart.AddItemAsync(ctx, _conversationId, _productId, 2, ct: ct);
 
@@ -125,7 +125,7 @@ public sealed class CartServiceTests : IAsyncLifetime
     [Fact]
     public async Task Confirm_ConCarritoVacio_Falla()
     {
-        var result = await new CartService(_db).ConfirmAsync(Context(), _conversationId, null, null, null, null, TestContext.Current.CancellationToken);
+        var result = await new CartService(_db, new InstaVende.Web.Services.Notifications.BusinessEvents()).ConfirmAsync(Context(), _conversationId, null, null, null, null, TestContext.Current.CancellationToken);
 
         Assert.False(result.Success);
     }

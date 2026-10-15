@@ -8,6 +8,7 @@ using InstaVende.Web.Infrastructure;
 using InstaVende.Web.Services.Bot;
 using InstaVende.Web.Services.Channels;
 using InstaVende.Web.Services.Messaging;
+using InstaVende.Web.Services.Notifications;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -110,6 +111,7 @@ internal static class ServiceCollectionExtensions
     {
         services.Configure<AppOptions>(configuration.GetSection(AppOptions.SectionName));
         services.Configure<BotCacheOptions>(configuration.GetSection(BotCacheOptions.SectionName));
+        services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
 
         services.AddOptions<OpenAiOptions>().Bind(configuration.GetSection(OpenAiOptions.SectionName));
         services.AddOptions<WhatsAppClientOptions>().Bind(configuration.GetSection(WhatsAppClientOptions.SectionName));
@@ -142,6 +144,9 @@ internal static class ServiceCollectionExtensions
         services.AddScoped<MessageDispatcher>();
         services.AddScoped<InboxNotifier>();
         services.AddHostedService<ReminderDispatcher>();
+
+        // Notificaciones al comercio (tiempo real + email)
+        services.AddHostedService<BusinessEventDispatcher>();
         return services;
     }
 
@@ -150,6 +155,8 @@ internal static class ServiceCollectionExtensions
         services.AddSingleton<OpenAiChatClientAccessor>();
         services.AddSingleton<BotPromptBuilder>();
         services.AddScoped<BotContextProvider>();
+        services.AddSingleton<BusinessEvents>();
+        services.AddSingleton<EmailSender>();
         services.AddScoped<CartService>();
         services.AddScoped<BotToolExecutor>();
         services.AddScoped<IBotEngineService, BotEngineService>();

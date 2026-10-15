@@ -2,6 +2,7 @@ using InstaVende.Core.Entities;
 using InstaVende.Core.Enums;
 using InstaVende.Core.Interfaces;
 using InstaVende.Infrastructure.Data;
+using InstaVende.Web.Services.Notifications;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,11 +20,13 @@ public class IncomingMessageHandler
     private readonly IBotEngineService _bot;
     private readonly MessageDispatcher _dispatcher;
     private readonly InboxNotifier _notifier;
+    private readonly BusinessEvents _events;
     private readonly ILogger<IncomingMessageHandler> _logger;
 
     public IncomingMessageHandler(AppDbContext db, ChannelConfigProvider channels, IBotEngineService bot,
-        MessageDispatcher dispatcher, InboxNotifier notifier, ILogger<IncomingMessageHandler> logger)
+        MessageDispatcher dispatcher, InboxNotifier notifier, BusinessEvents events, ILogger<IncomingMessageHandler> logger)
     {
+        _events = events;
         _db = db;
         _channels = channels;
         _bot = bot;
@@ -84,6 +87,10 @@ public class IncomingMessageHandler
         {
             var status = await _db.Conversations.Where(c => c.Id == conversation.Id).Select(c => c.Status).FirstAsync(ct);
             await _notifier.ConversationUpdatedAsync(inbound.BusinessId, conversation.Id, status, ct);
+            _events.Publish(new BusinessEvent(inbound.BusinessId, BusinessEventType.HandoffRequested,
+                "Un cliente necesita atención",
+                $"{contact.Name ?? contact.Phone ?? "Un cliente"} pidió hablar con un asesor por {inbound.Channel}. Último mensaje: \"{MessageDispatcher.Preview(inbound.Text)}\"",
+                $"/inbox/{conversation.Id}", conversation.Id));
         }
     }
 
