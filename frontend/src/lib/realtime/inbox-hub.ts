@@ -25,6 +25,15 @@ export interface InboxEvents {
   }
   messageStatus: { conversationId: number; messageId: number; status: MessageDeliveryStatus }
   conversationUpdated: { conversationId: number; status: ConversationStatus }
+  /** Avisos de negocio (pedido nuevo, cliente que pide un asesor). Ver BusinessEventDispatcher.cs. */
+  businessEvent: {
+    type: 'HandoffRequested' | 'OrderCreated'
+    title: string
+    message: string
+    link?: string | null
+    conversationId?: number | null
+    orderId?: number | null
+  }
 }
 
 let connection: HubConnection | null = null

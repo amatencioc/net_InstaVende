@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { AppTopbar } from '@/components/layout/app-topbar'
+import { BusinessEventToasts } from '@/components/layout/business-event-toasts'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { sessionQuery } from '@/lib/auth/session'
 import { startInboxHub, stopInboxHub } from '@/lib/realtime/inbox-hub'
@@ -27,6 +28,7 @@ function AppLayout() {
       <AppSidebar />
       <SidebarInset>
         <AppTopbar />
+        <BusinessEventToasts />
         <div className="flex-1">
           <Outlet />
         </div>
